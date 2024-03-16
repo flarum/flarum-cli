@@ -1,13 +1,12 @@
 import { getFsPaths, runStep } from '../../boilersmith/utils';
 
-import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
 import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
 import { GeneratePolicyExtender } from '../../../src/steps/extenders/policy';
 import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/console-command';
 import { FlarumProviders } from '../../../src/providers';
-import { Step } from '../../../src/boilersmith/step-manager';
+import { Step } from 'boilersmith/step-manager';
 import { Paths } from 'boilersmith/paths';
 import { stubPhpProviderFactory } from '../../utils';
 
@@ -26,14 +25,6 @@ const testSpecs: ExtenderTest[] = [
     params: {
       eventClass: 'Flarum\\Post\\Event\\Saving',
       listenerClass: 'Flarum\\Demo\\Listener\\SaveToDb',
-    },
-  },
-  // API Attributes
-  {
-    ExtenderClass: GenerateApiSerializerAttributesExtender,
-    params: {
-      serializerClass: 'Flarum\\Api\\Serializer\\UserSerializer',
-      modelClass: 'Flarum\\User\\User',
     },
   },
   // Route

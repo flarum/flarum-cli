@@ -4,7 +4,7 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';
-import { GenerateApiSerializerStub } from '../../../steps/stubs/backend/api-serializer';
+import { GenerateApiResourceStub } from '../../../steps/stubs/backend/api-resource';
 import { GenerateValidatorStub } from '../../../steps/stubs/backend/validator';
 import { GenerateRepositoryStub } from '../../../steps/stubs/backend/repository';
 import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
@@ -40,8 +40,8 @@ export default class Model extends BaseCommand {
         )
         .namedStep(
           'serializer',
-          new GenerateApiSerializerStub(this.STUB_PATH, genExtScaffolder()),
-          { optional: true, confirmationMessage: 'Generate corresponding API Serializer?', default: true },
+          new GenerateApiResourceStub(this.STUB_PATH, genExtScaffolder()),
+          { optional: true, confirmationMessage: 'Generate corresponding API Resource?', default: true },
           [
             {
               sourceStep: 'model',

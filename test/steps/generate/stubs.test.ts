@@ -2,7 +2,7 @@ import { getFsPaths, runStep } from '../../boilersmith/utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
-import { GenerateApiSerializerStub } from '../../../src/steps/stubs/backend/api-serializer';
+import { GenerateApiResourceStub } from '../../../src/steps/stubs/backend/api-resource';
 import { GenerateHandlerStub } from '../../../src/steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/handler-command';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
@@ -61,24 +61,24 @@ const backendTestSpecs: StubTest[] = [
     },
   },
 
-  // Api Serializer
+  // Api Resource
   {
-    StubClass: GenerateApiSerializerStub,
+    StubClass: GenerateApiResourceStub,
     params: {
-      className: 'PotatoSerializer',
+      className: 'PotatoResource',
       modelClass: '\\Flarum\\Potato\\Potato',
     },
-    expectedModifiedFilesDefaultDir: ['/ext/src/Api/Serializer/PotatoSerializer.php'],
-    expectedModifiedFilesRequestedDir: [`${requestedDir}/PotatoSerializer.php`],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Api/Resource/PotatoResource.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/PotatoResource.php`],
     expectedExposedParamsDefaultDir: {
-      class: 'Flarum\\Demo\\Api\\Serializer\\PotatoSerializer',
-      className: 'PotatoSerializer',
+      class: 'Flarum\\Demo\\Api\\Resource\\PotatoResource',
+      className: 'PotatoResource',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
     },
     expectedExposedParamsRequestedDir: {
-      class: 'Flarum\\Demo\\somePath\\PotatoSerializer',
-      className: 'PotatoSerializer',
+      class: 'Flarum\\Demo\\somePath\\PotatoResource',
+      className: 'PotatoResource',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
     },

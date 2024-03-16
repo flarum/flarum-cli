@@ -6,8 +6,8 @@ import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 import { Store } from 'mem-fs';
 
-export class GenerateApiSerializerStub extends BasePhpStubStep {
-  type = 'Generate Api Serializer Class';
+export class GenerateApiResourceStub extends BasePhpStubStep {
+  type = 'Generate Api Resource Class';
 
   protected additionalExposes = ['className', 'modelClass', 'modelClassName'];
 
@@ -16,13 +16,13 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
   protected phpClassParams = ['modelClass'];
 
   protected schema = {
-    recommendedSubdir: 'Api/Serializer',
-    sourceFile: 'backend/api-serializer.php',
+    recommendedSubdir: 'Api/Resource',
+    sourceFile: 'backend/api-resource.php',
     params: [
       {
         name: 'className',
         type: 'text',
-        message: 'Serializer class name',
+        message: 'Resource class name',
         validate: Validator.className,
       },
       {
