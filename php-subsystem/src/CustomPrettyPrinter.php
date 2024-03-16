@@ -10,7 +10,7 @@ class CustomPrettyPrinter extends Standard
     /**
      * @todo this is just a temporary solution, we should look into formatters such as php cs fixer
      */
-    protected function pExpr_MethodCall(Expr\MethodCall $node) {
+    protected function pExpr_MethodCall(Expr\MethodCall $node): string {
         return $this->pDereferenceLhs($node->var) . "\n        ->" . $this->pObjectProperty($node->name)
              . '(' . $this->pMaybeMultiline($node->args) . ')';
     }

@@ -8,6 +8,8 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
+use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use PhpParser\PrettyPrinter;
 
 class ExtenderUtil
@@ -67,20 +69,13 @@ class ExtenderUtil
   }
 
   protected function backupOriginal($originalCode) {
-    $lexer = new Lexer\Emulative([
-      'usedAttributes' => [
-        'comments',
-        'startLine', 'endLine',
-        'startTokenPos', 'endTokenPos',
-      ],
-    ]);
-    $parser = new Parser\Php7($lexer);
+    $parser = (new ParserFactory())->createForHostVersion();
 
     $traverser = new NodeTraverser();
     $traverser->addVisitor(new NodeVisitor\CloningVisitor());
 
     $oldAst = $parser->parse($originalCode);
-    $oldTokens = $lexer->getTokens();
+    $oldTokens = $parser->getTokens();
 
     $ast = $traverser->traverse($oldAst);
 

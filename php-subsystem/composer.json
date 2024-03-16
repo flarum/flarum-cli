@@ -2,7 +2,7 @@
   "name": "flarum/cli-php-util",
   "type": "library",
   "require": {
-    "nikic/php-parser": "^4.10"
+    "nikic/php-parser": "^5.0"
   },
   "autoload": {
     "psr-4": {
