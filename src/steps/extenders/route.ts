@@ -13,7 +13,7 @@ export class GenerateRoutesExtender extends BaseExtenderStep {
         args: [
           {
             type: ExpressionType.SCALAR,
-            value: 'api',
+            value: '${frontend}',
           },
         ],
       },
@@ -39,6 +39,15 @@ export class GenerateRoutesExtender extends BaseExtenderStep {
       ],
     },
     params: [
+      {
+        name: 'frontend',
+        type: 'autocomplete',
+        message: 'Route frontend',
+        choices: ['forum', 'admin', 'api'].map((type: string) => ({
+          title: type,
+          value: type.toLowerCase(),
+        })),
+      },
       {
         name: 'httpMethod',
         type: 'autocomplete',

@@ -1,7 +1,7 @@
 import { getFsPaths, runStep } from '../../boilersmith/utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
-import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
+import { GenerateControllerStub } from '../../../src/steps/stubs/backend/controller';
 import { GenerateApiResourceStub } from '../../../src/steps/stubs/backend/api-resource';
 import { GenerateHandlerStub } from '../../../src/steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/handler-command';
@@ -261,7 +261,7 @@ const backendTestSpecs: StubTest[] = [
 // Api Controllers
 for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']) {
   backendTestSpecs.push({
-    StubClass: GenerateApiControllerStub,
+    StubClass: GenerateControllerStub,
     params: {
       className: `${classType}Controller`,
       serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,

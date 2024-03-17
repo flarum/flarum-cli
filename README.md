@@ -91,9 +91,8 @@ The CLI has different types of commands for different tasks:
 
 **Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
 
-- `flarum-cli make backend api-controller [PATH]`
-- `flarum-cli make backend api-serializer [PATH]`
-- `flarum-cli make backend api-serializer-attributes [PATH]`
+- `flarum-cli make backend controller [PATH]`
+- `flarum-cli make backend api-resource [PATH]`
 - `flarum-cli make backend command [PATH]`
 - `flarum-cli make backend event-listener [PATH]`
 - `flarum-cli make backend handler [PATH]`

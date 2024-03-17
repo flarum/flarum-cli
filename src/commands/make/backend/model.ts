@@ -9,7 +9,7 @@ import { GenerateValidatorStub } from '../../../steps/stubs/backend/validator';
 import { GenerateRepositoryStub } from '../../../steps/stubs/backend/repository';
 import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
 import { GeneratePolicyExtender } from '../../../steps/extenders/policy';
-import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
+import { GenerateControllerStub } from '../../../steps/stubs/backend/controller';
 import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
@@ -276,7 +276,7 @@ export default class Model extends BaseCommand {
       stepManager
         .namedStep(
           'listApiController',
-          new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
+          new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()),
           { optional: true, confirmationMessage: 'Generate corresponding CRUD API Controllers?', default: true },
           [
             {
@@ -302,7 +302,7 @@ export default class Model extends BaseCommand {
         )
         .namedStep(
           'showApiController',
-          new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
+          new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()),
           {},
           [
             {
@@ -328,7 +328,7 @@ export default class Model extends BaseCommand {
         )
         .namedStep(
           'createApiController',
-          new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
+          new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()),
           {},
           [
             {
@@ -358,7 +358,7 @@ export default class Model extends BaseCommand {
         )
         .namedStep(
           'updateApiController',
-          new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
+          new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()),
           {},
           [
             {
@@ -388,7 +388,7 @@ export default class Model extends BaseCommand {
         )
         .namedStep(
           'deleteApiController',
-          new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
+          new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()),
           {},
           [
             {

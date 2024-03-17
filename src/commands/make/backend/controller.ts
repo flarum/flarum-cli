@@ -1,12 +1,12 @@
 import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
-import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
+import { GenerateControllerStub } from '../../../steps/stubs/backend/controller';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import { FlarumProviders } from '../../../providers';
 
-export default class ApiController extends BaseCommand {
-  static description = 'Generate an API controller class';
+export default class Controller extends BaseCommand {
+  static description = 'Generate a controller class';
 
   static flags = { ...BaseCommand.flags };
 
@@ -15,13 +15,18 @@ export default class ApiController extends BaseCommand {
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {
       stepManager
-        .namedStep('apiController', new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()))
+        .namedStep('controller', new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()))
         .step(new GenerateRoutesExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
           {
-            sourceStep: 'apiController',
+            sourceStep: 'controller',
             exposedName: 'class',
             consumedName: 'routeHandler',
           },
+          {
+            sourceStep: 'controller',
+            exposedName: 'frontend',
+            consumedName: 'frontend',
+          }
         ]);
     });
   }
