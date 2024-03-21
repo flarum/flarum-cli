@@ -13,6 +13,10 @@ export class Validator {
     return /^([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid PHP class name: only alphanumerical characters allowed.';
   }
 
+  public static module(s: string): ValidatorFunc {
+    return /^([\dA-Za-z]+)(\/([\dA-Za-z]+))*$/.test(s.trim()) || 'Invalid JS module. Must be fully qualified.';
+  }
+
   public static routeName(s: string): ValidatorFunc {
     return /^([\d.A-z-]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-).';
   }

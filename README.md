@@ -111,6 +111,7 @@ The CLI has different types of commands for different tasks:
 - `flarum-cli make frontend component [PATH]`
 - `flarum-cli make frontend modal [PATH]`
 - `flarum-cli make frontend model [PATH]`
+- `flarum-cli make frontend forum-page [PATH]`
 
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
 
@@ -122,24 +123,15 @@ _And of course, you can always use the help command to see a list of all availab
 
 All commands can use a `--no-interaction` flag to proceed with default values for prompts when possible.
 
-## 🔥 The Most Powerful Commands
+## Model Generation
 
-Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former obviously allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
+Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
 
 - Table migration
 - Policy
-- API Serializer
-- CRUD API Controllers
-- CRUD Handlers
-- Repository
-- Validator
+- API Resource
 - Routes
 - Related Extenders
-
-[center]
-![terminal_example](https://sycho9.github.io/flarum-cli.svg)
-![example_project_with_model_command](https://lh3.googleusercontent.com/-fUnfqQ7rwyo/YQVwwm0sa0I/AAAAAAAAFfE/-o9B30M2gE8y6d3NWaVgBhYa8xEwqLuNwCLcBGAsYHQ/s16000/Screenshot%2Bfrom%2B2021-07-31%2B16-46-38.png)
-[/center]
 
 ## Infrastructure Modules
 

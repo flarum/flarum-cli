@@ -3,15 +3,16 @@ import {Paths} from 'boilersmith/paths';
 import {BaseJsStep} from './base';
 import {ExtenderGenerationSchema} from "../extenders/base";
 import {ExpressionType} from "../../providers/php-provider";
-import {pluralKebabCaseModel} from "../../utils/model-name";
+import {Validator} from "../../utils/validation";
+import chalk from "chalk";
 
-export class GenerateModelExtender extends BaseJsStep {
+export class GenerateRoutesExtender extends BaseJsStep {
   type = 'Generate JS Model Extender';
 
   protected schema: ExtenderGenerationSchema = {
     extenderDef: {
       extender: {
-        className: 'flarum/common/extenders/Store',
+        className: 'flarum/common/extenders/Routes',
       },
       methodCalls: [
         {
@@ -19,7 +20,11 @@ export class GenerateModelExtender extends BaseJsStep {
           args: [
             {
               type: ExpressionType.SCALAR,
-              value: '${modelType}'
+              value: '${routeName}'
+            },
+            {
+              type: ExpressionType.SCALAR,
+              value: '${routePath}',
             },
             {
               type: ExpressionType.CLASS_CONST,
@@ -31,17 +36,21 @@ export class GenerateModelExtender extends BaseJsStep {
     },
     params: [
       {
-        name: 'className',
-        message: 'Class name',
+        name: 'routeName',
+        message: 'Route name (unique)',
+        type: 'text',
+        validate: Validator.routeName,
+      },
+      {
+        name: 'routePath',
+        message: `Route Path (${chalk.dim('/pathName')})`,
         type: 'text',
       },
       {
-        name: 'modelType',
-        message: 'Model type',
+        name: 'className',
+        message: 'Class name',
         type: 'text',
-        initial: (_prev, values) => {
-          return pluralKebabCaseModel(values.get('className') as string);
-        }
+        validate: Validator.module,
       }
     ]
   };
