@@ -25,7 +25,12 @@ export abstract class BaseJsStubStep extends FlarumBaseStubStep {
         ? this.schema.recommendedSubdir
         : paths.requestedDir()!.slice(`${paths.package('js/src')}/`.length);
 
-    params.frontend = await io.getParam(paramDefs.find((param) => param.name === 'frontend') as ParamDef);
+    const frontendParamDef = paramDefs.find((param) => param.name === 'frontend') as ParamDef;
+
+    if (frontendParamDef) {
+      params.frontend = await io.getParam(frontendParamDef);
+    }
+
     params.className = await io.getParam(paramDefs.find((param) => param.name === 'className') as ParamDef);
 
     this.subdir = cloneAndFill(this.subdir, params as Record<string, string>);

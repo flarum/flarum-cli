@@ -200,7 +200,7 @@ export class StepManager<Providers extends DefaultProviders> {
         if (storedStep instanceof AtomicStepManager) {
           const res = await storedStep.run(paths, io, providers);
           if (!res.succeeded) {
-            throw new Error(res.error);
+            throw new Error(JSON.stringify(res));
           }
 
           stepNames.push(...res.stepsRan);

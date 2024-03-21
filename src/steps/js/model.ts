@@ -1,31 +1,58 @@
-import { IO } from 'boilersmith/io';
-import { Paths } from 'boilersmith/paths';
-import { BaseJsStep } from './base';
+import {IO} from 'boilersmith/io';
+import {Paths} from 'boilersmith/paths';
+import {BaseJsStep} from './base';
+import {ExtenderGenerationSchema} from "../extenders/base";
+import {ExpressionType} from "../../providers/php-provider";
+import {pluralKebabCaseModel} from "../../utils/model-name";
 
 export class GenerateModelDefinition extends BaseJsStep {
   type = 'Generate JS Model Definition';
 
-  protected async getDefinition(io: IO): Promise<string> {
-    const className: string = await io.getParam({ name: 'className', message: 'Class name', type: 'text' });
-    let modelType: string = await io.getParam({ name: 'modelType', message: 'Model type', type: 'text' });
-
-    modelType = modelType.includes('-') ? `['${modelType}']` : `.${modelType}`;
-
-    return `app.store.models${modelType} = ${className};`;
-  }
-
-  protected async getImports(frontend: string, paths: Paths, io: IO): Promise<string> {
-    const className: string = await io.getParam({ name: 'className', message: 'Class name', type: 'text' });
-    const classNamespace: string = await io.getParam({ name: 'classNamespace', message: 'Class namespace', type: 'text' });
-
-    const importPath = this.importPath(frontend, classNamespace);
-
-    return `import ${className} from '${importPath}';`;
-  }
+  protected schema: ExtenderGenerationSchema = {
+    extenderDef: {
+      extender: {
+        className: 'flarum/common/extenders/Store',
+      },
+      methodCalls: [
+        {
+          methodName: 'add',
+          args: [
+            {
+              type: ExpressionType.SCALAR,
+              value: '${modelType}'
+            },
+            {
+              type: ExpressionType.CLASS_CONST,
+              value: '${className}',
+            }
+          ],
+        }
+      ]
+    },
+    params: [
+      {
+        name: 'className',
+        message: 'Class name',
+        type: 'text',
+      },
+      {
+        name: 'modelType',
+        message: 'Model type',
+        type: 'text',
+        initial: (_prev, values) => {
+          return pluralKebabCaseModel(values.get('className') as string);
+        }
+      }
+    ]
+  };
 
   exposes = [];
 
   getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
     return {};
+  }
+
+  protected async getDefinition(): Promise<null> {
+    return Promise.resolve(null);
   }
 }

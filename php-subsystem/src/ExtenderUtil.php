@@ -2,14 +2,11 @@
 
 namespace Flarum\CliPhpSubsystem;
 
-use Flarum\CliPhpSubsystem\CustomPrettyPrinter;
-use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
-use PhpParser\PhpVersion;
 use PhpParser\PrettyPrinter;
 
 class ExtenderUtil

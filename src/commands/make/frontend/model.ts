@@ -21,11 +21,9 @@ export default class Model extends BaseCommand {
         },
         {
           sourceStep: 'model',
-          exposedName: 'className',
-        },
-        {
-          sourceStep: 'model',
           exposedName: 'classNamespace',
+          consumedName: 'className',
+          modifier: (pathWithFrontend) => (pathWithFrontend as string).replace(/^[^/]+/, '.'),
         },
         {
           sourceStep: 'model',

@@ -76,23 +76,27 @@ export class PromptsIO implements IO {
       return this.cache.get(paramName) as T;
     }
 
-    let resValue: T;
-    if (this.noInteraction) {
-      if (paramDef.initial && paramDef.initial instanceof Function) {
-        resValue = paramDef.initial(this.prev?.val, this.cache, this.prev?.prompt as PromptObject) as unknown as T;
-      } else if (paramDef.type === 'confirm' || paramDef.type === 'toggle') {
-        resValue = (paramDef.initial ?? false) as unknown as T;
-      } else if ('initial' in paramDef) {
-        resValue = paramDef.initial as unknown as T;
-      } else {
-        return this.error(`No-Interaction mode is on, but input is required for param "${paramName}".`, true);
-      }
-    } else {
-      const res = (await prompt(paramDef, {
-        onCancel: this.onCancel,
-      })) as Record<string, unknown>;
-      resValue = res[paramName] as T;
+    let initial: T|null = null;
+
+    if (paramDef.initial && paramDef.initial instanceof Function) {
+      initial = paramDef.initial(this.prev?.val, this.cache, this.prev?.prompt as PromptObject) as unknown as T;
+    } else if (paramDef.type === 'confirm' || paramDef.type === 'toggle') {
+      initial = (paramDef.initial ?? false) as unknown as T;
+    } else if ('initial' in paramDef) {
+      initial = paramDef.initial as unknown as T;
+    } else if (this.noInteraction) {
+      return this.error(`No-Interaction mode is on, but input is required for param "${paramName}".`, true);
     }
+
+    if (initial) {
+      paramDef.initial = initial as unknown as string;
+    }
+
+    const res = (await prompt(paramDef, {
+      onCancel: this.onCancel,
+    })) as Record<string, unknown>;
+
+    const resValue = res[paramName] as T;
 
     if (!noCache) {
       this.cache.set(paramName, resValue);
