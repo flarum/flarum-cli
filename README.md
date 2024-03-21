@@ -3,10 +3,10 @@
 A CLI for developing Flarum extensions</p>
 
 <p align=center>
-<a href="https://oclif.io"><img alt"oclif" src="https://img.shields.io/badge/cli-oclif-brightgreen.svg"></a>
-<a href="https://npmjs.org/package/@flarum/cli"><img alt"Version" src="https://img.shields.io/npm/v/@flarum/cli.svg"></a>
-<a href="https://npmjs.org/package/@flarum/cli"><img alt"Downloads/week" src="https://img.shields.io/npm/dw/@flarum/cli.svg"></a>
-<a href="https://github.com/flarum/cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/@flarum/cli.svg"></a>
+<a href="https://oclif.io"><img alt="oclif" src="https://img.shields.io/badge/cli-oclif-brightgreen.svg"></a>
+<a href="https://npmjs.org/package/@flarum/cli"><img alt="Version" src="https://img.shields.io/npm/v/@flarum/cli.svg"></a>
+<a href="https://npmjs.org/package/@flarum/cli"><img alt="Downloads/week" src="https://img.shields.io/npm/dw/@flarum/cli.svg"></a>
+<a href="https://github.com/flarum/cli/blob/master/package.json"><img alt="License" src="https://img.shields.io/npm/l/@flarum/cli.svg"></a>
 <br>
 <img width=720 src="https://sycho9.github.io/flarum-cli.svg" alt="terminal_example">
 </p>
@@ -112,6 +112,7 @@ The CLI has different types of commands for different tasks:
 - `flarum-cli make frontend modal [PATH]`
 - `flarum-cli make frontend model [PATH]`
 - `flarum-cli make frontend forum-page [PATH]`
+- `flarum-cli make frontend gambit [PATH]`
 
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
 

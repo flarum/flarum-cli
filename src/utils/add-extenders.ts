@@ -14,11 +14,11 @@ function parseCode(code: string): t.File {
   });
 }
 
-export default function addExtenders(path: string, extenders: ExtenderDef[]): void {
+export default function addExtenders(path: string, extenders: ExtenderDef[], frontend: string): void {
   const code = fs.readFileSync(path, 'utf-8');
   const ast = parseCode(code);
 
-  const importing = applyImportsForExtenders(ast, extenders);
+  const importing = applyImportsForExtenders(ast, extenders, frontend);
 
   // The code would contain something like:
   // const extenders = [
@@ -121,7 +121,7 @@ export default function addExtenders(path: string, extenders: ExtenderDef[]): vo
   });
 }
 
-function applyImportsForExtenders(ast: t.File, extenders: ExtenderDef[]): { qualifiedModule: (name: string) => string } {
+function applyImportsForExtenders(ast: t.File, extenders: ExtenderDef[], frontend: string): { qualifiedModule: (name: string) => string } {
   const modules = extenders.map((extender) => extender.extender.className);
 
   modules.push(
@@ -145,8 +145,12 @@ function applyImportsForExtenders(ast: t.File, extenders: ExtenderDef[]): { qual
     }) as t.ImportDeclaration|undefined)?.specifiers as t.ImportSpecifier[]|null;
 
     if (! globalImportDeclaration && ! specificImportDeclarations?.length) {
+      const relativePath = modulePath
+        .replace(new RegExp(`^${frontend}`), '.')
+        .replace(/^common/, '../common');
+
       ast.program.body.unshift(
-        t.importDeclaration([t.importDefaultSpecifier(t.identifier(moduleName))], t.stringLiteral(modulePath+`/${moduleName}`))
+        t.importDeclaration([t.importDefaultSpecifier(t.identifier(moduleName))], t.stringLiteral(relativePath+`/${moduleName}`))
       );
 
       globalImportDeclaration = t.importDefaultSpecifier(t.identifier(moduleName));

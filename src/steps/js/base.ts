@@ -63,7 +63,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
 
       for (const match of fsSrcFilePaths) {
         if (match.includes('extend.') && extender) {
-          addExtenders(match, [extender]);
+          addExtenders(match, [extender], frontend);
         }
 
         if (! definition) continue;

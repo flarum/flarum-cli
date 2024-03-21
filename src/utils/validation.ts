@@ -21,6 +21,10 @@ export class Validator {
     return /^([\d.A-z-]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-).';
   }
 
+  public static alphaNumeric(s: string): ValidatorFunc {
+    return /^[\w-]+$/.test(s.trim()) || 'Field is required; alphanumerical characters and dashes only!';
+  }
+
   public static commandName(s: string): ValidatorFunc {
     return /^([\d.:A-z-]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-:).';
   }

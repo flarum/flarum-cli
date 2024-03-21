@@ -1,12 +1,12 @@
 import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
-import { GenerateForumPageStub } from '../../../steps/stubs/frontend/forum-page';
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
-import {GenerateRoutesExtender} from "../../../steps/js/routes";
+import {GenerateGambitStub} from "../../../steps/stubs/frontend/gambit";
+import {GenerateSearchGambitExtender} from "../../../steps/js/search-gambit";
 
-export default class ForumPage extends BaseCommand {
-  static description = 'Generate a forum page class';
+export default class Gambit extends BaseCommand {
+  static description = 'Generate a frontend gambit class';
 
   static flags = { ...BaseCommand.flags };
 
@@ -14,14 +14,14 @@ export default class ForumPage extends BaseCommand {
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {
-      stepManager.namedStep('forumPage', new GenerateForumPageStub(this.STUB_PATH, genExtScaffolder()))
-        .step(new GenerateRoutesExtender(), { optional: true, confirmationMessage: 'Generate corresponding route extender?', default: true }, [
+      stepManager.namedStep('gambit', new GenerateGambitStub(this.STUB_PATH, genExtScaffolder()))
+        .step(new GenerateSearchGambitExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
           {
-            sourceStep: 'forumPage',
+            sourceStep: 'gambit',
             exposedName: 'frontend',
           },
           {
-            sourceStep: 'forumPage',
+            sourceStep: 'gambit',
             exposedName: 'classNamespace',
             consumedName: 'className',
           },
