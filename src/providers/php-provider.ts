@@ -17,7 +17,7 @@ export interface MethodCallSpec {
 
 export interface ExpressionSpec {
   type: ExpressionType;
-  value: string | boolean | number | ClosureSpec;
+  value: string | boolean | number | Array<string | boolean | number> | ClosureSpec;
   auxiliaryValue?: string;
 }
 

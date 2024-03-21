@@ -137,22 +137,36 @@ class AddExtender extends NodeVisitorAbstract
     return $option->isFullyQualified() ? $option->toCodeString() : $option->toString();
   }
 
+  protected function scalarToExpr($value): Node\Expr {
+      if (is_string($value)) {
+          return new Node\Scalar\String_($value);
+      }
+
+      if (is_integer($value)) {
+          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_DEC]);
+      }
+
+      if (is_float($value)) {
+          return new Node\Scalar\DNumber($value);
+      }
+
+      if (is_bool($value)) {
+          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_BIN]);
+      }
+
+      if (is_array($value)) {
+          return new Node\Expr\Array_(
+              array_map([$this, 'scalarToExpr'], $value)
+          );
+      }
+
+    throw new \Exception("Unrecognized scalar type: " . gettype($value));
+  }
+
   protected function specToExpr(array $spec): Node\Expr {
     switch ($spec['type']) {
       case 'scalar':
-        $value = $spec['value'];
-        if (is_string($value)) {
-          return new Node\Scalar\String_($value);
-        }
-        if (is_integer($value)) {
-          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_DEC]);
-        }
-        if (is_float($value)) {
-          return new Node\Scalar\DNumber($value);
-        }
-        if (is_bool($value)) {
-          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_BIN]);
-        }
+        return $this->scalarToExpr($spec['value']);
       case 'class_const':
         return $this->nodeFactory->classConstFetch(
           $this->resolveName($spec['value']),

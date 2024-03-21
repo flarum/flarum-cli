@@ -106,6 +106,7 @@ The CLI has different types of commands for different tasks:
 - `flarum-cli make backend service-provider [PATH]`
 - `flarum-cli make backend validator [PATH]`
 - `flarum-cli make backend filter [PATH]`
+- `flarum-cli make backend notification-blueprint [PATH]`
 
 **Frontend Boilerplate Generation**: Generate frontend components/classes, ready to be used.
 
