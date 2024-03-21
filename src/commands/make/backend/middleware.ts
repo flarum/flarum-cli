@@ -5,7 +5,7 @@ import { GenerateMiddlewareExtender } from '../../../steps/extenders/middleware'
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
-export default class Command extends BaseCommand {
+export default class Middleware extends BaseCommand {
   static description = 'Generate a middleware';
 
   static flags = { ...BaseCommand.flags };

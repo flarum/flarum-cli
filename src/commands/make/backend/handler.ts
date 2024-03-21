@@ -5,7 +5,7 @@ import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
-export default class ApiController extends BaseCommand {
+export default class Handler extends BaseCommand {
   static description = 'Generate a domain logic handler class';
 
   static flags = { ...BaseCommand.flags };

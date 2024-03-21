@@ -14,7 +14,7 @@ use Tobyz\JsonApiServer\Context as OriginalContext;
 /**
  * @extends Resource\AbstractDatabaseResource<<%= modelClassName %>>
  */
-class UserResource extends Resource\AbstractDatabaseResource
+class <%= className %> extends Resource\AbstractDatabaseResource
 {
     public function type(): string
     {
