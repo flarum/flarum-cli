@@ -22,7 +22,7 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
             },
             {
               type: ExpressionType.SCALAR,
-              value: ['alert', 'email'],
+              value: (params: any) => params.notificationTypes,
             }
           ],
         },
@@ -35,6 +35,15 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
         validate: Validator.class,
         message: `Event Class (${chalk.dim('Vendor\\Path\\Event')})`,
       },
+      {
+        name: 'notificationTypes',
+        type: 'multiselect',
+        message: 'Notification types',
+        choices: [
+          { title: 'alert', value: 'alert', selected: true, },
+          { title: 'email', value: 'email', selected: true, },
+        ],
+      }
     ],
   };
 }

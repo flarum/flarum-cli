@@ -1,5 +1,7 @@
 import { execSync } from 'child_process';
 
+type Scalar = string | boolean | number;
+
 export interface ExtenderDef {
   extender: ExtenderSpec;
   methodCalls?: MethodCallSpec[];
@@ -17,7 +19,7 @@ export interface MethodCallSpec {
 
 export interface ExpressionSpec {
   type: ExpressionType;
-  value: string | boolean | number | Array<string | boolean | number> | ClosureSpec;
+  value: Scalar | Array<Scalar> | ClosureSpec | ((params: any) => Scalar | Array<Scalar>);
   auxiliaryValue?: string;
 }
 
