@@ -27,6 +27,7 @@ describe('Test extension skeleton step', function () {
     packageName: 'flarum/test',
     packageDescription: 'Text ext description',
     packageNamespace: 'Flarum\\Test',
+    escapedPackageNamespace: 'Flarum\\\\Test',
     authorName: 'Flarum Team',
     authorEmail: 'flarum@flarum.org',
     licenseType: 'MIT',

@@ -11,6 +11,7 @@ import { resolve } from 'path';
 import simpleGit from 'simple-git';
 import spdxLicenseListSimple from 'spdx-license-list/simple';
 import { getComposerJson } from '../utils/composer';
+import s from "string";
 
 function assertUnreachable(_x: never): never {
   throw new Error("Didn't expect to get here");
@@ -20,6 +21,7 @@ export const EXTENSION_PARAMS = [
   'packageName',
   'packageDescription',
   'packageNamespace',
+  'escapedPackageNamespace', // 'packageNamespace' with backslashes escaped
   'authorName',
   'authorEmail',
   'extensionName',
@@ -86,8 +88,15 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         getCurrVal: async (fs: Store, paths: Paths) => {
           const json = getComposerJson(fs, paths);
           const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
-          return namespace || '';
+          return (namespace || '').replace('\\\\', '\\');
         },
+      };
+
+    case 'escapedPackageNamespace':
+      return {
+        name,
+        uses: ['packageNamespace'],
+        compute: async (_paths, packageNamespace: string) => packageNamespace.replace('\\', '\\\\'),
       };
 
     case 'authorName':
@@ -283,7 +292,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'license',
             'require.flarum/core',
             'authors',
-            'autoload.psr-4.${params.packageNamespace}\\',
+            'autoload.psr-4.${params.escapedPackageNamespace}\\',
             'extra.flarum-extension.title',
             'extra.flarum-extension.category',
             'minimum-stability',
@@ -293,7 +302,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         needsTemplateParams: [
           'packageName',
           'packageNamespace',
-          'packageNamespace',
+          'escapedPackageNamespace',
           'packageDescription',
           'extensionName',
           'licenseType',
@@ -594,7 +603,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
         jsonToAugment: {
           'composer.json': [
-            'autoload-dev.psr-4.${params.packageNamespace}\\Tests\\',
+            'autoload-dev.psr-4.${params.escapedPackageNamespace}\\Tests\\',
             'scripts.test',
             'scripts.test:unit',
             'scripts.test:integration',
@@ -606,7 +615,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'require-dev.flarum/testing',
           ],
         },
-        needsTemplateParams: ['packageNamespace'],
+        needsTemplateParams: ['escapedPackageNamespace'],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('tests'));
         },

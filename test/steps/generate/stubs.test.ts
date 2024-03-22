@@ -381,6 +381,8 @@ scaffolder.templateParamVal = jest
         return 'flarum/core';
       case 'packageNamespace':
         return 'Flarum\\Demo';
+      case 'escapedPackageNamespace':
+        return 'Flarum\\\\Demo';
       default:
         return 'flarum';
     }
