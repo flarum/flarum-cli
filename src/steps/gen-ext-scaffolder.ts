@@ -77,6 +77,10 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           name,
           type: 'text',
           message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
+          initial: (_prev, values) => (values as unknown as Map<string, string>).get('packageName')!
+            .replace('/flarum-', '/')
+            .split('/')
+            .map((b: string) => s(b).camelize().capitalize().toString()).join('\\'),
           validate: (s) => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
           format: (str: string) =>
             str &&
@@ -133,6 +137,12 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           type: 'text',
           message: 'Extension name',
           validate: (str) => Boolean(str.trim()) || 'The extension name is required',
+          initial: (_prev, values) => s((values as unknown as Map<string, string>).get('packageName')!
+            .split('/')[1])
+            .replaceAll('flarum-', '')
+            .humanize()
+            .capitalize()
+            .toString(),
           format: (str) =>
             str
               .split(' ')
@@ -153,6 +163,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           type: 'autocomplete',
           message: 'License',
           choices: [...(spdxLicenseListSimple as Set<string>)].map((e) => ({ title: e, value: e })),
+          initial: 'MIT',
         },
         getCurrVal: async (fs: Store, paths: Paths) => {
           const json = getComposerJson(fs, paths);
