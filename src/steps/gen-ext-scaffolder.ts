@@ -278,6 +278,7 @@ export const EXTENSION_MODULES = [
   'bundlewatch',
 
   'backendTesting',
+  'phpstan',
 
   'editorConfig',
   'styleci',
@@ -629,6 +630,32 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         needsTemplateParams: ['escapedPackageNamespace'],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('tests'));
+        },
+      };
+
+    case 'phpstan':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: false,
+        shortDescription: 'Static analysis of PHP code with PHPStan.',
+        dependsOn: [],
+        filesToReplace: [
+          '.github/workflows/phpstan.yml',
+          'phpstan.neon'
+        ],
+        jsonToAugment: {
+          'composer.json': [
+            'scripts.analyse:phpstan',
+            'scripts.clear-cache:phpstan',
+            'scripts-descriptions.analyse:phpstan',
+            'require-dev.flarum/phpstan',
+          ],
+        },
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('phpstan.neon'));
         },
       };
 

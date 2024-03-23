@@ -1,0 +1,12 @@
+name: Static Code Analysis
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+  run:
+    uses: flarum/framework/.github/workflows/REUSABLE_backend.yml@2.x
+    with:
+      enable_backend_testing: false
+      enable_phpstan: <%= modules.phpstan %>
+
+      backend_directory: <%= params.backendDirectory %>

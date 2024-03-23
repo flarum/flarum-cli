@@ -39,7 +39,7 @@ export default class Infra extends BaseCommand {
     stepManager.namedStep('infra', genExtScaffolder().genInfraStep(this.args.module), {}, [], {}, mapPaths);
 
     const JS_MODULES = ['js', 'prettier', 'typescript'];
-    const PHP_MODULES = ['backendTesting'];
+    const PHP_MODULES = ['backendTesting', 'phpstan'];
 
     const packageManager = this.jsPackageManager(extRoot);
     if (!this.flags.monorepo && JS_MODULES.includes(module)) {

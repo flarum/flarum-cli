@@ -47,6 +47,7 @@ describe('Test extension skeleton step', function () {
     'modules.typescript': true,
     'modules.bundlewatch': true,
     'modules.backendTesting': true,
+    'modules.phpstan': true,
     'modules.editorConfig': true,
     'modules.styleci': true,
   };
