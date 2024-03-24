@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import { FlarumProviders } from '../../../providers';
-import {GenerateNotificationBlueprintStub} from "../../../steps/stubs/backend/notification-blueprint";
-import {GenerateNotificationTypeExtender} from "../../../steps/extenders/notification-type";
+import { GenerateNotificationBlueprintStub } from '../../../steps/stubs/backend/notification-blueprint';
+import { GenerateNotificationTypeExtender } from '../../../steps/extenders/notification-type';
 
 export default class NotificationBlueprint extends BaseCommand {
   static description = 'Generate a notification blueprint class';

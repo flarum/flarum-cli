@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
 

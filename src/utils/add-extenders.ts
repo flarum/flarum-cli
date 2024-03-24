@@ -1,13 +1,16 @@
-import {ExpressionType, ExtenderDef} from "../providers/php-provider";
-import * as fs from "fs";
-import * as t from "@babel/types";
+import { ExpressionType, ExtenderDef } from '../providers/php-provider';
+import * as fs from 'fs';
+import * as t from '@babel/types';
 import {
   applyImports,
   argumentsExpressions,
   findCallExpression,
-  findNewExpressionWithinNestedMemberExpression, generateCode, ModuleImport, parseCode,
-  sameArguments
-} from "./ast";
+  findNewExpressionWithinNestedMemberExpression,
+  generateCode,
+  ModuleImport,
+  parseCode,
+  sameArguments,
+} from './ast';
 
 export default function addExtenders(path: string, extenders: ExtenderDef[], frontend: string): void {
   const code = fs.readFileSync(path, 'utf-8');
@@ -54,7 +57,7 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
           callExpression = element;
         }
 
-        if (! callExpression) {
+        if (!callExpression) {
           return false;
         }
 
@@ -70,15 +73,18 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
       }
 
       return (newExpression.callee as t.Identifier).name === className && sameArguments(ast, newExpression.arguments, extender.extender.args);
-    }) as (t.NewExpression | t.SequenceExpression | t.CallExpression | undefined);
+    }) as t.NewExpression | t.SequenceExpression | t.CallExpression | undefined;
 
     const extenderExists = Boolean(newExtender);
 
     // Create the new extender expression.
-    if (! newExtender) {
-      newExtender = t.newExpression(t.identifier(importing.qualifiedModule(classPath)), extender.extender.args?.map((arg) => {
-        return argumentsExpressions([arg])[0];
-      }) || []);
+    if (!newExtender) {
+      newExtender = t.newExpression(
+        t.identifier(importing.qualifiedModule(classPath)),
+        extender.extender.args?.map((arg) => {
+          return argumentsExpressions([arg])[0];
+        }) || []
+      );
     }
 
     let callExpression = null;
@@ -90,7 +96,10 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
           continue;
         }
 
-        callExpression = t.callExpression(t.memberExpression(callExpression ?? newExtender, t.identifier(methodCall.methodName)), methodCall.args ? argumentsExpressions(methodCall.args) : []);
+        callExpression = t.callExpression(
+          t.memberExpression(callExpression ?? newExtender, t.identifier(methodCall.methodName)),
+          methodCall.args ? argumentsExpressions(methodCall.args) : []
+        );
       }
     }
 
@@ -109,21 +118,36 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
   generateCode(ast).then((formattedCode: string) => fs.writeFileSync(path, formattedCode));
 }
 
-function applyImportsForExtenders(ast: t.File, extenders: ExtenderDef[], frontend: string): { qualifiedModule: (name: string|ModuleImport) => string } {
+function applyImportsForExtenders(
+  ast: t.File,
+  extenders: ExtenderDef[],
+  frontend: string
+): { qualifiedModule: (name: string | ModuleImport) => string } {
   const modules = extenders.map((extender) => extender.extender.className);
 
   modules.push(
-    ...extenders.flatMap((extender) => extender.extender.args?.filter((arg) => arg.type === ExpressionType.CLASS_CONST).map((arg) => arg.value as string) || []),
-    ...extenders.flatMap((extender) => extender.methodCalls?.flatMap((methodCall) => methodCall.args?.filter((arg) => arg.type === ExpressionType.CLASS_CONST).map((arg) => arg.value as string) || []) || [])
+    ...extenders.flatMap(
+      (extender) => extender.extender.args?.filter((arg) => arg.type === ExpressionType.CLASS_CONST).map((arg) => arg.value as string) || []
+    ),
+    ...extenders.flatMap(
+      (extender) =>
+        extender.methodCalls?.flatMap(
+          (methodCall) => methodCall.args?.filter((arg) => arg.type === ExpressionType.CLASS_CONST).map((arg) => arg.value as string) || []
+        ) || []
+    )
   );
 
-  return applyImports(ast, frontend, modules.map((module) => {
-    return {
-      name: module.split('/').pop()!,
-      path: module,
-      defaultImport: true
-    };
-  }));
+  return applyImports(
+    ast,
+    frontend,
+    modules.map((module) => {
+      return {
+        name: module.split('/').pop()!,
+        path: module,
+        defaultImport: true,
+      };
+    })
+  );
 }
 
 function findExtendersArray(ast: t.File): t.ArrayExpression {
@@ -132,7 +156,7 @@ function findExtendersArray(ast: t.File): t.ArrayExpression {
   }) as t.ExportDefaultDeclaration;
 
   if (!defaultExport) {
-    ast.program.body.push(defaultExport = t.exportDefaultDeclaration(t.arrayExpression([])));
+    ast.program.body.push((defaultExport = t.exportDefaultDeclaration(t.arrayExpression([]))));
   }
 
   return defaultExport.declaration as t.ArrayExpression;

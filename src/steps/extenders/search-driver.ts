@@ -16,7 +16,7 @@ export class GenerateSearchDriverExtender extends BaseExtenderStep {
             value: '${driverClass}',
             auxiliaryValue: 'class',
           },
-        ]
+        ],
       },
       methodCalls: [],
     },

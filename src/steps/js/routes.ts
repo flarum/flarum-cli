@@ -1,10 +1,10 @@
-import {IO} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {BaseJsStep} from './base';
-import {ExtenderGenerationSchema} from "../extenders/base";
-import {ExpressionType} from "../../providers/php-provider";
-import {Validator} from "../../utils/validation";
-import chalk from "chalk";
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { BaseJsStep } from './base';
+import { ExtenderGenerationSchema } from '../extenders/base';
+import { ExpressionType } from '../../providers/php-provider';
+import { Validator } from '../../utils/validation';
+import chalk from 'chalk';
 
 export class GenerateRoutesExtender extends BaseJsStep {
   type = 'Generate JS Model Extender';
@@ -20,7 +20,7 @@ export class GenerateRoutesExtender extends BaseJsStep {
           args: [
             {
               type: ExpressionType.SCALAR,
-              value: '${routeName}'
+              value: '${routeName}',
             },
             {
               type: ExpressionType.SCALAR,
@@ -29,10 +29,10 @@ export class GenerateRoutesExtender extends BaseJsStep {
             {
               type: ExpressionType.CLASS_CONST,
               value: '${className}',
-            }
+            },
           ],
-        }
-      ]
+        },
+      ],
     },
     params: [
       {
@@ -51,8 +51,8 @@ export class GenerateRoutesExtender extends BaseJsStep {
         message: 'Class name',
         type: 'text',
         validate: Validator.module,
-      }
-    ]
+      },
+    ],
   };
 
   exposes = [];

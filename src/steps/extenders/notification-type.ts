@@ -23,7 +23,7 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
             {
               type: ExpressionType.SCALAR,
               value: (params: any) => params.notificationTypes,
-            }
+            },
           ],
         },
       ],
@@ -40,10 +40,10 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
         type: 'multiselect',
         message: 'Notification types',
         choices: [
-          { title: 'alert', value: 'alert', selected: true, },
-          { title: 'email', value: 'email', selected: true, },
+          { title: 'alert', value: 'alert', selected: true },
+          { title: 'email', value: 'email', selected: true },
         ],
-      }
+      },
     ],
   };
 }

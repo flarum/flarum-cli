@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
-import {GenerateFilterStub} from "../../../steps/stubs/backend/filter";
-import {GenerateSearchFilterExtender} from "../../../steps/extenders/search-filter";
+import { GenerateFilterStub } from '../../../steps/stubs/backend/filter';
+import { GenerateSearchFilterExtender } from '../../../steps/extenders/search-filter';
 
 export default class Filter extends BaseCommand {
   static description = 'Generate a filter class';

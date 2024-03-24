@@ -26,7 +26,7 @@ export default class Controller extends BaseCommand {
             sourceStep: 'controller',
             exposedName: 'frontend',
             consumedName: 'frontend',
-          }
+          },
         ]);
     });
   }

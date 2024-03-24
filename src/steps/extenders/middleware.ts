@@ -1,7 +1,7 @@
 import { ExpressionType } from '../../providers/php-provider';
 import { BaseExtenderStep, ExtenderGenerationSchema } from './base';
-import {Validator} from "../../utils/validation";
-import chalk from "chalk";
+import { Validator } from '../../utils/validation';
+import chalk from 'chalk';
 
 export class GenerateMiddlewareExtender extends BaseExtenderStep {
   type = 'Generate console extender';

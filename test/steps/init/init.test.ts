@@ -73,7 +73,9 @@ describe('Test extension skeleton step', function () {
 
     const expected = await getExpected();
 
-    expect(getFsPaths(fs).sort()).toStrictEqual(expected.filter((p) => !p.includes('.bundlewatch') && !p.includes('.neon') && !p.includes('phpstan.yml')));
+    expect(getFsPaths(fs).sort()).toStrictEqual(
+      expected.filter((p) => !p.includes('.bundlewatch') && !p.includes('.neon') && !p.includes('phpstan.yml'))
+    );
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);

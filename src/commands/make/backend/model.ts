@@ -22,7 +22,7 @@ export default class Model extends BaseCommand {
         .namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder()))
         .step(
           new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()),
-          {optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true},
+          { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true },
           [
             {
               sourceStep: 'model',
@@ -34,7 +34,7 @@ export default class Model extends BaseCommand {
         .namedStep(
           'resource',
           new GenerateApiResourceStub(this.STUB_PATH, genExtScaffolder()),
-          {optional: true, confirmationMessage: 'Generate corresponding API Resource?', default: true},
+          { optional: true, confirmationMessage: 'Generate corresponding API Resource?', default: true },
           [
             {
               sourceStep: 'model',
@@ -52,7 +52,7 @@ export default class Model extends BaseCommand {
         .namedStep(
           'policy',
           new GeneratePolicyStub(this.STUB_PATH, genExtScaffolder()),
-          {optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true},
+          { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true },
           [
             {
               sourceStep: 'model',

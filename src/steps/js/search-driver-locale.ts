@@ -1,6 +1,6 @@
-import {IO} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {BaseJsStep, InitializerDefinition} from './base';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { BaseJsStep, InitializerDefinition } from './base';
 
 export class GenerateSearchDriverLocaleDefinition extends BaseJsStep {
   type = 'Generate Search Driver Locale Definition';
@@ -13,7 +13,7 @@ export class GenerateSearchDriverLocaleDefinition extends BaseJsStep {
 
   protected schema = null;
 
-  protected async getDefinition(frontend: string, _paths: Paths, io: IO): Promise<InitializerDefinition|null> {
+  protected async getDefinition(frontend: string, _paths: Paths, io: IO): Promise<InitializerDefinition | null> {
     if (frontend !== 'admin') {
       return null;
     }
@@ -35,7 +35,7 @@ export class GenerateSearchDriverLocaleDefinition extends BaseJsStep {
           name: 'extend',
           path: 'flarum/common/extend',
           defaultImport: false,
-        }
+        },
       ],
     };
   }

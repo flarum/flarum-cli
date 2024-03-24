@@ -1,9 +1,9 @@
-import {IO} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {BaseJsStep} from './base';
-import {ExtenderGenerationSchema} from "../extenders/base";
-import {ExpressionType} from "../../providers/php-provider";
-import {pluralKebabCaseModel} from "../../utils/model-name";
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { BaseJsStep } from './base';
+import { ExtenderGenerationSchema } from '../extenders/base';
+import { ExpressionType } from '../../providers/php-provider';
+import { pluralKebabCaseModel } from '../../utils/model-name';
 
 export class GenerateModelExtender extends BaseJsStep {
   type = 'Generate JS Model Extender';
@@ -19,15 +19,15 @@ export class GenerateModelExtender extends BaseJsStep {
           args: [
             {
               type: ExpressionType.SCALAR,
-              value: '${modelType}'
+              value: '${modelType}',
             },
             {
               type: ExpressionType.CLASS_CONST,
               value: '${className}',
-            }
+            },
           ],
-        }
-      ]
+        },
+      ],
     },
     params: [
       {
@@ -41,9 +41,9 @@ export class GenerateModelExtender extends BaseJsStep {
         type: 'text',
         initial: (_prev, values) => {
           return pluralKebabCaseModel(values.get('className') as string);
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
   exposes = [];

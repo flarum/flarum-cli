@@ -1,6 +1,6 @@
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
 
 export class GenerateGambitStub extends BaseJsStubStep {
   type = 'Generate a Gambit';
@@ -33,14 +33,14 @@ export class GenerateGambitStub extends BaseJsStubStep {
         type: 'select',
         choices: ['boolean', 'key-value'].map((type) => ({
           title: type,
-          value: type
+          value: type,
         })),
       },
       {
         name: 'filterKey',
         message: 'Backend filter key',
         type: 'text',
-        validate: Validator.alphaNumeric
+        validate: Validator.alphaNumeric,
       },
     ],
   };

@@ -3,7 +3,7 @@ import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
 import { Store } from 'mem-fs';
-import {kebab, pluralKebabCaseModel} from "../../../utils/model-name";
+import { kebab } from '../../../utils/model-name';
 
 export class GenerateForumPageStub extends BaseJsStubStep {
   type = 'Generate Forum Page Class';

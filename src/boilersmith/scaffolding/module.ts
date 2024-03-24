@@ -267,10 +267,9 @@ export async function applyModule<MN extends string, TN extends string>(
 
   // This is necessary because one layer of escaped backslashes is lost on template population.
   const clonedTplData = { ...tplData };
-  clonedTplData.params = Object.fromEntries(Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])) as Record<
-    TN,
-    unknown
-  >;
+  clonedTplData.params = Object.fromEntries(
+    Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])
+  ) as Record<TN, unknown>;
 
   for (const jsonPath of Object.keys(jsonPaths)) {
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), clonedTplData);

@@ -23,7 +23,7 @@ export class GenerateSearchDriverAbstractModelSearcherStub extends BasePhpStubSt
         name: 'classNamespace',
         type: 'text',
         message: 'Class Namespace',
-      }
+      },
     ],
   };
 }

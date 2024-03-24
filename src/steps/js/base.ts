@@ -1,16 +1,16 @@
 import globby from 'globby';
-import {Store} from 'mem-fs';
-import {create} from 'mem-fs-editor';
-import {IO, ParamDef} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {Step} from 'boilersmith/step-manager';
-import {FlarumProviders} from '../../providers';
-import addExtenders from "../../utils/add-extenders";
-import {ExtenderDef} from "../../providers/php-provider";
-import {ExtenderGenerationSchema} from "../extenders/base";
-import {cloneAndFill} from "boilersmith/utils/clone-and-fill";
-import {genExtScaffolder} from "../gen-ext-scaffolder";
-import {applyImports, generateCode, ModuleImport, parseCode} from "../../utils/ast";
+import { Store } from 'mem-fs';
+import { create } from 'mem-fs-editor';
+import { IO, ParamDef } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { Step } from 'boilersmith/step-manager';
+import { FlarumProviders } from '../../providers';
+import addExtenders from '../../utils/add-extenders';
+import { ExtenderDef } from '../../providers/php-provider';
+import { ExtenderGenerationSchema } from '../extenders/base';
+import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
+import { genExtScaffolder } from '../gen-ext-scaffolder';
+import { applyImports, generateCode, ModuleImport, parseCode } from '../../utils/ast';
 
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
@@ -22,7 +22,7 @@ export type InitializerDefinition = {
 export abstract class BaseJsStep implements Step<FlarumProviders> {
   abstract type: string;
 
-  protected abstract schema: ExtenderGenerationSchema|null;
+  protected abstract schema: ExtenderGenerationSchema | null;
 
   composable = true;
 
@@ -39,7 +39,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
 
     this.params = await this.compileParams(io);
 
-    const extender = this.schema && cloneAndFill<ExtenderDef>(this.schema.extenderDef, this.params as Record<string, string>) || null;
+    const extender = (this.schema && cloneAndFill<ExtenderDef>(this.schema.extenderDef, this.params as Record<string, string>)) || null;
 
     const frontend: string = await io.getParam({
       name: 'frontend',
@@ -58,7 +58,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
 
     this.params = {
       ...this.params,
-      ...await genExtScaffolder().templateParamVals(fs, paths, io),
+      ...(await genExtScaffolder().templateParamVals(fs, paths, io)),
     };
 
     for (const frontend of frontends) {
@@ -72,7 +72,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
           addExtenders(match, [extender], frontend);
         }
 
-        if (! definition) continue;
+        if (!definition) continue;
 
         const currContents = fsEditor.read(match);
 
@@ -99,7 +99,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
     return fs;
   }
 
-  protected abstract getDefinition(frontend: string, paths: Paths, io: IO): Promise<InitializerDefinition|null>;
+  protected abstract getDefinition(frontend: string, paths: Paths, io: IO): Promise<InitializerDefinition | null>;
 
   protected importPath(frontend: string, classNamespace: string): string {
     let path = `../${classNamespace}`;

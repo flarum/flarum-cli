@@ -76,7 +76,7 @@ export class PromptsIO implements IO {
       return this.cache.get(paramName) as T;
     }
 
-    let initial: T|null = null;
+    let initial: T | null = null;
 
     if (paramDef.initial && paramDef.initial instanceof Function) {
       initial = paramDef.initial(this.prev?.val, this.cache, this.prev?.prompt as PromptObject) as unknown as T;
@@ -124,10 +124,13 @@ export class PromptsIO implements IO {
    * @internal
    */
   cached(): Record<string, unknown> {
-    return [...this.cache].reduce((obj, [key, value]) => {
-      obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    return [...this.cache].reduce(
+      (obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      },
+      {} as Record<string, unknown>
+    );
   }
 
   info(message: string, immediate: boolean): void {

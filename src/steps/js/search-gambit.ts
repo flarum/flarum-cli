@@ -1,10 +1,9 @@
-import {IO} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {BaseJsStep} from './base';
-import {ExtenderGenerationSchema} from "../extenders/base";
-import {ExpressionType} from "../../providers/php-provider";
-import {Validator} from "../../utils/validation";
-import chalk from "chalk";
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { BaseJsStep } from './base';
+import { ExtenderGenerationSchema } from '../extenders/base';
+import { ExpressionType } from '../../providers/php-provider';
+import { Validator } from '../../utils/validation';
 
 export class GenerateSearchGambitExtender extends BaseJsStep {
   type = 'Generate JS Gambit Extender';
@@ -26,15 +25,15 @@ export class GenerateSearchGambitExtender extends BaseJsStep {
           args: [
             {
               type: ExpressionType.SCALAR,
-              value: '${modelType}'
+              value: '${modelType}',
             },
             {
               type: ExpressionType.CLASS_CONST,
               value: '${className}',
-            }
+            },
           ],
-        }
-      ]
+        },
+      ],
     },
     params: [
       {
@@ -47,8 +46,8 @@ export class GenerateSearchGambitExtender extends BaseJsStep {
         message: 'Class name',
         type: 'text',
         validate: Validator.module,
-      }
-    ]
+      },
+    ],
   };
 
   protected async getDefinition(): Promise<null> {

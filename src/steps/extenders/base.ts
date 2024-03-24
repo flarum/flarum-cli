@@ -1,11 +1,11 @@
-import {Store} from 'mem-fs';
-import {create} from 'mem-fs-editor';
-import {IO, ParamDef} from 'boilersmith/io';
-import {Paths} from 'boilersmith/paths';
-import {ExpressionType, ExtenderDef} from '../../providers/php-provider';
-import {Step} from 'boilersmith/step-manager';
-import {cloneAndFill} from 'boilersmith/utils/clone-and-fill';
-import {FlarumProviders} from '../../providers';
+import { Store } from 'mem-fs';
+import { create } from 'mem-fs-editor';
+import { IO, ParamDef } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { ExpressionType, ExtenderDef } from '../../providers/php-provider';
+import { Step } from 'boilersmith/step-manager';
+import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
+import { FlarumProviders } from '../../providers';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;
@@ -39,16 +39,15 @@ export abstract class BaseExtenderStep implements Step<FlarumProviders> {
 
     const extenderDef = this.schema.extenderDef;
 
-    [extenderDef.extender.args, extenderDef.methodCalls?.flatMap((mc) => mc.args)]
-      .forEach((args) => {
-        if (args) {
-          args.forEach((arg) => {
-            if (arg && arg.type === ExpressionType.SCALAR && typeof arg.value === 'function') {
-              arg.value = arg.value(this.params);
-            }
-          });
-        }
-      });
+    [extenderDef.extender.args, extenderDef.methodCalls?.flatMap((mc) => mc.args)].forEach((args) => {
+      if (args) {
+        args.forEach((arg) => {
+          if (arg && arg.type === ExpressionType.SCALAR && typeof arg.value === 'function') {
+            arg.value = arg.value(this.params);
+          }
+        });
+      }
+    });
 
     const filledExtenderDef = cloneAndFill<ExtenderDef>(extenderDef, this.params as Record<string, string>);
 

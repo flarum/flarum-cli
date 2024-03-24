@@ -28,7 +28,7 @@ export class GenerateSearchDriverStub extends BasePhpStubStep {
         type: 'text',
         message: 'Unique driver name (e.g. extension-name-driver-name)',
         validate: Validator.alphaDash,
-      }
+      },
     ],
   };
 }

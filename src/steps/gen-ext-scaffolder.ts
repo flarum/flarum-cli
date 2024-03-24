@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import simpleGit from 'simple-git';
 import spdxLicenseListSimple from 'spdx-license-list/simple';
 import { getComposerJson } from '../utils/composer';
-import s from "string";
+import s from 'string';
 
 function assertUnreachable(_x: never): never {
   throw new Error("Didn't expect to get here");
@@ -38,7 +38,7 @@ export const EXTENSION_PARAMS = [
   'frontendDirectory',
 ] as const;
 
-export type ExtensionParams = typeof EXTENSION_PARAMS[number];
+export type ExtensionParams = (typeof EXTENSION_PARAMS)[number];
 
 function paramNamesToDef(name: ExtensionParams): TemplateParam<string, ExtensionParams> {
   switch (name) {
@@ -76,10 +76,13 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           name,
           type: 'text',
           message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
-          initial: (_prev, values) => (values as unknown as Map<string, string>).get('packageName')!
-            .replace('/flarum-', '/')
-            .split('/')
-            .map((b: string) => s(b).camelize().capitalize().toString()).join('\\'),
+          initial: (_prev, values) =>
+            (values as unknown as Map<string, string>)
+              .get('packageName')!
+              .replace('/flarum-', '/')
+              .split('/')
+              .map((b: string) => s(b).camelize().capitalize().toString())
+              .join('\\'),
           validate: (s) => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
           format: (str: string) =>
             str &&
@@ -129,12 +132,12 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           type: 'text',
           message: 'Extension name',
           validate: (str) => Boolean(str.trim()) || 'The extension name is required',
-          initial: (_prev, values) => s((values as unknown as Map<string, string>).get('packageName')!
-            .split('/')[1])
-            .replaceAll('flarum-', '')
-            .humanize()
-            .capitalize()
-            .toString(),
+          initial: (_prev, values) =>
+            s((values as unknown as Map<string, string>).get('packageName')!.split('/')[1])
+              .replaceAll('flarum-', '')
+              .humanize()
+              .capitalize()
+              .toString(),
           format: (str) =>
             str
               .split(' ')
@@ -276,7 +279,7 @@ export const EXTENSION_MODULES = [
   'styleci',
 ] as const;
 
-export type ExtensionModules = typeof EXTENSION_MODULES[number];
+export type ExtensionModules = (typeof EXTENSION_MODULES)[number];
 
 function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
   switch (name) {
@@ -525,7 +528,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             monorepoPath: '.github/workflows/${params.extensionId}-phpstan.yml',
             requireMonorepo: false,
             moduleDeps: ['phpstan'],
-          }
+          },
         ],
         jsonToAugment: {},
         needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
@@ -645,9 +648,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         defaultEnabled: false,
         shortDescription: 'Static analysis of PHP code with PHPStan.',
         dependsOn: [],
-        filesToReplace: [
-          'phpstan.neon'
-        ],
+        filesToReplace: ['phpstan.neon'],
         jsonToAugment: {
           'composer.json': [
             'scripts.analyse:phpstan',
