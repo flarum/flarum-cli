@@ -21,7 +21,6 @@ export const EXTENSION_PARAMS = [
   'packageName',
   'packageDescription',
   'packageNamespace',
-  'escapedPackageNamespace', // 'packageNamespace' with backslashes escaped
   'authorName',
   'authorEmail',
   'extensionName',
@@ -94,13 +93,6 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
           return (namespace || '').replace('\\\\', '\\');
         },
-      };
-
-    case 'escapedPackageNamespace':
-      return {
-        name,
-        uses: ['packageNamespace'],
-        compute: async (_paths, packageNamespace: string) => packageNamespace.replace('\\', '\\\\'),
       };
 
     case 'authorName':
@@ -304,7 +296,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'license',
             'require.flarum/core',
             'authors',
-            'autoload.psr-4.${params.escapedPackageNamespace}\\',
+            'autoload.psr-4.${params.packageNamespace}\\',
             'extra.flarum-extension.title',
             'extra.flarum-extension.category',
             'minimum-stability',
@@ -314,7 +306,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         needsTemplateParams: [
           'packageName',
           'packageNamespace',
-          'escapedPackageNamespace',
+          'packageNamespace',
           'packageDescription',
           'extensionName',
           'licenseType',
@@ -402,6 +394,12 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           { path: 'js/src/admin/index.ts', doNotUpdate: true, moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
           { path: 'js/src/forum/index.ts', doNotUpdate: true, moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
           { path: 'js/src/common/index.ts', doNotUpdate: true, moduleDeps: ['jsCommon', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/admin/extend.js', doNotUpdate: true, moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/forum/extend.js', doNotUpdate: true, moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/common/extend.js', doNotUpdate: true, moduleDeps: ['jsCommon', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/admin/extend.ts', doNotUpdate: true, moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/forum/extend.ts', doNotUpdate: true, moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/common/extend.ts', doNotUpdate: true, moduleDeps: ['jsCommon', { module: 'typescript', enabled: true }] },
         ],
         jsonToAugment: {
           'js/package.json': [
@@ -522,6 +520,12 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             monorepoPath: '.github/workflows/${params.extensionId}-backend.yml',
             requireMonorepo: false,
           },
+          {
+            path: '.github/workflows/phpstan.yml',
+            monorepoPath: '.github/workflows/${params.extensionId}-phpstan.yml',
+            requireMonorepo: false,
+            moduleDeps: ['phpstan'],
+          }
         ],
         jsonToAugment: {},
         needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
@@ -615,7 +619,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
         jsonToAugment: {
           'composer.json': [
-            'autoload-dev.psr-4.${params.escapedPackageNamespace}\\Tests\\',
+            'autoload-dev.psr-4.${params.packageNamespace}\\Tests\\',
             'scripts.test',
             'scripts.test:unit',
             'scripts.test:integration',
@@ -627,7 +631,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'require-dev.flarum/testing',
           ],
         },
-        needsTemplateParams: ['escapedPackageNamespace'],
+        needsTemplateParams: ['packageNamespace'],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('tests'));
         },
@@ -642,7 +646,6 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         shortDescription: 'Static analysis of PHP code with PHPStan.',
         dependsOn: [],
         filesToReplace: [
-          '.github/workflows/phpstan.yml',
           'phpstan.neon'
         ],
         jsonToAugment: {

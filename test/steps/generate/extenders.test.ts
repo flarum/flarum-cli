@@ -31,6 +31,7 @@ const testSpecs: ExtenderTest[] = [
   {
     ExtenderClass: GenerateRoutesExtender,
     params: {
+      frontend: 'forum',
       routePath: '/potatoes',
       routeName: 'potatoes.index',
       routeHandler: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',

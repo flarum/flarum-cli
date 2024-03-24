@@ -259,22 +259,22 @@ const backendTestSpecs: StubTest[] = [
 ];
 
 // Api Controllers
-for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']) {
+for (const frontend of ['forum', 'admin', 'api']) {
   backendTestSpecs.push({
     StubClass: GenerateControllerStub,
     params: {
-      className: `${classType}Controller`,
-      serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,
-      handlerCommandClass: `Flarum\\Demo\\Custom${classType}`,
-      classType,
+      className: `${frontend}Controller`,
+      frontend,
     },
-    expectedModifiedFilesDefaultDir: [`/ext/src/Api/Controller/${classType}Controller.php`],
-    expectedModifiedFilesRequestedDir: [`${requestedDir}/${classType}Controller.php`],
+    expectedModifiedFilesDefaultDir: [`/ext/src/Controller/${frontend}Controller.php`],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/${frontend}Controller.php`],
     expectedExposedParamsDefaultDir: {
-      class: `Flarum\\Demo\\Api\\Controller\\${classType}Controller`,
+      class: `Flarum\\Demo\\Controller\\${frontend}Controller`,
+      frontend,
     },
     expectedExposedParamsRequestedDir: {
-      class: `Flarum\\Demo\\somePath\\${classType}Controller`,
+      class: `Flarum\\Demo\\somePath\\${frontend}Controller`,
+      frontend,
     },
   });
 }
@@ -381,8 +381,6 @@ scaffolder.templateParamVal = jest
         return 'flarum/core';
       case 'packageNamespace':
         return 'Flarum\\Demo';
-      case 'escapedPackageNamespace':
-        return 'Flarum\\\\Demo';
       default:
         return 'flarum';
     }

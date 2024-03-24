@@ -265,13 +265,16 @@ export async function applyModule<MN extends string, TN extends string>(
 
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
 
-  for (const jsonPath of Object.keys(jsonPaths)) {
-    const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
-    const scaffoldContentsJson = JSON.parse(scaffoldContents);
+  // This is necessary because one layer of escaped backslashes is lost on template population.
+  const clonedTplData = { ...tplData };
+  clonedTplData.params = Object.fromEntries(Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])) as Record<
+    TN,
+    unknown
+  >;
 
-    if (!fsEditor.exists(paths.package(jsonPath))) {
-      fsEditor.writeJSON(paths.package(jsonPath), scaffoldContentsJson, undefined, 4);
-    }
+  for (const jsonPath of Object.keys(jsonPaths)) {
+    const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), clonedTplData);
+    const scaffoldContentsJson = JSON.parse(scaffoldContents);
 
     const excludeKeys = cloneAndFill(excludeScaffolding.configKeys[jsonPath] ?? [], tplDataFlat);
     const fieldsToAugment = jsonPaths[jsonPath].filter((key) => !excludeKeys.includes(key));

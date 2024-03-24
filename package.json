@@ -103,7 +103,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "prettier --check . && eslint . --ext .ts --config .eslintrc && tsc --build --dry",
     "prepack": "rm -rf lib && tsc --project tsconfig.build.json && yarn oclif-dev manifest && yarn oclif-dev readme",
-    "test": "jest",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "version": "yarn oclif-dev readme && git add README.md"
   },
   "types": "lib/index.d.ts",

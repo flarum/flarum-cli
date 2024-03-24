@@ -92,11 +92,17 @@ export class PromptsIO implements IO {
       paramDef.initial = initial as unknown as string;
     }
 
-    const res = (await prompt(paramDef, {
-      onCancel: this.onCancel,
-    })) as Record<string, unknown>;
+    let resValue: T;
 
-    const resValue = res[paramName] as T;
+    if (initial !== null && this.noInteraction) {
+      resValue = initial;
+    } else {
+      const res = (await prompt(paramDef, {
+        onCancel: this.onCancel,
+      })) as Record<string, unknown>;
+
+      resValue = res[paramName] as T;
+    }
 
     if (!noCache) {
       this.cache.set(paramName, resValue);

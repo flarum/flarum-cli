@@ -48,4 +48,8 @@ export class Validator {
   public static gitRepo(s: string): ValidatorFunc {
     return /^((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w./:@~-]+)(\.git)(\/)?$/.test(s.trim()) || 'Invalid git repo URL.';
   }
+
+  public static alphaDash(s: string): ValidatorFunc {
+    return /^[\w-]+$/.test(s.trim()) || 'Field is required; alphanumerical characters and dashes only!';
+  }
 }

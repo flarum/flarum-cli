@@ -9,19 +9,20 @@ import addExtenders from "../../utils/add-extenders";
 import {ExtenderDef} from "../../providers/php-provider";
 import {ExtenderGenerationSchema} from "../extenders/base";
 import {cloneAndFill} from "boilersmith/utils/clone-and-fill";
+import {genExtScaffolder} from "../gen-ext-scaffolder";
+import {applyImports, generateCode, ModuleImport, parseCode} from "../../utils/ast";
 
-const IMPORTS_REGEX = /((^import\s+(?:([\s\w*,{}]+)\s+from)?\s*["']?([\s\w./@\\-]+)\3?["']?\s*;?\s*)*)(.*)/m;
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
 export type InitializerDefinition = {
   code: string;
-  imports: string;
+  imports: ModuleImport[];
 };
 
 export abstract class BaseJsStep implements Step<FlarumProviders> {
   abstract type: string;
 
-  protected abstract schema: ExtenderGenerationSchema;
+  protected abstract schema: ExtenderGenerationSchema|null;
 
   composable = true;
 
@@ -38,7 +39,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
 
     this.params = await this.compileParams(io);
 
-    const extender = cloneAndFill<ExtenderDef>(this.schema.extenderDef, this.params as Record<string, string>);
+    const extender = this.schema && cloneAndFill<ExtenderDef>(this.schema.extenderDef, this.params as Record<string, string>) || null;
 
     const frontend: string = await io.getParam({
       name: 'frontend',
@@ -54,6 +55,11 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
     if (frontend === 'common') {
       frontends = ['admin', 'forum'];
     }
+
+    this.params = {
+      ...this.params,
+      ...await genExtScaffolder().templateParamVals(fs, paths, io),
+    };
 
     for (const frontend of frontends) {
       const fsSrcFilePaths = globby.sync(paths.package(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
@@ -75,7 +81,16 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
           continue;
         }
 
-        const newContents = currContents.replace(INIT_REGEX, `$1\n  ${definition.code}\n`).replace(IMPORTS_REGEX, `$1${definition.imports}\n\n$5`);
+        let newContents = currContents.replace(INIT_REGEX, `$1\n  ${definition.code}\n`);
+
+        const imports = definition.imports;
+
+        if (imports) {
+          const ast = parseCode(newContents);
+          applyImports(ast, frontend, imports);
+          // eslint-disable-next-line no-await-in-loop
+          newContents = await generateCode(ast);
+        }
 
         fsEditor.write(match, newContents);
       }
@@ -97,7 +112,12 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
   protected async compileParams(io: IO): Promise<Record<string, unknown>> {
     const params: Record<string, string> = {};
 
-    const paramDefs = this.schema.params;
+    const paramDefs = this.schema?.params;
+
+    if (!paramDefs) {
+      return params;
+    }
+
     for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
       params[paramDef.name as string] = await io.getParam(paramDef as ParamDef);
