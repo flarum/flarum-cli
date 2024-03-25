@@ -89,6 +89,10 @@ The CLI has different types of commands for different tasks:
 
 - `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up to date for all enabled modules.
 
+**Backend/Frontend Boilerplate Generation**: These commands generate boilerplate code for different parts of an extension.
+
+- `flarum-cli make notification [PATH]`: Generates a backend notification blueprint, the corresponding backend extender, and the frontend equivalent.
+
 **Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
 
 - `flarum-cli make backend controller [PATH]`
@@ -115,6 +119,7 @@ The CLI has different types of commands for different tasks:
 - `flarum-cli make frontend model [PATH]`
 - `flarum-cli make frontend forum-page [PATH]`
 - `flarum-cli make frontend gambit [PATH]`
+- `flarum-cli make frontend notification [PATH]`
 
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
 

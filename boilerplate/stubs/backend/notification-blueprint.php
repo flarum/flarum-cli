@@ -30,7 +30,7 @@ class <%= className %> implements BlueprintInterface
 
     public static function getType(): string
     {
-        // @TODO: implement
+        return '<%= type %>';
     }
 
     public static function getSubjectModel(): string

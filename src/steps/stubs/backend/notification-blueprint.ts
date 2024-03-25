@@ -1,10 +1,14 @@
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
+import s from "string";
+import {StubGenerationSchema} from "boilersmith/steps/stub-base";
 
 export class GenerateNotificationBlueprintStub extends BasePhpStubStep {
   type = 'Generate Notification Blueprint';
 
-  protected schema = {
+  additionalExposes = ['className', 'type'];
+
+  protected schema: StubGenerationSchema = {
     recommendedSubdir: 'Notification',
     sourceFile: 'backend/notification-blueprint.php',
     params: [
@@ -18,6 +22,14 @@ export class GenerateNotificationBlueprintStub extends BasePhpStubStep {
         name: 'classNamespace',
         type: 'text',
         message: 'Class Namespace',
+      },
+      {
+        name: 'type',
+        message: 'Notification type',
+        type: 'text',
+        initial: (_prev, params): string => {
+          return s((params.get('className') as string)).underscore().camelize().toString().replace(/Blueprint$/, '');
+        }
       },
     ],
   };
