@@ -176,7 +176,7 @@ export class StepManager<Providers extends DefaultProviders> {
     }
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown>): Promise<StepsResult> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown> = {}): Promise<StepsResult> {
     if (dry && this.steps.some((s) => !(s instanceof AtomicStepManager) && !s.step.composable)) {
       throw new Error('Cannot dry run, as this step manager has non-composable steps.');
     }
@@ -356,7 +356,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown>): Promise<StepsResult> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown> = {}): Promise<StepsResult> {
     let fs = createMemFs();
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string, firstStep = false) => {

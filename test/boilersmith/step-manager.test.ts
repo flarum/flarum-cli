@@ -568,7 +568,7 @@ describe('Step Manager Execution', function () {
   });
 
   test('can dry run on StepManager', async function () {
-    const results = await new StepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true);
+    const results = await new StepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true, {});
 
     expect(results.stepsRan).toStrictEqual(['Step 1', 'Step 2']);
 

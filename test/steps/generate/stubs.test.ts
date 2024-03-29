@@ -75,12 +75,14 @@ const backendTestSpecs: StubTest[] = [
       className: 'PotatoResource',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
+      modelType: 'potatoes',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\PotatoResource',
       className: 'PotatoResource',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
+      modelType: 'potatoes',
     },
   },
 
