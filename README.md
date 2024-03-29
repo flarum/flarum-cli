@@ -85,9 +85,9 @@ The CLI has different types of commands for different tasks:
 
 - `flarum-cli infra [MODULE] [PATH]`: Adds (or updates) infrastructure for some part of extension infrastructure. You can see all available modules by running `fl-dev infra --help`.
 
-**Audit**: These commands help you make sure your extension is up to date.
+**Audit**: These commands help you make sure your extension is up-to-date.
 
-- `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up to date for all enabled modules.
+- `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up-to-date for all enabled modules.
 
 **Backend/Frontend Boilerplate Generation**: These commands generate boilerplate code for different parts of an extension.
 
@@ -118,9 +118,9 @@ The CLI has different types of commands for different tasks:
 **Frontend Boilerplate Generation**: Generate frontend components/classes, ready to be used.
 
 - `flarum-cli make frontend component [frontend] [className] [PATH] [-n|--no-interaction]`
-- `flarum-cli make frontend modal [PATH] [-n|--no-interaction]`
+- `flarum-cli make frontend modal [frontend] [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend model [className] [PATH] [-n|--no-interaction]`
-- `flarum-cli make frontend forum-page [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make frontend forum-page [className] [routeName] [routePath] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend gambit [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend notification [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend post-type [className] [PATH] [-n|--no-interaction]`
