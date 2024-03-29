@@ -5,26 +5,12 @@ namespace <%= classNamespace %>;
 use Flarum\User\User;
 
 class <%= className %>
-{<% if (!['create', 'none'].includes(classType)) { %>
-    /**
-     * @var int
-     */
-    public $modelId;
+{
+    public function __construct(<% if (!['create', 'none'].includes(classType)) { %>
+        public int $modelId;
 <% } %>
-    /**
-     * @var \Flarum\User\User
-     */
-    public $actor;
-
-    /**
-     * @var array
-     */
-    public $data;
-
-    public function __construct(<%= !['create', 'none'].includes(classType) ? '$modelId, ' : '' %>User $actor, array $data)
-    {<% if (!['create', 'none'].includes(classType)) { %>
-        $this->modelId = $modelId;<% } %>
-        $this->actor = $actor;
-        $this->data = $data;
+        public User $actor;
+        public array $data;
+    ) {
     }
 }

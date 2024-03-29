@@ -10,6 +10,7 @@ export abstract class FlarumBaseStubStep extends BaseStubStep<FlarumProviders, E
     return {
       ...(await super.precompileParams(fs, paths, io)),
       extensionId: await this.scaffolder.templateParamVal('extensionId', fs, paths, io),
+      packageNamespace: await this.scaffolder.templateParamVal('packageNamespace', fs, paths, io),
     };
   }
 }

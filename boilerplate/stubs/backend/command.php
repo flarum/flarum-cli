@@ -13,7 +13,7 @@ class <%= className %> extends AbstractCommand
             ->setDescription('<%= commandDescription %>');
     }
 
-    protected function fire()
+    protected function fire(): int
     {
         // See https://docs.flarum.org/extend/console.html#console and
         // https://symfony.com/doc/current/console.html#configuring-the-command for more information.
