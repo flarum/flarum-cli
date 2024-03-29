@@ -176,20 +176,18 @@ export class StepManager<Providers extends DefaultProviders> {
     }
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown>): Promise<StepsResult> {
     if (dry && this.steps.some((s) => !(s instanceof AtomicStepManager) && !s.step.composable)) {
       throw new Error('Cannot dry run, as this step manager has non-composable steps.');
     }
 
     const stepNames: string[] = [];
-    let firstStep = true;
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
       const shouldRun: boolean = await this.stepShouldRun(step, io, packagePath);
       if (!shouldRun) return;
 
-      const fs = await this.runStep(step, paths, io, providers, packagePath, undefined, firstStep);
-      firstStep = false;
+      const fs = await this.runStep(step, paths, io, providers, packagePath, undefined, args);
 
       if (!dry) {
         await commitAsync(fs);
@@ -201,7 +199,7 @@ export class StepManager<Providers extends DefaultProviders> {
     try {
       for (const storedStep of this.steps) {
         if (storedStep instanceof AtomicStepManager) {
-          const res = await storedStep.run(paths, io, providers);
+          const res = await storedStep.run(paths, io, providers, false, args);
           if (!res.succeeded) {
             throw new Error(JSON.stringify(res));
           }
@@ -269,11 +267,11 @@ export class StepManager<Providers extends DefaultProviders> {
     providers: Providers,
     packagePath?: string,
     fs: Store = createMemFs(),
-    firstStep = false
+    args: Record<string, unknown> = {}
   ): Promise<Store> {
-    const cached: any = {};
+    const cached: Record<string, unknown> = {};
 
-    Object.entries(io.cached()).forEach(([key, value]) => {
+    Object.entries(args).forEach(([key, value]) => {
       if (value !== undefined) {
         cached[key] = value;
       }
@@ -297,7 +295,7 @@ export class StepManager<Providers extends DefaultProviders> {
 
         return initial;
       },
-      firstStep ? cached : ({} as Record<string, unknown>)
+      cached
     );
 
     const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, io.getOutput());
@@ -358,31 +356,28 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown>): Promise<StepsResult> {
     let fs = createMemFs();
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string, firstStep = false) => {
       const shouldRun: boolean = await this.stepShouldRun(step, io, packagePath);
       if (!shouldRun) return;
 
-      fs = await this.runStep(step, paths, io, providers, packagePath, fs, firstStep);
+      fs = await this.runStep(step, paths, io, providers, packagePath, fs, args);
 
       stepNames.push(packagePath ? `${step.step.type} (${packagePath})` : step.step.type);
     };
 
     const stepNames: string[] = [];
-    let firstStep = true
 
     try {
       for (const storedStep of this.steps) {
         if (storedStep.mapPaths.length > 0) {
           for (const path of storedStep.mapPaths) {
-            await checkAndRun(storedStep, path, firstStep);
-            firstStep = false;
+            await checkAndRun(storedStep, path);
           }
         } else {
-          await checkAndRun(storedStep, undefined, firstStep);
-          firstStep = false;
+          await checkAndRun(storedStep, undefined);
         }
       }
     } catch (error) {

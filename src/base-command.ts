@@ -87,7 +87,7 @@ export default abstract class BaseCommand extends Command {
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
-    const out = await this.steps(new StepManager<FlarumProviders>(), extRoot).run(paths, this.genIO(), { php: phpProvider }, this.dry);
+    const out = await this.steps(new StepManager<FlarumProviders>(), extRoot).run(paths, this.genIO(), { php: phpProvider }, this.dry, args);
 
     const errorMessages = out.messages.filter((m) => m.type === 'error');
 

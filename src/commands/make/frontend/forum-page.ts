@@ -12,6 +12,16 @@ export default class ForumPage extends BaseCommand {
 
   static args = [
     BaseCommand.classNameArg,
+    {
+      name: 'routeName',
+      description: 'Route name (unique)',
+      required: false,
+    },
+    {
+      name: 'routePath',
+      description: 'Route path',
+      required: false,
+    },
     ...BaseCommand.args
   ];
 
