@@ -24,11 +24,6 @@ export class GenerateIntegrationTestStub extends BasePhpStubStep {
         type: 'text',
         message: 'Class Namespace',
       },
-      {
-        name: 'extensionId',
-        type: 'text',
-        message: 'Extension Id',
-      },
     ],
   };
 }

@@ -12,11 +12,7 @@ export default class FrontendPostType extends BaseCommand {
   static flags = { ...BaseCommand.flags };
 
   static args = [
-    {
-      name: 'className',
-      description: 'The name of the class to generate',
-      required: false,
-    },
+    BaseCommand.classNameArg,
     ...BaseCommand.args
   ];
 

@@ -18,6 +18,8 @@ export abstract class BaseJsStubStep extends FlarumBaseStubStep {
   protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params = await super.precompileParams(fs, paths, io);
 
+    io.pushCache(params);
+
     const paramDefs = this.schema.params.filter((param) => !this.implicitParams.includes(param.name as string));
 
     this.subdir =

@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
+import {StubGenerationSchema} from "boilersmith/steps/stub-base";
 
 export class GenerateHandlerCommandStub extends BasePhpStubStep {
   type = 'Generate Handler Class';
@@ -9,7 +10,7 @@ export class GenerateHandlerCommandStub extends BasePhpStubStep {
 
   protected phpClassParams = [];
 
-  protected schema = {
+  protected schema: StubGenerationSchema = {
     recommendedSubdir: 'Command',
     sourceFile: 'backend/handler/command.php',
     params: [
@@ -31,6 +32,7 @@ export class GenerateHandlerCommandStub extends BasePhpStubStep {
         choices: ['None', 'Create', 'Update', 'Delete'].map((type: string) => ({
           title: type,
           value: type.toLowerCase(),
+          selected: type === 'None',
         })),
       },
     ],

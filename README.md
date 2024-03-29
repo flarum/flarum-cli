@@ -98,29 +98,29 @@ The CLI has different types of commands for different tasks:
 **Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
 
 - `flarum-cli make backend model [className] [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend controller [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend controller [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend api-resource [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend command [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend command [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend event-listener [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend handler [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend integration-test [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend job [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend migration [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend handler [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend integration-test [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend job [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend migration [name] [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend policy [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend repository [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend route [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend service-provider [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend validator [PATH] [-n|--no-interaction]`
-- `flarum-cli make backend filter [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend service-provider [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend validator [className] [PATH] [-n|--no-interaction]`
+- `flarum-cli make backend filter [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend notification-blueprint [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make backend post-type [className] [PATH] [-n|--no-interaction]`
 
 **Frontend Boilerplate Generation**: Generate frontend components/classes, ready to be used.
 
-- `flarum-cli make frontend component [PATH] [-n|--no-interaction]`
+- `flarum-cli make frontend component [frontend] [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend modal [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend model [className] [PATH] [-n|--no-interaction]`
-- `flarum-cli make frontend forum-page [PATH] [-n|--no-interaction]`
+- `flarum-cli make frontend forum-page [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend gambit [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend notification [className] [PATH] [-n|--no-interaction]`
 - `flarum-cli make frontend post-type [className] [PATH] [-n|--no-interaction]`
@@ -134,16 +134,6 @@ _And of course, you can always use the help command to see a list of all availab
 - `flarum-cli help [COMMAND]`
 
 All commands can use a `--no-interaction` flag to proceed with default values for prompts when possible.
-
-## Model Generation
-
-Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
-
-- Table migration
-- Policy
-- API Resource
-- Routes
-- Related Extenders
 
 ## Infrastructure Modules
 

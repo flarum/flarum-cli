@@ -42,6 +42,8 @@ export interface IO {
   getOutput(): Message[];
 
   newInstance(cache: Record<string, unknown>, messages: Message[]): IO;
+
+  pushCache(params: Record<string, unknown>): void;
 }
 
 type OnCancel = () => void;
@@ -133,6 +135,12 @@ export class PromptsIO implements IO {
       },
       {} as Record<string, unknown>
     );
+  }
+
+  pushCache(params: Record<string, unknown>) {
+    for (const [key, value] of Object.entries(params)) {
+      this.cache.set(key, value);
+    }
   }
 
   info(message: string, immediate: boolean): void {

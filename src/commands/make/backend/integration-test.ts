@@ -9,7 +9,10 @@ export default class IntegrationTest extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [...BaseCommand.args];
+  static args = [
+    BaseCommand.classNameArg,
+    ...BaseCommand.args
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {

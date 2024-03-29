@@ -9,7 +9,15 @@ export default class Component extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [...BaseCommand.args];
+  static args = [
+    {
+      name: 'frontend',
+      description: 'The frontend name',
+      required: false,
+    },
+    BaseCommand.classNameArg,
+    ...BaseCommand.args
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.step(new GenerateComponentStub(this.STUB_PATH, genExtScaffolder()));

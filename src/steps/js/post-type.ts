@@ -7,7 +7,7 @@ import { Validator } from '../../utils/validation';
 import s from "string";
 
 export class GeneratePostTypeExtender extends BaseJsStep {
-  type = 'Generate JS Notification Extender';
+  type = 'Generate JS Post Type Extender';
 
   exposes = [];
 

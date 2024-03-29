@@ -10,13 +10,16 @@ export default class Controller extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [...BaseCommand.args];
+  static args = [
+    BaseCommand.classNameArg,
+    ...BaseCommand.args
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {
       stepManager
         .namedStep('controller', new GenerateControllerStub(this.STUB_PATH, genExtScaffolder()))
-        .step(new GenerateRoutesExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
+        .step(new GenerateRoutesExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: ! this.args.className }, [
           {
             sourceStep: 'controller',
             exposedName: 'class',

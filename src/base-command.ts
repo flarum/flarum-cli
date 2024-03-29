@@ -45,6 +45,12 @@ export default abstract class BaseCommand extends Command {
     },
   ];
 
+  static classNameArg: Interfaces.Arg = {
+    name: 'className',
+    description: 'The name of the class to generate',
+    required: false,
+  };
+
   protected requireExistingExtension = true;
 
   async run(): Promise<void> {

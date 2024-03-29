@@ -9,7 +9,14 @@ export default class Migration extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [...BaseCommand.args];
+  static args = [
+    {
+      name: 'name',
+      description: 'The name of the migration',
+      required: false,
+    },
+    ...BaseCommand.args
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.step(new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()));

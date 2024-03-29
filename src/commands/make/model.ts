@@ -12,11 +12,7 @@ export default class Model extends BaseCommand {
   static flags = { ...BaseCommand.flags };
 
   static args: Interfaces.ArgInput = [
-    {
-      name: 'className',
-      description: 'The name of the class to generate',
-      required: false,
-    },
+    BaseCommand.classNameArg,
     ...BaseCommand.args,
   ];
 

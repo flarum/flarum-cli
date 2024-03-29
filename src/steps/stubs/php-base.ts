@@ -22,6 +22,8 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
       classNamespace: this.stubNamespace(await this.scaffolder.templateParamVal('packageNamespace', fs, paths, io), paths),
     };
 
+    io.pushCache(params);
+
     let paramDefs = this.schema.params.filter((param) => !this.implicitParams.includes(param.name as string));
 
     const classParams = [...this.phpClassParams];
