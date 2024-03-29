@@ -271,6 +271,14 @@ export class StepManager<Providers extends DefaultProviders> {
     fs: Store = createMemFs(),
     firstStep = false
   ): Promise<Store> {
+    const cached: any = {};
+
+    Object.entries(io.cached()).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cached[key] = value;
+      }
+    });
+
     const initial: Record<string, unknown> = storedStep.dependencies.reduce(
       (initial, dep) => {
         const sourceStep = this.namedSteps.get(dep.sourceStep);
@@ -289,7 +297,7 @@ export class StepManager<Providers extends DefaultProviders> {
 
         return initial;
       },
-      firstStep ? io.cached() : ({} as Record<string, unknown>)
+      firstStep ? cached : ({} as Record<string, unknown>)
     );
 
     const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, io.getOutput());
