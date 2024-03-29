@@ -1,5 +1,7 @@
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
+import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import s from "string";
 
 export class GenerateSearchDriverStub extends BasePhpStubStep {
   type = 'Generate Search Driver';
@@ -8,7 +10,7 @@ export class GenerateSearchDriverStub extends BasePhpStubStep {
 
   protected phpClassParams = [];
 
-  protected schema = {
+  protected schema: StubGenerationSchema = {
     recommendedSubdir: 'Search',
     sourceFile: 'backend/search/driver.php',
     params: [
@@ -28,6 +30,12 @@ export class GenerateSearchDriverStub extends BasePhpStubStep {
         type: 'text',
         message: 'Unique driver name (e.g. extension-name-driver-name)',
         validate: Validator.alphaDash,
+        initial: (_prev, params) => {
+          const extensionId = params.get('extensionId') as string;
+          const driverName = s(params.get('className') as string).underscore().dasherize().toString().replace(/-search-driver$/, '').replace(/-driver$/, '');
+
+          return `${extensionId}-${driverName}`;
+        }
       },
     ],
   };

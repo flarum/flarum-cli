@@ -6,6 +6,7 @@ import { GenerateSearchDriverStub } from '../../../steps/stubs/backend/search-dr
 import { GenerateSearchDriverExtender } from '../../../steps/extenders/search-driver';
 import { GenerateSearchDriverLocaleDefinition } from '../../../steps/js/search-driver-locale';
 import { GenerateSearchDriverAbstractModelSearcherStub } from '../../../steps/stubs/backend/search-driver-searcher';
+import {LocaleStep} from "../../../steps/locale/base";
 
 export default class SearchDriver extends BaseCommand {
   static description = 'Generate a controller class';
@@ -32,6 +33,19 @@ export default class SearchDriver extends BaseCommand {
             frontend: 'admin',
           }
         )
+        .step(new LocaleStep(genExtScaffolder()), {}, [
+          {
+            sourceStep: 'driver',
+            exposedName: 'driverName',
+            consumedName: 'key',
+            modifier: (driverName) => `admin.advanced.search.driver_options.${driverName}`
+          },
+          {
+            sourceStep: 'driver',
+            exposedName: 'driverName',
+            consumedName: 'value',
+          },
+        ])
         .step(new GenerateSearchDriverExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
           {
             sourceStep: 'driver',

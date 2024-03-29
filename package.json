@@ -24,6 +24,7 @@
     "@types/pluralize": "0.0.29",
     "@types/prompts": "^2.0.14",
     "@types/string": "0.0.31",
+    "@types/yaml": "^1.9.7",
     "@types/yosay": "^0.0.29",
     "@typescript-eslint/parser": "^5.8.1",
     "babel-jest": "^27.4.5",
@@ -128,6 +129,7 @@
     "spdx-license-list": "^6.4.0",
     "string": "^3.3.3",
     "tslib": "^1.14.1",
+    "yaml": "^2.4.1",
     "yosay": "^2.0.2"
   }
 }

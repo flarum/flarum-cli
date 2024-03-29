@@ -9,12 +9,6 @@ import s from "string";
 export class GenerateNotificationExtender extends BaseJsStep {
   type = 'Generate JS Notification Extender';
 
-  exposes = [];
-
-  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
-  }
-
   protected schema: ExtenderGenerationSchema = {
     extenderDef: {
       extender: {

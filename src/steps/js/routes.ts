@@ -55,12 +55,6 @@ export class GenerateRoutesExtender extends BaseJsStep {
     ],
   };
 
-  exposes = [];
-
-  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
-  }
-
   protected async getDefinition(): Promise<null> {
     return Promise.resolve(null);
   }

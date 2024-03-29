@@ -8,7 +8,7 @@ export default class <%= className %> extends Page {
   oninit(vnode) {
     super.oninit(vnode);
 
-    const title = app.translator.trans('<%= extensionId %>.forum.<%= pathName %>.title');
+    const title = app.translator.trans('<%= extensionId %>.forum.<%= pathName %>.title', {}, true);
 
     app.setTitle(title);
     app.history.push('<%= pathName %>', title);
@@ -24,7 +24,7 @@ export default class <%= className %> extends Page {
       >
         {this.loading || (
           <div className="<%= className %>-content">
-            Hello, world!
+            {app.translator.trans('<%= extensionId %>.forum.<%= pathName %>.content')}
           </div>
         )}
       </PageStructure>
@@ -37,10 +37,10 @@ export default class <%= className %> extends Page {
         <div className="container">
           <div className="containerNarrow">
             <h1 className="Hero-title">
-              <%= className %> Hero
+              {app.translator.trans('<%= extensionId %>.forum.<%= pathName %>.hero.title')}
             </h1>
             <div className="Hero-subtitle">
-              <%= className %> Hero subtitle
+              {app.translator.trans('<%= extensionId %>.forum.<%= pathName %>.hero.subtitle')}
             </div>
           </div>
         </div>

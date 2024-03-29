@@ -5,12 +5,6 @@ import { BaseJsStep, InitializerDefinition } from './base';
 export class GenerateSearchDriverLocaleDefinition extends BaseJsStep {
   type = 'Generate Search Driver Locale Definition';
 
-  exposes = [];
-
-  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
-  }
-
   protected schema = null;
 
   protected async getDefinition(frontend: string, _paths: Paths, io: IO): Promise<InitializerDefinition | null> {

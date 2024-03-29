@@ -5,6 +5,7 @@ import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import {GenerateNotificationStub} from "../../../steps/stubs/frontend/notification";
 import {GenerateNotificationExtender} from "../../../steps/js/notification";
 import s from "string";
+import {LocaleStep} from "../../../steps/locale/base";
 
 export default class FrontendNotification extends BaseCommand {
   static description = 'Generate a frontend notification class';
@@ -40,6 +41,20 @@ export default class FrontendNotification extends BaseCommand {
           exposedName: 'type',
           modifier: (value) => s(value as string).underscore().camelize().toString(),
         }
+      ])
+      .step(new LocaleStep(genExtScaffolder()), {}, [
+        {
+          sourceStep: 'notification',
+          exposedName: 'type',
+          consumedName: 'key',
+          modifier: (type) => `forum.notifications.${s(type as string).underscore().toString()}_text`
+        },
+        {
+          sourceStep: 'notification',
+          exposedName: 'type',
+          consumedName: 'value',
+          modifier: (type) => `${s(type as string).humanize().titleCase().toString()} notification from {user}`,
+        },
       ]);
   }
 }

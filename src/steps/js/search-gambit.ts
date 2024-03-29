@@ -8,12 +8,6 @@ import { Validator } from '../../utils/validation';
 export class GenerateSearchGambitExtender extends BaseJsStep {
   type = 'Generate JS Gambit Extender';
 
-  exposes = [];
-
-  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
-  }
-
   protected schema: ExtenderGenerationSchema = {
     extenderDef: {
       extender: {

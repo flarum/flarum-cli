@@ -4,6 +4,9 @@ import { GenerateForumPageStub } from '../../../steps/stubs/frontend/forum-page'
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import { GenerateRoutesExtender } from '../../../steps/js/routes';
+import {LocaleStep} from "../../../steps/locale/base";
+import s from "string";
+import {kebab} from "../../../utils/model-name";
 
 export default class ForumPage extends BaseCommand {
   static description = 'Generate a forum page class';
@@ -39,7 +42,51 @@ export default class ForumPage extends BaseCommand {
             exposedName: 'classNamespace',
             consumedName: 'className',
           },
-        ]);
+        ])
+        .step(new LocaleStep(genExtScaffolder()), {}, [
+          {
+            sourceStep: 'forumPage',
+            exposedName: 'className',
+            consumedName: 'key',
+            modifier: (className) => `forum.${kebab(className as string)}.title`
+          },
+          {
+            sourceStep: 'forumPage',
+            exposedName: 'className',
+            consumedName: 'value',
+            modifier: (className) => s(className as string).humanize().titleCase().s
+          },
+        ])
+        .step(new LocaleStep(genExtScaffolder()), {}, [
+          {
+            sourceStep: 'forumPage',
+            exposedName: 'className',
+            consumedName: 'key',
+            modifier: (className) => `forum.${kebab(className as string)}.content`
+          },
+        ], {
+          value: 'Hello, world!'
+        })
+        .step(new LocaleStep(genExtScaffolder()), {}, [
+          {
+            sourceStep: 'forumPage',
+            exposedName: 'className',
+            consumedName: 'key',
+            modifier: (className) => `forum.${kebab(className as string)}.hero.title`
+          },
+        ], {
+          value: 'Hero title',
+        })
+        .step(new LocaleStep(genExtScaffolder()), {}, [
+          {
+            sourceStep: 'forumPage',
+            exposedName: 'className',
+            consumedName: 'key',
+            modifier: (className) => `forum.${kebab(className as string)}.hero.subtitle`
+          },
+        ], {
+          value: 'Hero subtitle',
+        });
     });
   }
 }

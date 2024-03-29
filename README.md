@@ -95,6 +95,10 @@ The CLI has different types of commands for different tasks:
 - `flarum-cli make notification [className] [PATH] [-n|--no-interaction]`: Generates a backend notification blueprint, the corresponding backend extender, and the frontend equivalent.
 - `flarum-cli make post-type [className] [PATH] [-n|--no-interaction]`: Generates a post type, the corresponding extenders, and the frontend equivalent.
 
+**Localized text generation**: This command generates a locale key-value pair for a given string.
+
+- `flarum-cli make locale [key] [value] [PATH] [-n|--no-interaction]`
+
 **Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
 
 - `flarum-cli make backend model [className] [PATH] [-n|--no-interaction]`

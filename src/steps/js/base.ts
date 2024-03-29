@@ -12,6 +12,7 @@ import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { genExtScaffolder } from '../gen-ext-scaffolder';
 import { applyImports, generateCode, ModuleImport, parseCode } from '../../utils/ast';
 import {resolve} from "path";
+import pick from "pick-deep";
 
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
@@ -27,10 +28,10 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
 
   composable = true;
 
-  exposes = [];
+  exposes: string[] = [];
 
   getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
+    return pick(this.params, this.exposes) as Record<string, unknown>;
   }
 
   protected params!: Record<string, unknown>;

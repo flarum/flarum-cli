@@ -9,11 +9,7 @@ import s from "string";
 export class GeneratePostTypeExtender extends BaseJsStep {
   type = 'Generate JS Post Type Extender';
 
-  exposes = [];
-
-  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return {};
-  }
+  exposes = ['type'];
 
   protected schema: ExtenderGenerationSchema = {
     extenderDef: {
