@@ -3,6 +3,7 @@ import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import BaseCommand from '../../../base-command';
 import { GenerateApiResourceStub } from '../../../steps/stubs/backend/api-resource';
+import {GenerateApiResourceExtender} from "../../../steps/extenders/api-resource";
 
 export default class ApiResource extends BaseCommand {
   static description = 'Generate an API resource class';
@@ -12,6 +13,16 @@ export default class ApiResource extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager.step(new GenerateApiResourceStub(this.STUB_PATH, genExtScaffolder()));
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager
+        .namedStep('api-resource', new GenerateApiResourceStub(this.STUB_PATH, genExtScaffolder()))
+        .step(new GenerateApiResourceExtender(), { optional: true, confirmationMessage: 'Generate corresponding Extender?', default: true }, [
+          {
+            sourceStep: 'api-resource',
+            exposedName: 'class',
+            consumedName: 'resourceClass',
+          },
+        ]);
+    });
   }
 }

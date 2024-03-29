@@ -9,7 +9,7 @@ import { Store } from 'mem-fs';
 export class GenerateApiResourceStub extends BasePhpStubStep {
   type = 'Generate Api Resource Class';
 
-  protected additionalExposes = ['className', 'modelClass', 'modelClassName'];
+  protected additionalExposes = ['className', 'modelClass', 'modelClassName', 'modelType'];
 
   protected additionalImplicitParams = ['modelType'];
 

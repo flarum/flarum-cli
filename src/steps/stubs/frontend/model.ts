@@ -10,6 +10,8 @@ export class GenerateModelStub extends BaseJsStubStep {
 
   protected additionalExposes = ['frontend', 'modelType', 'classNamespace'];
 
+  additionalImplicitParams = ['modelType'];
+
   protected schema = {
     recommendedSubdir: '${frontend}/models',
     sourceFile: 'frontend/model.js',
@@ -18,6 +20,10 @@ export class GenerateModelStub extends BaseJsStubStep {
         name: 'frontend',
         type: 'text',
         message: 'Frontend name',
+        choices: ['forum', 'admin', 'common'].map((type: string) => ({
+          title: type,
+          value: type.toLowerCase(),
+        })),
       },
       {
         name: 'className',

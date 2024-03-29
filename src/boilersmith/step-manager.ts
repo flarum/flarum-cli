@@ -36,13 +36,13 @@ export interface Step<Providers extends DefaultProviders = DefaultProviders, Exp
   getExposed(paths: Paths, io: IO): Record<Exposes, unknown>;
 }
 
-interface ShouldRunConfig {
+export interface ShouldRunConfig {
   optional?: boolean;
   confirmationMessage?: string;
   default?: boolean;
 }
 
-interface StoredStep<Providers extends DefaultProviders> {
+export interface StoredStep<Providers extends DefaultProviders> {
   name?: string;
   step: Step<Providers>;
   shouldRun: ShouldRunConfig;
@@ -51,15 +51,16 @@ interface StoredStep<Providers extends DefaultProviders> {
   mapPaths: string[];
 }
 
-interface StepDependency {
+export interface StepDependency {
   sourceStep: string;
   exposedName: string;
   consumedName?: string;
   dontRunIfFalsy?: boolean;
+  promptWhenMissing?: boolean;
   modifier?: (value: unknown) => string;
 }
 
-type PredefinedParameters = Record<string, unknown>;
+export type PredefinedParameters = Record<string, unknown>;
 
 type StepsResult =
   | {
@@ -181,12 +182,14 @@ export class StepManager<Providers extends DefaultProviders> {
     }
 
     const stepNames: string[] = [];
+    let firstStep = true;
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
       const shouldRun: boolean = await this.stepShouldRun(step, io, packagePath);
       if (!shouldRun) return;
 
-      const fs = await this.runStep(step, paths, io, providers, packagePath);
+      const fs = await this.runStep(step, paths, io, providers, packagePath, undefined, firstStep);
+      firstStep = false;
 
       if (!dry) {
         await commitAsync(fs);
@@ -237,7 +240,7 @@ export class StepManager<Providers extends DefaultProviders> {
       const sourceStep = this.namedSteps.get(dep.sourceStep);
       const sourcePackagePath = sourceStep?.mapPaths.length ? packagePath : undefined;
 
-      if (!this.exposedParams.stepRan(dep.sourceStep, sourcePackagePath)) allDependenciesRan = false;
+      if (!this.exposedParams.stepRan(dep.sourceStep, sourcePackagePath) && !dep.promptWhenMissing) allDependenciesRan = false;
 
       if (dep.exposedName !== '__succeeded' && dep.dontRunIfFalsy && !this.exposedParams.get(dep.sourceStep, dep.exposedName, sourcePackagePath)) {
         noRequiredNonFalsyDependenciesAreFalsy = false;
@@ -258,13 +261,15 @@ export class StepManager<Providers extends DefaultProviders> {
     return promptConfirm;
   }
 
+  // eslint-disable-next-line max-params
   protected async runStep(
     storedStep: StoredStep<Providers>,
     paths: Paths,
     io: IO,
     providers: Providers,
     packagePath?: string,
-    fs: Store = createMemFs()
+    fs: Store = createMemFs(),
+    firstStep = false
   ): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce(
       (initial, dep) => {
@@ -284,7 +289,7 @@ export class StepManager<Providers extends DefaultProviders> {
 
         return initial;
       },
-      {} as Record<string, unknown>
+      firstStep ? io.cached() : ({} as Record<string, unknown>)
     );
 
     const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, io.getOutput());
@@ -348,25 +353,28 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
   async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
     let fs = createMemFs();
 
-    const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
+    const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string, firstStep = false) => {
       const shouldRun: boolean = await this.stepShouldRun(step, io, packagePath);
       if (!shouldRun) return;
 
-      fs = await this.runStep(step, paths, io, providers, packagePath, fs);
+      fs = await this.runStep(step, paths, io, providers, packagePath, fs, firstStep);
 
       stepNames.push(packagePath ? `${step.step.type} (${packagePath})` : step.step.type);
     };
 
     const stepNames: string[] = [];
+    let firstStep = true
 
     try {
       for (const storedStep of this.steps) {
         if (storedStep.mapPaths.length > 0) {
           for (const path of storedStep.mapPaths) {
-            await checkAndRun(storedStep, path);
+            await checkAndRun(storedStep, path, firstStep);
+            firstStep = false;
           }
         } else {
-          await checkAndRun(storedStep);
+          await checkAndRun(storedStep, undefined, firstStep);
+          firstStep = false;
         }
       }
     } catch (error) {

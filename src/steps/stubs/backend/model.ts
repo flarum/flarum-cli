@@ -4,6 +4,7 @@ import { Validator } from '../../../utils/validation';
 import { pluralSnakeCaseModel, pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 import { Store } from 'mem-fs';
+import {StubGenerationSchema} from "boilersmith/steps/stub-base";
 
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
@@ -12,7 +13,7 @@ export class GenerateModelStub extends BasePhpStubStep {
 
   protected phpClassParams = [];
 
-  protected schema = {
+  protected schema: StubGenerationSchema = {
     recommendedSubdir: '',
     sourceFile: 'backend/model.php',
     params: [
@@ -30,9 +31,9 @@ export class GenerateModelStub extends BasePhpStubStep {
       {
         name: 'tableName',
         type: 'text',
-        message: 'Table name (Optional)',
+        message: 'Table name',
         validate: Validator.tableName,
-        optional: true,
+        initial: (_prev, params) => pluralSnakeCaseModel(params.get('className') as string),
       },
     ],
   };
@@ -42,11 +43,6 @@ export class GenerateModelStub extends BasePhpStubStep {
 
     params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
     params.modelPluralKebab = pluralKebabCaseModel(params.className as string);
-
-    if (!params.tableName) {
-      params.tableName = params.modelPluralSnake;
-    }
-
     params.migrationName = `create_${params.tableName}_table`;
 
     return params;

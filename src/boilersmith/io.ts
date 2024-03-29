@@ -84,6 +84,8 @@ export class PromptsIO implements IO {
       initial = (paramDef.initial ?? false) as unknown as T;
     } else if ('initial' in paramDef) {
       initial = paramDef.initial as unknown as T;
+    } else if ('choices' in paramDef) {
+      initial = (paramDef.choices as any[]).filter((c) => c.selected).map((c) => c.value) as unknown as T;
     } else if (this.noInteraction) {
       return this.error(`No-Interaction mode is on, but input is required for param "${paramName}".`, true);
     }

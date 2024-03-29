@@ -38,7 +38,7 @@ export default abstract class BaseCommand extends Command {
     help: Flags.help({ char: 'h' }),
   };
 
-  static args = [
+  static args: Interfaces.ArgInput = [
     {
       name: 'path',
       description: 'Where should this command be executed?',
@@ -155,7 +155,7 @@ export default abstract class BaseCommand extends Command {
   // ----------------------------------------------------------------
 
   protected genIO(): IO {
-    return new PromptsIO({}, [], this.flags['no-interaction'], exit);
+    return new PromptsIO(this.args, [], this.flags['no-interaction'], exit);
   }
 
   protected monorepoPaths(options: {

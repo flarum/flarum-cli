@@ -1,5 +1,5 @@
 /* eslint-disable no-warning-comments */
-import { StepManager } from 'boilersmith/step-manager';
+import {PredefinedParameters, ShouldRunConfig, StepDependency, StepManager} from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';
@@ -8,80 +8,100 @@ import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
 import { GeneratePolicyExtender } from '../../../steps/extenders/policy';
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
+import {GenerateApiResourceExtender} from "../../../steps/extenders/api-resource";
+import * as Interfaces from "@oclif/core/lib/interfaces";
 
-export default class Model extends BaseCommand {
+export default class BackendModel extends BaseCommand {
   static description = 'Generate a model class';
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [...BaseCommand.args];
+  static args: Interfaces.ArgInput = [
+    {
+      name: 'className',
+      description: 'The name of the class to generate',
+      required: false,
+    },
+    ...BaseCommand.args,
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {
-      stepManager
-        .namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder()))
-        .step(
-          new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()),
-          { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true },
-          [
-            {
-              sourceStep: 'model',
-              exposedName: 'migrationName',
-              consumedName: 'name',
-            },
-          ]
-        )
-        .namedStep(
-          'resource',
-          new GenerateApiResourceStub(this.STUB_PATH, genExtScaffolder()),
-          { optional: true, confirmationMessage: 'Generate corresponding API Resource?', default: true },
-          [
-            {
-              sourceStep: 'model',
-              exposedName: 'class',
-              consumedName: 'modelClass',
-            },
-            {
-              sourceStep: 'model',
-              exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `${modelClassName as string}Resource`,
-            },
-          ]
-        )
-        .namedStep(
-          'policy',
-          new GeneratePolicyStub(this.STUB_PATH, genExtScaffolder()),
-          { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true },
-          [
-            {
-              sourceStep: 'model',
-              exposedName: 'class',
-              consumedName: 'modelClass',
-            },
-            {
-              sourceStep: 'model',
-              exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `${modelClassName as string}Policy`,
-            },
-          ]
-        )
-        .step(new GeneratePolicyExtender(), {}, [
-          {
-            sourceStep: 'policy',
-            exposedName: '__succeeded',
-          },
-          {
-            sourceStep: 'policy',
-            exposedName: 'class',
-            consumedName: 'policyClass',
-          },
-          {
-            sourceStep: 'policy',
-            exposedName: 'modelClass',
-          },
-        ]);
+      BackendModel.steps(stepManager, this.STUB_PATH);
     });
+  }
+
+  public static steps(stepManager: StepManager<FlarumProviders>, STUB_PATH: string, shouldRun?: ShouldRunConfig, dependencies?: StepDependency[], predefinedDependencies?: PredefinedParameters): StepManager<FlarumProviders> {
+    return stepManager
+      .namedStep('backendModel', new GenerateModelStub(STUB_PATH, genExtScaffolder()), shouldRun, dependencies, predefinedDependencies)
+      .step(
+        new GenerateMigrationStub(STUB_PATH, genExtScaffolder()),
+        { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true },
+        [
+          {
+            sourceStep: 'backendModel',
+            exposedName: 'migrationName',
+            consumedName: 'name',
+          },
+        ]
+      )
+      .namedStep(
+        'api-resource',
+        new GenerateApiResourceStub(STUB_PATH, genExtScaffolder()),
+        { optional: true, confirmationMessage: 'Generate corresponding API Resource?', default: true },
+        [
+          {
+            sourceStep: 'backendModel',
+            exposedName: 'class',
+            consumedName: 'modelClass',
+          },
+          {
+            sourceStep: 'backendModel',
+            exposedName: 'className',
+            consumedName: 'className',
+            modifier: (modelClassName: unknown) => `${modelClassName as string}Resource`,
+          },
+        ]
+      )
+      .step(new GenerateApiResourceExtender(), {}, [
+        {
+          sourceStep: 'api-resource',
+          exposedName: 'class',
+          consumedName: 'resourceClass',
+        },
+      ])
+      .namedStep(
+        'policy',
+        new GeneratePolicyStub(STUB_PATH, genExtScaffolder()),
+        { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true },
+        [
+          {
+            sourceStep: 'backendModel',
+            exposedName: 'class',
+            consumedName: 'modelClass',
+          },
+          {
+            sourceStep: 'backendModel',
+            exposedName: 'className',
+            consumedName: 'className',
+            modifier: (modelClassName: unknown) => `${modelClassName as string}Policy`,
+          },
+        ]
+      )
+      .step(new GeneratePolicyExtender(), {}, [
+        {
+          sourceStep: 'policy',
+          exposedName: '__succeeded',
+        },
+        {
+          sourceStep: 'policy',
+          exposedName: 'class',
+          consumedName: 'policyClass',
+        },
+        {
+          sourceStep: 'policy',
+          exposedName: 'modelClass',
+        },
+      ]);
   }
 }
