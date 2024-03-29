@@ -72,7 +72,11 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
         return false;
       }
 
-      return (newExpression.callee as t.Identifier).name === className && sameArguments(ast, newExpression.arguments, extender.extender.args);
+      const sameName = newExpression.callee.type === 'MemberExpression'
+        ? (newExpression.callee.property as t.Identifier).name === className
+        : (newExpression.callee as t.Identifier).name === className;
+
+      return sameName && sameArguments(ast, newExpression.arguments, extender.extender.args);
     }) as t.NewExpression | t.SequenceExpression | t.CallExpression | undefined;
 
     const extenderExists = Boolean(newExtender);
