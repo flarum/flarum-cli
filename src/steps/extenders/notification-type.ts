@@ -33,7 +33,7 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
         name: 'blueprintClass',
         type: 'text',
         validate: Validator.class,
-        message: `Event Class (${chalk.dim('Vendor\\Path\\Event')})`,
+        message: `Blueprint Class (${chalk.dim('Vendor\\Path\\Event')})`,
       },
       {
         name: 'notificationChannels',

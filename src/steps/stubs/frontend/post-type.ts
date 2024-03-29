@@ -6,19 +6,19 @@ import {IO} from "boilersmith/io";
 import {Paths} from "boilersmith/paths";
 import s from "string";
 
-export class GenerateNotificationStub extends BaseJsStubStep {
-  type = 'Generate a Notification';
+export class GeneratePostTypeStub extends BaseJsStubStep {
+  type = 'Generate a new post type component';
 
-  protected additionalExposes = ['frontend', 'classNamespace', 'type'];
+  protected additionalExposes = ['frontend', 'classNamespace', 'postType'];
 
   protected schema: StubGenerationSchema = {
     recommendedSubdir: 'forum/components',
-    sourceFile: 'frontend/notification.js',
+    sourceFile: 'frontend/post-type.js',
     params: [
       {
         name: 'className',
         type: 'text',
-        message: 'Notification class name',
+        message: 'Post Type class name',
         validate: Validator.className,
       },
       {
@@ -27,11 +27,11 @@ export class GenerateNotificationStub extends BaseJsStubStep {
         message: 'Class Namespace',
       },
       {
-        name: 'type',
+        name: 'postType',
         message: 'Notification type',
         type: 'text',
         initial: (_prev, params): string => {
-          return s(params.get('className') as string).underscore().toString().replace(/_notification$/, '');
+          return s(params.get('className') as string).underscore().toString().replace(/_post$/, '');
         }
       },
     ],
