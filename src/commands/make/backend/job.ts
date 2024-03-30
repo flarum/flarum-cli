@@ -9,10 +9,7 @@ export default class Job extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [
-    BaseCommand.classNameArg,
-    ...BaseCommand.args
-  ];
+  static args = [BaseCommand.classNameArg, ...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.step(new GenerateJobStub(this.STUB_PATH, genExtScaffolder()));

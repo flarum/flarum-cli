@@ -1,7 +1,7 @@
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
-import s from "string";
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
+import s from 'string';
 
 export class GeneratePostTypeStub extends BasePhpStubStep {
   type = 'Generate Event Post class';
@@ -28,9 +28,13 @@ export class GeneratePostTypeStub extends BasePhpStubStep {
         type: 'text',
         message: 'Post type',
         initial: (_prev, params): string => {
-          return s((params.get('className') as string)).underscore().camelize().toString().replace(/Post$/, '');
-        }
-      }
+          return s(params.get('className') as string)
+            .underscore()
+            .camelize()
+            .toString()
+            .replace(/Post$/, '');
+        },
+      },
     ],
   };
 }

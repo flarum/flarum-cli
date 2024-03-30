@@ -137,7 +137,7 @@ export class PromptsIO implements IO {
     );
   }
 
-  pushCache(params: Record<string, unknown>) {
+  pushCache(params: Record<string, unknown>): void {
     for (const [key, value] of Object.entries(params)) {
       this.cache.set(key, value);
     }

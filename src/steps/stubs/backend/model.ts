@@ -4,7 +4,8 @@ import { Validator } from '../../../utils/validation';
 import { pluralSnakeCaseModel, pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 import { Store } from 'mem-fs';
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
+import { Answers } from 'prompts';
 
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
@@ -33,7 +34,7 @@ export class GenerateModelStub extends BasePhpStubStep {
         type: 'text',
         message: 'Table name',
         validate: Validator.tableName,
-        initial: (_prev, params) => pluralSnakeCaseModel(params.get('className') as string),
+        initial: (_prev: string, params: Answers<string>): string => pluralSnakeCaseModel(params.get('className') as string),
       },
     ],
   };

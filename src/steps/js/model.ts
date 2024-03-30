@@ -1,9 +1,8 @@
-import { IO } from 'boilersmith/io';
-import { Paths } from 'boilersmith/paths';
 import { BaseJsStep } from './base';
 import { ExtenderGenerationSchema } from '../extenders/base';
 import { ExpressionType } from '../../providers/php-provider';
 import { pluralKebabCaseModel } from '../../utils/model-name';
+import { Answers } from 'prompts';
 
 export class GenerateModelExtender extends BaseJsStep {
   type = 'Generate JS Model Extender';
@@ -39,8 +38,8 @@ export class GenerateModelExtender extends BaseJsStep {
         name: 'modelType',
         message: 'Model type',
         type: 'text',
-        initial: (_prev, values) => {
-          return pluralKebabCaseModel(values.get('className') as string);
+        initial: (_prev: string, params: Answers<string>): string => {
+          return pluralKebabCaseModel(params.get('className') as string);
         },
       },
     ],

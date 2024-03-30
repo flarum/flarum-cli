@@ -5,10 +5,10 @@ import { Paths } from 'boilersmith/paths';
 import { ExtenderDef } from '../../providers/php-provider';
 import { Step } from 'boilersmith/step-manager';
 import { FlarumProviders } from '../../providers';
-import {Scaffolder} from "boilersmith/scaffolding/scaffolder";
-import {ExtensionModules, ExtensionParams} from "../gen-ext-scaffolder";
-import {resolve} from "path";
-import YAML from "yaml";
+import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
+import { ExtensionModules, ExtensionParams } from '../gen-ext-scaffolder';
+import { resolve } from 'path';
+import YAML from 'yaml';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;
@@ -21,7 +21,7 @@ export interface ExtenderGenerationSchema {
 }
 
 export class LocaleStep implements Step<FlarumProviders> {
-  type: string = 'Generate key-value locale pair';
+  type = 'Generate key-value locale pair';
 
   composable = true;
 
@@ -39,7 +39,7 @@ export class LocaleStep implements Step<FlarumProviders> {
     this.scaffolder = scaffolder;
   }
 
-  async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
 
     this.params = await this.compileParams(fs, paths, io);
@@ -54,21 +54,21 @@ export class LocaleStep implements Step<FlarumProviders> {
 
     const doc = YAML.parseDocument(fsEditor.read(path));
 
-    const key = (this.params.key as string).split('.')[0] === this.params.extensionId
-      ? this.params.key
-      : `${this.params.extensionId}.${this.params.key}`;
+    const key =
+      (this.params.key as string).split('.')[0] === this.params.extensionId ? this.params.key : `${this.params.extensionId}.${this.params.key}`;
 
     const keys = (key as string).split('.');
     const keyPath = [];
 
     try {
-      for (let i in keys) {
+      // eslint-disable-next-line guard-for-in
+      for (const i in keys) {
         const k = keys[i];
 
         if (doc.hasIn(keyPath) && doc.getIn(keyPath) !== null) {
           keyPath.push(k);
         } else {
-          const remainingKeyPath = keys.slice(parseInt(i));
+          const remainingKeyPath = keys.slice(Number.parseInt(i, 10));
           const remainingAsNestedObject = {};
           setNested(remainingKeyPath.join('.'), this.params.value as string, remainingAsNestedObject);
           doc.setIn(keyPath, remainingAsNestedObject);
@@ -79,7 +79,7 @@ export class LocaleStep implements Step<FlarumProviders> {
       if (keyPath.join('.') === key) {
         doc.setIn(keyPath, this.params.value);
       }
-    } catch (e) {
+    } catch {
       // Do nothing
     }
 
@@ -113,7 +113,7 @@ export class LocaleStep implements Step<FlarumProviders> {
  * nested key format, e.g: forum.custom_model.title
  * obj: forum: { custom_modal: title: '' }
  */
-export function setNested(key: string, value: string, object: any): void {
+export function setNested(key: string, value: string, object: Record<string, any>): void {
   const keys = key.split('.');
   let current = object;
 
@@ -122,6 +122,7 @@ export function setNested(key: string, value: string, object: any): void {
     if (!current[k]) {
       current[k] = {};
     }
+
     current = current[k];
   }
 

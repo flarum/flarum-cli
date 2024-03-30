@@ -16,7 +16,7 @@ export class GenerateApiResourceExtender extends BaseExtenderStep {
             value: '${resourceClass}',
             auxiliaryValue: 'class',
           },
-        ]
+        ],
       },
       methodCalls: [],
     },

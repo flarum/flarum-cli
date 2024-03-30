@@ -3,7 +3,7 @@ import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import BaseCommand from '../../../base-command';
 import { GenerateComponentStub } from '../../../steps/stubs/frontend/component';
-import {Interfaces} from "@oclif/core";
+import { Interfaces } from '@oclif/core';
 
 export default class Component extends BaseCommand {
   static description = 'Generate a frontend component';
@@ -16,11 +16,7 @@ export default class Component extends BaseCommand {
     required: false,
   };
 
-  static args = [
-    Component.frontendArg,
-    BaseCommand.classNameArg,
-    ...BaseCommand.args
-  ];
+  static args = [Component.frontendArg, BaseCommand.classNameArg, ...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.step(new GenerateComponentStub(this.STUB_PATH, genExtScaffolder()));

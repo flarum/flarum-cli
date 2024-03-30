@@ -15,7 +15,7 @@ export default class Migration extends BaseCommand {
       description: 'The name of the migration',
       required: false,
     },
-    ...BaseCommand.args
+    ...BaseCommand.args,
   ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {

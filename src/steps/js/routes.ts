@@ -1,5 +1,3 @@
-import { IO } from 'boilersmith/io';
-import { Paths } from 'boilersmith/paths';
 import { BaseJsStep } from './base';
 import { ExtenderGenerationSchema } from '../extenders/base';
 import { ExpressionType } from '../../providers/php-provider';

@@ -1,7 +1,8 @@
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
-import s from "string";
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import s from 'string';
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
+import { Answers } from 'prompts';
 
 export class GenerateNotificationBlueprintStub extends BasePhpStubStep {
   type = 'Generate Notification Blueprint';
@@ -27,9 +28,13 @@ export class GenerateNotificationBlueprintStub extends BasePhpStubStep {
         name: 'type',
         message: 'Notification type',
         type: 'text',
-        initial: (_prev, params): string => {
-          return s((params.get('className') as string)).underscore().camelize().toString().replace(/Blueprint$/, '');
-        }
+        initial: (_prev: string, params: Answers<string>): string => {
+          return s(params.get('className') as string)
+            .underscore()
+            .camelize()
+            .toString()
+            .replace(/Blueprint$/, '');
+        },
       },
     ],
   };

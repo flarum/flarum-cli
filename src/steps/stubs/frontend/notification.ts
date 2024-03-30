@@ -1,10 +1,11 @@
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
 import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
-import {Store} from "mem-fs";
-import {IO} from "boilersmith/io";
-import {Paths} from "boilersmith/paths";
-import s from "string";
+import { Store } from 'mem-fs';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import s from 'string';
+import { Answers } from 'prompts';
 
 export class GenerateNotificationStub extends BaseJsStubStep {
   type = 'Generate a Notification';
@@ -30,9 +31,12 @@ export class GenerateNotificationStub extends BaseJsStubStep {
         name: 'type',
         message: 'Notification type',
         type: 'text',
-        initial: (_prev, params): string => {
-          return s(params.get('className') as string).underscore().toString().replace(/_notification$/, '');
-        }
+        initial: (_prev: string, params: Answers<string>): string => {
+          return s(params.get('className') as string)
+            .underscore()
+            .toString()
+            .replace(/_notification$/, '');
+        },
       },
     ],
   };

@@ -1,6 +1,6 @@
 import globby from 'globby';
 import { Store } from 'mem-fs';
-import {create, Editor} from 'mem-fs-editor';
+import { create, Editor } from 'mem-fs-editor';
 import { IO, ParamDef } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
@@ -11,8 +11,8 @@ import { ExtenderGenerationSchema } from '../extenders/base';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { genExtScaffolder } from '../gen-ext-scaffolder';
 import { applyImports, generateCode, ModuleImport, parseCode } from '../../utils/ast';
-import {resolve} from "path";
-import pick from "pick-deep";
+import { resolve } from 'path';
+import pick from 'pick-deep';
 
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
@@ -125,14 +125,14 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
         for (const extension of extensions) {
           const filePath = paths.package(`js/src/${frontend}/${fileName}.${extension}`);
 
-          if (! existingFilesMatchingNames.includes(fileName) && fsEditor.exists(filePath)) {
+          if (!existingFilesMatchingNames.includes(fileName) && fsEditor.exists(filePath)) {
             existingFilesMatchingNames.push(fileName);
           }
         }
       }
 
       for (const fileName of fileNames) {
-        if (! existingFilesMatchingNames.includes(fileName)) {
+        if (!existingFilesMatchingNames.includes(fileName)) {
           const stubFilePath = resolve(__dirname, `../../../boilerplate/skeleton/extension/js/src/${frontend}/${fileName}.js`);
           fsEditor.write(paths.package(`js/src/${frontend}/${fileName}.js`), fsEditor.read(stubFilePath));
         }
@@ -143,17 +143,27 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
           const filePath = paths.package(`js/src/${frontend}/${fileName}.${extension}`);
           let contents = '';
 
-          if (! fsEditor.exists(filePath)) {
+          if (!fsEditor.exists(filePath)) {
             continue;
           }
 
           contents = fsEditor.read(filePath);
 
-          if (fsEditor.exists(filePath) && fileName === 'index' && frontend !== 'common' && ! contents.includes('export { default as extend } from \'./extend\';')) {
+          if (
+            fsEditor.exists(filePath) &&
+            fileName === 'index' &&
+            frontend !== 'common' &&
+            !contents.includes("export { default as extend } from './extend';")
+          ) {
             fsEditor.write(filePath, `export { default as extend } from './extend';\n${contents}`);
           }
 
-          if (fsEditor.exists(filePath) && fileName === 'extend' && frontend !== 'common' && ! contents.includes('import commonExtend from \'../common/extend\';')) {
+          if (
+            fsEditor.exists(filePath) &&
+            fileName === 'extend' &&
+            frontend !== 'common' &&
+            !contents.includes("import commonExtend from '../common/extend';")
+          ) {
             contents = `import commonExtend from '../common/extend';\n${contents}`;
             contents.replace('export default [', 'export default [...commonExtend,');
             fsEditor.write(filePath, contents);

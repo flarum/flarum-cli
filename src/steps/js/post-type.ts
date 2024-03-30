@@ -1,10 +1,9 @@
-import { IO } from 'boilersmith/io';
-import { Paths } from 'boilersmith/paths';
 import { BaseJsStep } from './base';
 import { ExtenderGenerationSchema } from '../extenders/base';
 import { ExpressionType } from '../../providers/php-provider';
 import { Validator } from '../../utils/validation';
-import s from "string";
+import s from 'string';
+import { Answers } from 'prompts';
 
 export class GeneratePostTypeExtender extends BaseJsStep {
   type = 'Generate JS Post Type Extender';
@@ -43,9 +42,12 @@ export class GeneratePostTypeExtender extends BaseJsStep {
         name: 'type',
         message: 'Post type',
         type: 'text',
-        initial: (_prev, params): string => {
-          return s(params.get('className') as string).camelize().toString().replace(/Post$/, '');
-        }
+        initial: (_prev: string, params: Answers<string>): string => {
+          return s(params.get('className') as string)
+            .camelize()
+            .toString()
+            .replace(/Post$/, '');
+        },
       },
     ],
   };

@@ -95,13 +95,14 @@ function relativizePath(path: string, root: string) {
   return path.replace(new RegExp(`^${root}`), '.').replace(/^common/, '../common');
 }
 
+// eslint-disable-next-line complexity
 export function populateImports(
   ast: t.File,
   module: ModuleImport,
   defaultImports: Record<string, t.ImportDefaultSpecifier | null>,
   specificImports: Record<string, t.ImportSpecifier[] | null>,
   frontend: string
-) {
+): void {
   const preferDefaultImport = module.defaultImport || (module.preferGroupImport && module.useNamedGroupImport);
   let defaultImportDeclaration = null;
   const relativePath = relativizePath(module.path, frontend);

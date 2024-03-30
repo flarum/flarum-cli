@@ -2,7 +2,8 @@ import { Validator } from '../../utils/validation';
 import { ExpressionType } from '../../providers/php-provider';
 import { BaseExtenderStep, ExtenderGenerationSchema } from './base';
 import chalk from 'chalk';
-import s from "string";
+import s from 'string';
+import { Answers } from 'prompts';
 
 export class GenerateMailDriverExtender extends BaseExtenderStep {
   type = 'Generate Mail Driver extender';
@@ -40,7 +41,13 @@ export class GenerateMailDriverExtender extends BaseExtenderStep {
         name: 'driverName',
         type: 'text',
         message: 'Driver Name',
-        initial: (_prev, params) => s((params.get('driverClass') as string).split('\\').pop()).underscore().camelize().toString().replace(/MailDriver$/, '').replace(/Driver$/, '')
+        initial: (_prev: string, params: Answers<string>): string =>
+          s((params.get('driverClass') as string).split('\\').pop())
+            .underscore()
+            .camelize()
+            .toString()
+            .replace(/MailDriver$/, '')
+            .replace(/Driver$/, ''),
       },
     ],
   };

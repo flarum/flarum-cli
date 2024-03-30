@@ -1,6 +1,6 @@
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
 
 export class GenerateMailDriverStub extends BasePhpStubStep {
   type = 'Generate Mail Driver';

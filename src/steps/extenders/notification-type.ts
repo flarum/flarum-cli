@@ -22,7 +22,7 @@ export class GenerateNotificationTypeExtender extends BaseExtenderStep {
             },
             {
               type: ExpressionType.SCALAR,
-              value: (params: any) => params.notificationChannels,
+              value: (params: Record<string, any>): string[] => params.notificationChannels,
             },
           ],
         },

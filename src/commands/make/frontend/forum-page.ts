@@ -4,9 +4,9 @@ import { GenerateForumPageStub } from '../../../steps/stubs/frontend/forum-page'
 import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import { GenerateRoutesExtender } from '../../../steps/js/routes';
-import {LocaleStep} from "../../../steps/locale/base";
-import s from "string";
-import {kebab} from "../../../utils/model-name";
+import { LocaleStep } from '../../../steps/locale/base';
+import s from 'string';
+import { kebab } from '../../../utils/model-name';
 
 export default class ForumPage extends BaseCommand {
   static description = 'Generate a forum page class';
@@ -25,7 +25,7 @@ export default class ForumPage extends BaseCommand {
       description: 'Route path',
       required: false,
     },
-    ...BaseCommand.args
+    ...BaseCommand.args,
   ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
@@ -48,45 +48,63 @@ export default class ForumPage extends BaseCommand {
             sourceStep: 'forumPage',
             exposedName: 'className',
             consumedName: 'key',
-            modifier: (className) => `forum.${kebab(className as string)}.title`
+            modifier: (className) => `forum.${kebab(className as string)}.title`,
           },
           {
             sourceStep: 'forumPage',
             exposedName: 'className',
             consumedName: 'value',
-            modifier: (className) => s(className as string).humanize().titleCase().s
+            modifier: (className) =>
+              s(className as string)
+                .humanize()
+                .titleCase().s,
           },
         ])
-        .step(new LocaleStep(genExtScaffolder()), {}, [
+        .step(
+          new LocaleStep(genExtScaffolder()),
+          {},
+          [
+            {
+              sourceStep: 'forumPage',
+              exposedName: 'className',
+              consumedName: 'key',
+              modifier: (className) => `forum.${kebab(className as string)}.content`,
+            },
+          ],
           {
-            sourceStep: 'forumPage',
-            exposedName: 'className',
-            consumedName: 'key',
-            modifier: (className) => `forum.${kebab(className as string)}.content`
-          },
-        ], {
-          value: 'Hello, world!'
-        })
-        .step(new LocaleStep(genExtScaffolder()), {}, [
+            value: 'Hello, world!',
+          }
+        )
+        .step(
+          new LocaleStep(genExtScaffolder()),
+          {},
+          [
+            {
+              sourceStep: 'forumPage',
+              exposedName: 'className',
+              consumedName: 'key',
+              modifier: (className) => `forum.${kebab(className as string)}.hero.title`,
+            },
+          ],
           {
-            sourceStep: 'forumPage',
-            exposedName: 'className',
-            consumedName: 'key',
-            modifier: (className) => `forum.${kebab(className as string)}.hero.title`
-          },
-        ], {
-          value: 'Hero title',
-        })
-        .step(new LocaleStep(genExtScaffolder()), {}, [
+            value: 'Hero title',
+          }
+        )
+        .step(
+          new LocaleStep(genExtScaffolder()),
+          {},
+          [
+            {
+              sourceStep: 'forumPage',
+              exposedName: 'className',
+              consumedName: 'key',
+              modifier: (className) => `forum.${kebab(className as string)}.hero.subtitle`,
+            },
+          ],
           {
-            sourceStep: 'forumPage',
-            exposedName: 'className',
-            consumedName: 'key',
-            modifier: (className) => `forum.${kebab(className as string)}.hero.subtitle`
-          },
-        ], {
-          value: 'Hero subtitle',
-        });
+            value: 'Hero subtitle',
+          }
+        );
     });
   }
 }

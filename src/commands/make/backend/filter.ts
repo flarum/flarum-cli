@@ -10,22 +10,23 @@ export default class Filter extends BaseCommand {
 
   static flags = { ...BaseCommand.flags };
 
-  static args = [
-    BaseCommand.classNameArg,
-    ...BaseCommand.args
-  ];
+  static args = [BaseCommand.classNameArg, ...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager.atomicGroup((stepManager) => {
       stepManager
         .namedStep('filter', new GenerateFilterStub(this.STUB_PATH, genExtScaffolder()))
-        .step(new GenerateSearchFilterExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: ! this.args.className }, [
-          {
-            sourceStep: 'filter',
-            exposedName: 'class',
-            consumedName: 'filterClass',
-          },
-        ]);
+        .step(
+          new GenerateSearchFilterExtender(),
+          { optional: true, confirmationMessage: 'Generate corresponding extender?', default: !this.args.className },
+          [
+            {
+              sourceStep: 'filter',
+              exposedName: 'class',
+              consumedName: 'filterClass',
+            },
+          ]
+        );
     });
   }
 }

@@ -3,7 +3,7 @@ import { FlarumProviders } from '../../../providers';
 import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import BaseCommand from '../../../base-command';
 import { GenerateApiResourceStub } from '../../../steps/stubs/backend/api-resource';
-import {GenerateApiResourceExtender} from "../../../steps/extenders/api-resource";
+import { GenerateApiResourceExtender } from '../../../steps/extenders/api-resource';
 
 export default class ApiResource extends BaseCommand {
   static description = 'Generate an API resource class';

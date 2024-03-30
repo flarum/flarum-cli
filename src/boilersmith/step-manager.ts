@@ -277,26 +277,23 @@ export class StepManager<Providers extends DefaultProviders> {
       }
     });
 
-    const initial: Record<string, unknown> = storedStep.dependencies.reduce(
-      (initial, dep) => {
-        const sourceStep = this.namedSteps.get(dep.sourceStep);
+    const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
+      const sourceStep = this.namedSteps.get(dep.sourceStep);
 
-        let depValue;
-        depValue =
-          dep.exposedName === '__succeeded'
-            ? this.exposedParams.stepRan(dep.sourceStep, packagePath)
-            : this.exposedParams.get(dep.sourceStep, dep.exposedName, sourceStep?.mapPaths.length ? packagePath : undefined);
+      let depValue;
+      depValue =
+        dep.exposedName === '__succeeded'
+          ? this.exposedParams.stepRan(dep.sourceStep, packagePath)
+          : this.exposedParams.get(dep.sourceStep, dep.exposedName, sourceStep?.mapPaths.length ? packagePath : undefined);
 
-        if (dep.modifier) {
-          depValue = dep.modifier(depValue);
-        }
+      if (dep.modifier) {
+        depValue = dep.modifier(depValue);
+      }
 
-        initial[dep.consumedName || dep.exposedName] = depValue;
+      initial[dep.consumedName || dep.exposedName] = depValue;
 
-        return initial;
-      },
-      cached
-    );
+      return initial;
+    }, cached);
 
     const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, io.getOutput());
 
@@ -359,7 +356,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
   async run(paths: Paths, io: IO, providers: Providers, dry = false, args: Record<string, unknown> = {}): Promise<StepsResult> {
     let fs = createMemFs();
 
-    const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string, firstStep = false) => {
+    const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
       const shouldRun: boolean = await this.stepShouldRun(step, io, packagePath);
       if (!shouldRun) return;
 
@@ -377,7 +374,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
             await checkAndRun(storedStep, path);
           }
         } else {
-          await checkAndRun(storedStep, undefined);
+          await checkAndRun(storedStep);
         }
       }
     } catch (error) {
