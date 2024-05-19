@@ -9,6 +9,7 @@ jobs:
       enable_bundlewatch: <%= modules.bundlewatch %>
       enable_prettier: <%= modules.prettier %>
       enable_typescript: <%= modules.typescript %>
+      enable_tests: <%= modules.frontendTesting %>
 
       frontend_directory: <%= params.frontendDirectory %>
       backend_directory: <%= params.backendDirectory %>

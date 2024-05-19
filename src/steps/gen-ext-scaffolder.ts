@@ -271,6 +271,7 @@ export const EXTENSION_MODULES = [
   'prettier',
   'typescript',
   'bundlewatch',
+  'frontendTesting',
 
   'backendTesting',
   'phpstan',
@@ -602,6 +603,34 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         needsTemplateParams: [],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('js/.bundlewatch.config.json'));
+        },
+      };
+
+    case 'frontendTesting':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Frontend testing via Jest and Mithril Query.',
+        dependsOn: ['js'],
+        filesToReplace: [
+          'js/jest.config.cjs',
+          'js/tsconfig.test.json',
+          'js/webpack.config.cjs',
+          'js/tests/unit/.gitkeep',
+          'js/tests/integration/.gitkeep',
+        ],
+        jsonToAugment: {
+          'js/package.json': [
+            'devDependencies.@flarum/jest-config',
+            'scripts.test',
+            'type',
+          ],
+        },
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('js/jest.config.cjs'));
         },
       };
 
