@@ -13,13 +13,13 @@ export function parseCode(code: string): t.File {
   });
 }
 
-export async function generateCode(ast: t.File): Promise<string> {
+export async function generateCode(ast: t.File, extenders = false): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const generatedCode = generate(ast).code;
 
   // Format the code
-  return formatCode(generatedCode);
+  return formatCode(generatedCode, extenders);
 }
 
 export type ModuleImport = {
@@ -256,6 +256,12 @@ export function sameArguments(
   return JSON.stringify(argumentValues) === JSON.stringify(configuredArgs);
 }
 
-export function formatCode(code: string): Promise<string> {
-  return prettier.format(code, { ...(prettierConfig as prettier.Options), parser: 'babel', printWidth: 100 });
+export function formatCode(code: string, extenders = false): Promise<string> {
+  const options = { ...(prettierConfig as prettier.Options), parser: 'babel-ts' };
+
+  if (extenders) {
+    options.printWidth = 100;
+  }
+
+  return prettier.format(code, options);
 }
