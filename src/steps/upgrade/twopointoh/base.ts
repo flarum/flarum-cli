@@ -5,7 +5,7 @@ import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
 import pick from 'pick-deep';
 import {FlarumProviders} from "../../../providers";
-import {applyImports, generateCode, ModuleImport, parseCode} from "../../../utils/ast";
+import {applyImports, formatCode, generateCode, ModuleImport, parseCode} from "../../../utils/ast";
 import {create} from "mem-fs-editor";
 import {commitAll} from "../../monorepo/create";
 import BaseCommand from "../../../base-command";
@@ -15,7 +15,7 @@ import s from "string";
 import simpleGit from "simple-git";
 
 export type ReplacementResult = {
-  imports?: ModuleImport[];
+  imports?: ImportChange[];
   newPath?: string;
   updated: string | AdvancedContent;
 };
@@ -23,6 +23,11 @@ export type ReplacementResult = {
 export type Replacement = (file: string, code: string, advanced: AdvancedContent) => null|ReplacementResult|Promise<null|ReplacementResult>;
 
 export type AdvancedContent = t.File|Record<string, any>|null;
+
+export type ImportChange = {
+  replacesPath?: string|null;
+  import: ModuleImport;
+};
 
 export type GitCommit = {
   message: string;
@@ -44,7 +49,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected command: BaseCommand;
 
-  constructor(command: BaseCommand) {
+  public constructor(command: BaseCommand) {
     this.command = command;
   }
 
@@ -132,20 +137,22 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       // eslint-disable-next-line no-await-in-loop
       code = await this.updateCode(file, code, result.updated);
 
-      if ((result.imports?.length ?? 0) > 0) {
+      if (result.imports?.length || (result.updated && typeof result.updated !== 'string' && 'program' in result.updated)) {
         try {
           advanced = parseCode(code);
         } catch (error) {
           this.command.warn(`Failed to parse code for ${file}, code: \n${code}`);
           throw error;
         }
+      }
 
+      if ((result.imports?.length ?? 0) > 0) {
         result.imports?.forEach((imp) => {
           this.ensureImport(file, advanced, imp);
         });
 
         // eslint-disable-next-line no-await-in-loop
-        code = await generateCode(advanced as t.File);
+        code = await generateCode(advanced as t.File, false);
       }
 
       if (result.newPath) {
@@ -180,7 +187,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       }
     }
 
-    if (lang === 'js') {
+    if (['js', 'ts', 'jsx', 'tsx'].includes(lang || '')) {
       return parseCode(code);
     }
 
@@ -189,6 +196,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   async updateCode(file: string, code: string, updated: string | AdvancedContent): Promise<string> {
     const lang = file.split('.').pop();
+
+    if (['js', 'ts', 'jsx', 'tsx'].includes(lang || '') && typeof updated === 'string') {
+      return formatCode(updated, false);
+    }
 
     if (typeof updated === 'string') {
       return updated;
@@ -202,7 +213,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
     if (updated && 'program' in updated) {
       try {
-        return generateCode(updated as t.File);
+        return generateCode(updated as t.File, false);
       } catch (error) {
         this.command.warn(`Failed to generate code for ${file}, code: \n${code}`);
         throw error;

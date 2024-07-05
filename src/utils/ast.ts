@@ -3,20 +3,25 @@ import { MemberExpression, NewExpression } from '@babel/types';
 import { ClosureSpec, ExpressionSpec, ExpressionType, MethodCallSpec } from '../providers/php-provider';
 import prettier from 'prettier';
 import prettierConfig from '@flarum/prettier-config/prettierrc.json';
-import { parse } from '@babel/parser';
-import generate from '@babel/generator';
+// import { parse } from '@babel/parser';
+// import generate from '@babel/generator';
+import * as recast from "recast";
 
 export function parseCode(code: string): t.File {
-  return parse(code, {
-    sourceType: 'module',
-    plugins: ['typescript', 'jsx'],
-  });
+  try {
+    return recast.parse(code, {
+      parser: require('recast/parsers/babel-ts'),
+    });
+  } catch (error) {
+    console.log(code)
+    throw error;
+  }
 }
 
 export async function generateCode(ast: t.File, extenders = false): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const generatedCode = generate(ast).code;
+  const generatedCode = recast.print(ast).code;
 
   // Format the code
   return formatCode(generatedCode, extenders);
@@ -264,4 +269,14 @@ export function formatCode(code: string, extenders = false): Promise<string> {
   }
 
   return prettier.format(code, options);
+}
+
+export function getFunctionName(node: t.Node): string | null {
+  if (node.type === 'Identifier') {
+    return node.name;
+  } else if (node.type === 'MemberExpression') {
+    return `${getFunctionName(node.object)}.${getFunctionName(node.property)}`;
+  }
+
+  return null;
 }

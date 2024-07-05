@@ -1,5 +1,9 @@
-import {BaseUpgradeStep, GitCommit, Replacement, ReplacementResult} from "../base";
+import {BaseUpgradeStep, GitCommit, ImportChange, Replacement} from "../base";
 import chalk from "chalk";
+import * as t from '@babel/types';
+import traverse from "@babel/traverse";
+import {getFunctionName} from "../../../../utils/ast";
+import generate from "@babel/generator";
 
 export default class Misc extends BaseUpgradeStep {
   type = 'Miscellaneous frontend changes';
@@ -51,9 +55,11 @@ ${readMore}`;
 
       return {
         imports: [{
-          name: 'IndexSidebar',
-          defaultImport: true,
-          path: 'flarum/forum/components/IndexSidebar',
+          import: {
+            name: 'IndexSidebar',
+            defaultImport: true,
+            path: 'flarum/forum/components/IndexSidebar',
+          }
         }],
         updated: code
           .replace(/IndexPage\.prototype\.sidebar/g, 'IndexSidebar')
@@ -66,60 +72,111 @@ ${readMore}`;
 
   private updateAvatarIcon(): Replacement {
     return (file, code, advanced) => {
-      const imports = [];
+      const imports: ImportChange[] = [];
 
       if (code.includes('flarum/common/helpers/avatar')) {
         imports.push({
-          name: 'Avatar',
-          defaultImport: true,
-          path: 'flarum/common/components/Avatar',
+          replacesPath: 'flarum/common/helpers/avatar',
+          import: {
+            name: 'Avatar',
+            defaultImport: true,
+            path: 'flarum/common/components/Avatar',
+          },
         });
       }
 
       if (code.includes('flarum/common/helpers/icon')) {
         imports.push({
-          name: 'Icon',
-          defaultImport: true,
-          path: 'flarum/common/components/Icon',
+          replacesPath: 'flarum/common/helpers/icon',
+          import: {
+            name: 'Icon',
+            defaultImport: true,
+            path: 'flarum/common/components/Icon',
+          },
         });
       }
 
       if (imports.length === 0) return null;
 
-      const regexes = [
-        /(\w+):\s*({[^,}]+}),?/g,
-        /["']([^"']+)["']:\s*({[^,}]+}),?/g,
-        /["']([^"']+)["']:\s*([^,}]+),?/g,
-        /(\w+):\s*([^,}]+),?/g
-      ];
+      const ast = advanced as t.File;
+
+      traverse(ast, {
+        CallExpression(path) {
+          const node = path.node;
+          const funcName = getFunctionName(node.callee);
+          const args = node.arguments;
+
+          if (['avatar', 'icon'].includes(funcName || '')) {
+            const userOrName = args[0];
+            const attrs = args[1];
+
+            if (! t.isExpression(userOrName) && ! t.isStringLiteral(userOrName)) {
+              console.warn(`Unknown userOrName type for ${funcName} in ${file}: ${userOrName.type}`);
+              return;
+            }
+
+            let attrsToJsx = null
+
+            if (attrs && t.isObjectExpression(attrs)) {
+              attrsToJsx = (attrs as t.ObjectExpression).properties
+                .filter((prop) => t.isObjectProperty(prop) && ! t.isArrayPattern(prop.value))
+                .map((prop) => {
+                  prop = prop as t.ObjectProperty;
+
+                  const key = 'value' in prop.key ? prop.key.value : ('name' in prop.key ? prop.key.name : prop.key.type);
+
+                  if (t.isArrayPattern(prop.value) || t.isObjectPattern(prop.value) || t.isRestElement(prop.value)) {
+                    console.warn('Failed to convert to JSX: ', { [key.toString()]: prop.value });
+                    return null;
+                  }
+
+                  if (t.isAssignmentPattern(prop.value)) {
+                    return t.jsxAttribute(
+                      t.jsxIdentifier(key.toString()),
+                      t.isStringLiteral(prop.value.right) ? prop.value.right : t.jsxExpressionContainer(prop.value.right)
+                    );
+                  }
+
+                  try {
+                    return t.jsxAttribute(
+                      t.jsxIdentifier(key.toString()),
+                      t.isStringLiteral(prop.value) ? prop.value : t.jsxExpressionContainer(prop.value)
+                    );
+                  } catch (error) {
+                    console.log({ [key.toString()]: prop.value });
+                    throw error;
+                  }
+                }) as t.JSXAttribute[];
+            } else if (attrs && t.isIdentifier(attrs)) {
+              attrsToJsx = [t.jsxSpreadAttribute(attrs)];
+            } else if (attrs) {
+              console.warn(`Unknown attrs type for ${funcName} in ${file}: ${attrs.type}`);
+            }
+
+            const tag = t.jsxIdentifier(funcName === 'avatar' ? 'Avatar' : 'Icon');
+            const mainArgName = funcName === 'avatar' ? 'user' : 'name';
+            const mainArg = t.jsxAttribute(t.jsxIdentifier(mainArgName), t.isStringLiteral(userOrName) ? userOrName : t.jsxExpressionContainer(userOrName));
+
+            const jsxElem = t.jsxElement(
+              t.jsxOpeningElement(tag, [mainArg, ...attrsToJsx || []], true),
+              null,
+              [],
+              true
+            );
+
+            // If the node is enclosed in { ... }, remove them
+            if (t.isJSXExpressionContainer(path.parent)) {
+              path.parentPath.replaceWith(jsxElem);
+            } else {
+              path.replaceWith(jsxElem);
+            }
+          }
+        }
+      });
 
       return {
         imports,
-        updated: code
-          // avatar(user, { ... }) => <Avatar user={user} { ... } />
-          // avatar(user, { className: 'haha', 'attr2': 101 }) => <Avatar user={user} className="haha" attr2={101} />
-          .replace(/{?avatar\(([^),]+)(?:,\s*{([^}]+)})?\)}?/g, (match, user, attrs) => {
-            if (! attrs) return `<Avatar user={${user}} />`;
-
-            regexes.forEach((regex) => {
-              attrs = attrs.replace(regex, '$1={$2}')
-            })
-
-            return `<Avatar user={${user}} ${attrs.replace(' }', '}').trim()} />`;
-          })
-          .replace(/import\s+(\w+)\s+from\s+["']flarum\/common\/helpers\/avatar["'];/g, '')
-          // icon('fas fa-user', { ... }) => <Icon name="fas fa-user" { ... } />
-          // icon('fas fa-user', { className: 'haha', 'attr2': 101 }) => <Icon name="fas fa-user" className="haha" attr2={101} />
-          .replace(/{?icon\(([^),]+)(?:,\s*{([^}]+)})?\)}?/g, (match, name, attrs) => {
-            if (! attrs) return `<Icon name="${name.replaceAll("'", '')}" />`;
-
-            regexes.forEach((regex) => {
-              attrs = attrs.replace(regex, '$1={$2}')
-            })
-
-            return `<Icon name="${name}" ${attrs.replace(' }', '}').trim()} />`;
-          })
-          .replace(/import\s+(\w+)\s+from\s+["']flarum\/common\/helpers\/icon["'];/g, ''),
+        updated: ast
       };
     };
   }
@@ -160,7 +217,10 @@ ${readMore}`;
           //   ...
           // }),
           .replace(/UploadImageButton\.component\(\s*{([^}]+),?\s*}\s*\)/g, (_match, attrs) => {
-            const name = attrs.match(/name: ["']([^"']+)["']/)?.[1];
+            const name = attrs.match(/name: ["']([^"']+)["'],?/)?.[1];
+
+            // remove ,
+            attrs = attrs.replace(/,\s*$/, '');
 
             return `UploadImageButton.component({${attrs}, routePath: '${name}', value: app.data.settings['${name}_path'], url: app.forum.attribute('${name}Url')})`;
           }),

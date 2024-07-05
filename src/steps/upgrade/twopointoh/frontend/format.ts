@@ -9,7 +9,7 @@ export default class FormatCode extends BaseUpgradeStep {
 
     return [
       async (_file, code) => ({
-        updated: await formatCode(code)
+        updated: await formatCode(code, false)
       })
     ];
   }
