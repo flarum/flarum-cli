@@ -106,7 +106,8 @@ export function populateImports(
   module: ModuleImport,
   defaultImports: Record<string, t.ImportDefaultSpecifier | null>,
   specificImports: Record<string, t.ImportSpecifier[] | null>,
-  frontend: string
+  frontend: string,
+  insertAt: number | null = null
 ): void {
   const preferDefaultImport = module.defaultImport || (module.preferGroupImport && module.useNamedGroupImport);
   let defaultImportDeclaration = null;
@@ -144,11 +145,23 @@ export function populateImports(
     if (!module.preferGroupImport) {
       defaultImportDeclaration = t.importDefaultSpecifier(t.identifier(module.name));
 
-      ast.program.body.unshift(t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath)));
+      const declaration = t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath));
+
+      if (! insertAt) {
+        ast.program.body.unshift(declaration);
+      } else {
+        ast.program.body.splice(insertAt, 0, declaration);
+      }
     } else if (module.useNamedGroupImport) {
       defaultImportDeclaration = t.importDefaultSpecifier(t.identifier(module.useNamedGroupImport));
 
-      ast.program.body.unshift(t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath.split('/').slice(0, -1).join('/'))));
+      const declaration = t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath.split('/').slice(0, -1).join('/')));
+
+      if (! insertAt) {
+        ast.program.body.unshift(declaration);
+      } else {
+        ast.program.body.splice(insertAt, 0, declaration);
+      }
     }
   }
 
@@ -170,7 +183,11 @@ export function populateImports(
       } else {
         specificImportDeclarations = newImports.specifiers as t.ImportSpecifier[];
 
-        ast.program.body.unshift(newImports);
+        if (! insertAt) {
+          ast.program.body.unshift(newImports);
+        } else {
+          ast.program.body.splice(insertAt, 0, newImports);
+        }
       }
     }
   }

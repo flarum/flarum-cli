@@ -23,7 +23,9 @@ export default class Misc extends BaseUpgradeStep {
       this.updateIndexPage(),
       this.updateAvatarIcon(),
       this.updateCurrentTag(),
+      this.updateInitializers(),
       this.updateUploadImageButton(),
+      ...this.updateExtendModal(),
     ];
   }
 
@@ -182,11 +184,24 @@ ${readMore}`;
   }
 
   private updateCurrentTag(): Replacement {
-    return (file, code) => {
+    return (_file, code) => {
       if (!code.includes('this.currentTag')) return null;
 
       return {
         updated: code.replace(/this\.currentTag/g, 'app.currentTag'),
+      };
+    };
+  }
+
+  private updateInitializers(): Replacement {
+    return (_file, code) => {
+      if (!code.includes('this.currentTag')) return null;
+
+      return {
+        updated: code
+          .replace(/initializers\.has\(['"]lock['"]\)/g, 'initializers.has(\'flarum-lock\')')
+          .replace(/initializers\.has\(['"]subscriptions['"]\)/g, 'initializers.has(\'flarum-subscriptions\')')
+          .replace(/initializers\.has\(['"]flarum\/nicknames['"]\)/g, 'initializers.add(\'flarum-nicknames\')'),
       };
     };
   }
@@ -226,5 +241,64 @@ ${readMore}`;
           }),
       }
     };
+  }
+
+  private updateExtendModal(): Replacement[] {
+    return [
+      (file, code, advanced) => {
+        if (! file.endsWith('.tsx') && ! file.endsWith('.jsx') && ! file.endsWith('.js') && ! file.endsWith('.ts')) return null;
+
+        if (! code.includes(' extends Modal') || ! code.includes('flarum/common/components/Modal')) return null;
+
+        if (! (new RegExp('<input\\s').test(code)) && ! code.includes(' onsubmit(')) return null;
+
+        const ast = advanced as t.File;
+
+        // Change extends Modal to extends FormModal
+        traverse(ast, {
+          ClassDeclaration(path) {
+            const node = path.node;
+
+            if (node.superClass && t.isIdentifier(node.superClass) && node.superClass.name === 'Modal') {
+              node.superClass = t.identifier('FormModal');
+            }
+          }
+        });
+
+        return {
+          imports: [
+            {
+              replacesPath: 'flarum/common/components/Modal',
+              import: {
+                name: 'FormModal',
+                defaultImport: true,
+                path: 'flarum/common/components/FormModal',
+              }
+            }
+          ],
+          updated: advanced,
+        };
+      },
+
+      (file, code) => {
+        if (! file.endsWith('.tsx') && ! file.endsWith('.jsx') && ! file.endsWith('.js') && ! file.endsWith('.ts')) return null;
+
+        if (! code.includes('extends FormModal')) return null;
+
+        if (! code.includes('IInternalModalAttrs')) return null;
+
+        return {
+          imports: [{
+            replacesPath: 'flarum/common/components/Modal',
+            import: {
+              name: 'IFormModalAttrs',
+              defaultImport: false,
+              path: 'flarum/common/components/FormModal',
+            }
+          }],
+          updated: code.replace(/IInternalModalAttrs/g, 'IFormModalAttrs'),
+        };
+      },
+    ];
   }
 }

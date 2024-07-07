@@ -5,7 +5,7 @@ import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
 import pick from 'pick-deep';
 import {FlarumProviders} from "../../../providers";
-import {applyImports, formatCode, generateCode, ModuleImport, parseCode} from "../../../utils/ast";
+import {formatCode, generateCode, ModuleImport, parseCode, populateImports} from "../../../utils/ast";
 import {create} from "mem-fs-editor";
 import {commitAll} from "../../monorepo/create";
 import BaseCommand from "../../../base-command";
@@ -13,6 +13,7 @@ import globby from "globby";
 import chalk from "chalk";
 import s from "string";
 import simpleGit from "simple-git";
+import {cloneNode} from "@babel/types";
 
 export type ReplacementResult = {
   imports?: ImportChange[];
@@ -144,9 +145,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
           this.command.warn(`Failed to parse code for ${file}, code: \n${code}`);
           throw error;
         }
-      }
 
-      if ((result.imports?.length ?? 0) > 0) {
         result.imports?.forEach((imp) => {
           this.ensureImport(file, advanced, imp);
         });
@@ -166,9 +165,36 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     };
   }
 
-  ensureImport(file: string, advanced: AdvancedContent, imp: ModuleImport): void {
+  ensureImport(file: string, advanced: AdvancedContent, imp: ImportChange): void {
     const frontend = file.split('/src/')[1].split('/')[0];
-    applyImports(advanced as t.File, frontend, [imp]);
+    const ast = advanced as t.File;
+
+    // Remove old import first.
+    let index: number|null = null;
+    let postAdd = null;
+
+    if (imp.replacesPath) {
+      index = ast.program.body.findIndex((node) => {
+        if (! t.isImportDeclaration(node)) return false;
+
+        return node.source.value === imp.replacesPath;
+      });
+
+      const replaces = cloneNode(ast.program.body[index] as t.ImportDeclaration);
+      replaces.specifiers = replaces.specifiers.filter((specifier) => ! t.isImportDefaultSpecifier(specifier));
+
+      if (imp.import.defaultImport && replaces?.specifiers?.length) {
+        postAdd = () => ast.program.body.splice(index!, 0, replaces);
+      }
+
+      if (index >= 0) {
+        ast.program.body.splice(index, 1);
+      }
+    }
+
+    populateImports(ast, imp.import, {}, {}, frontend, index);
+
+    postAdd?.();
   }
 
   advancedContent(file: string, code: string): AdvancedContent {
