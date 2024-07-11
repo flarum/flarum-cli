@@ -95,7 +95,7 @@ ${example}`;
     return (_file, code) => {
       // replace `import module from 'flarum/ext/module-path';` with `import module from 'ext:flarum/extension/module-path';`
       // extension must not be one of [forum, admin, common]
-      const regex = new RegExp(/import\s+(\w+)\s+from\s+["'](flarum\/(?!.*\b(?:common|admin|forum)\b).*\/[\w/]+)["']/gim);
+      const regex = new RegExp(/import\s+(\w+)\s+from\s+["'](flarum\/(?!.*\b(?:common|admin|forum|utils|helpers|components)\b).*\/[\w/]+)["']/gim);
 
       // First collect all the imports that are from extensions
       const imports = code.match(regex);

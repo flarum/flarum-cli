@@ -8,6 +8,7 @@ import Compat from "../../steps/upgrade/twopointoh/frontend/export-registry/comp
 import ExtendLazyModules from "../../steps/upgrade/twopointoh/frontend/code-splitting/extend-lazy-modules";
 import Misc from "../../steps/upgrade/twopointoh/frontend/misc";
 import FormatCode from "../../steps/upgrade/twopointoh/frontend/format";
+import {UpdateJSImports} from "../../steps/update/js-imports";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
