@@ -21,7 +21,9 @@ export function parseCode(code: string): t.File {
 export async function generateCode(ast: t.File, extenders = false): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const generatedCode = recast.print(ast).code;
+  const generatedCode = recast.print(ast, {
+    parser: require('recast/parsers/babel-ts'),
+  }).code;
 
   // Format the code
   return formatCode(generatedCode, extenders);

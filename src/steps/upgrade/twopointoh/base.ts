@@ -54,6 +54,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.command = command;
   }
 
+  before(file: string, code: string, advanced: AdvancedContent): void {
+    // ...
+  }
+
   abstract targets(): string[];
   abstract replacements(file: string, code: string): Replacement[];
   abstract gitCommit(): GitCommit;
@@ -78,6 +82,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         // eslint-disable-next-line no-await-in-loop
         ? await globby(paths.package(target))
         : [paths.package(target)];
+
+      for (const file of files) {
+        const code = fsEditor.read(file);
+        const advanced = this.advancedContent(file, code);
+
+        this.before(file, code, advanced);
+      }
 
       for (const file of files) {
         const code = fsEditor.read(file);

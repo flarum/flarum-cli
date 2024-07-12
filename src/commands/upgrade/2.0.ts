@@ -5,10 +5,10 @@ import Dependencies from "../../steps/upgrade/twopointoh/dependencies";
 import Infrastructure from "../../steps/upgrade/twopointoh/infra";
 import ImportExt from "../../steps/upgrade/twopointoh/frontend/export-registry/import-ext";
 import Compat from "../../steps/upgrade/twopointoh/frontend/export-registry/compat";
-import ExtendLazyModules from "../../steps/upgrade/twopointoh/frontend/code-splitting/extend-lazy-modules";
+import UsageOfLazyModules from "../../steps/upgrade/twopointoh/frontend/code-splitting/usage-of-lazy-modules";
 import Misc from "../../steps/upgrade/twopointoh/frontend/misc";
 import FormatCode from "../../steps/upgrade/twopointoh/frontend/format";
-import {UpdateJSImports} from "../../steps/update/js-imports";
+import chalk from "chalk";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -22,7 +22,7 @@ export default class TwoPointOh extends BaseCommand {
   protected requireExistingExtension = false;
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    Error.stackTraceLimit = Number.POSITIVE_INFINITY;
+    // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
     return stepManager
       .step(new FormatCode(this))
@@ -30,7 +30,7 @@ export default class TwoPointOh extends BaseCommand {
       .step(new Infrastructure(this))
       .step(new Compat(this))
       .step(new ImportExt(this))
-      .step(new ExtendLazyModules(this))
+      .step(new UsageOfLazyModules(this))
       .step(new Misc(this));
   }
 
@@ -43,11 +43,16 @@ export default class TwoPointOh extends BaseCommand {
   }
 
   protected goodbyeMessage(): string {
+    const composer = chalk.bold.bgYellow('composer update');
+    const yarn = chalk.bold.bgYellow('yarn install');
+
     return `
     Your extension has been successfully upgraded to Flarum 2.0.
     You may need to make some manual changes to your code. Look for added @TODO comments in your code.
     Please refer to the Flarum 2.0 upgrade guide for more information.
     https://docs.flarum.org/extend/update-2_0
+
+    Make sure to run ${composer} and ${yarn} then test your extension to ensure everything is working as expected.
     `;
   }
 }
