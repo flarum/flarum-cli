@@ -49,6 +49,7 @@ export enum ParamTypeType {
 
 export interface PhpProvider {
   withExtender(extendContents: string, extenderDef: ExtenderDef): string;
+  run(command: string, args: Record<string, any>): string;
 }
 
 export class PhpSubsystemProvider implements PhpProvider {
@@ -63,6 +64,21 @@ export class PhpSubsystemProvider implements PhpProvider {
       'extend.php': extendContents,
       op: 'extender.add',
       params: extenderDef,
+    });
+
+    const res = execSync(`php ${this.phpPath}`, { input });
+
+    if (!res) {
+      throw new Error(`The PHP subsystem returned an invalid value: ${res}`);
+    }
+
+    return res.toString();
+  }
+
+  run(command: string, args: Record<string, any>): string {
+    const input = JSON.stringify({
+      op: command,
+      ...args,
     });
 
     const res = execSync(`php ${this.phpPath}`, { input });

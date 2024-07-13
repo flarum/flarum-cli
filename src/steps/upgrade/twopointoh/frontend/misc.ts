@@ -4,7 +4,7 @@ import * as t from '@babel/types';
 import traverse from "@babel/traverse";
 import {getFunctionName} from "../../../../utils/ast";
 
-export default class Misc extends BaseUpgradeStep {
+export default class MiscFrontendChanges extends BaseUpgradeStep {
   type = 'Miscellaneous frontend changes';
 
   // - [`IndexPage.prototype.sidebar` -> `IndexSidebar`](https://github.com/flarum/framework/blob/72f89c0209a5c4bbdc5482ecbdc2435dcd57550f/framework/core/js/src/forum/components/IndexSidebar.tsx)

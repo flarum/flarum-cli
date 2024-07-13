@@ -6,9 +6,12 @@ import Infrastructure from "../../steps/upgrade/twopointoh/infra";
 import ImportExt from "../../steps/upgrade/twopointoh/frontend/export-registry/import-ext";
 import Compat from "../../steps/upgrade/twopointoh/frontend/export-registry/compat";
 import UsageOfLazyModules from "../../steps/upgrade/twopointoh/frontend/code-splitting/usage-of-lazy-modules";
-import Misc from "../../steps/upgrade/twopointoh/frontend/misc";
+import MiscFrontendChanges from "../../steps/upgrade/twopointoh/frontend/misc";
 import FormatCode from "../../steps/upgrade/twopointoh/frontend/format";
 import chalk from "chalk";
+import MiscBackendChanges from "../../steps/upgrade/twopointoh/backend/misc";
+import Filesystem from "../../steps/upgrade/twopointoh/backend/filesystem";
+import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -25,13 +28,18 @@ export default class TwoPointOh extends BaseCommand {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
     return stepManager
+      // Frontend
       .step(new FormatCode(this))
       .step(new Dependencies(this))
       .step(new Infrastructure(this))
       .step(new Compat(this))
       .step(new ImportExt(this))
       .step(new UsageOfLazyModules(this))
-      .step(new Misc(this));
+      .step(new MiscFrontendChanges(this))
+      // Backend
+      .step(new MiscBackendChanges(this))
+      .step(new Filesystem(this))
+      .step(new Mailer(this));
   }
 
   protected welcomeMessage(): string {

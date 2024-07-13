@@ -14,6 +14,7 @@ import chalk from "chalk";
 import s from "string";
 import simpleGit from "simple-git";
 import {cloneNode} from "@babel/types";
+import {PhpProvider} from "../../../providers/php-provider";
 
 export type ReplacementResult = {
   imports?: ImportChange[];
@@ -50,11 +51,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected command: BaseCommand;
 
+  protected php: null|PhpProvider = null;
+
   public constructor(command: BaseCommand) {
     this.command = command;
   }
 
-  before(file: string, code: string, advanced: AdvancedContent): void {
+  before(_file: string, _code: string, _advanced: AdvancedContent): void {
     // ...
   }
 
@@ -63,8 +66,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract gitCommit(): GitCommit;
   abstract pauseMessage(): string;
 
-  async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
+
+    this.php = providers.php;
 
     // Skip if this was already done (check by commits).
     if (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
