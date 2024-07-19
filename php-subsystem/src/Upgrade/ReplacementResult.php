@@ -7,8 +7,11 @@ class ReplacementResult
     /** @var string|array */
     public $updated;
 
-    public function __construct($updated)
+    public $data;
+
+    public function __construct($updated, $data = [])
     {
         $this->updated = $updated;
+        $this->data = $data;
     }
 }

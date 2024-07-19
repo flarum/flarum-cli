@@ -40,6 +40,7 @@ export interface ShouldRunConfig {
   optional?: boolean;
   confirmationMessage?: string;
   default?: boolean;
+  silent?: boolean;
 }
 
 export interface StoredStep<Providers extends DefaultProviders> {
@@ -85,6 +86,8 @@ export class StepManager<Providers extends DefaultProviders> {
 
   protected exposedParams = new ExposedParamManager();
 
+  private silent = false;
+
   /**
    * A step is an incremental operation that updates the filesystem.
    */
@@ -96,6 +99,13 @@ export class StepManager<Providers extends DefaultProviders> {
     mapPaths: string[] = []
   ): this {
     this.validateDependencies(step, dependencies, mapPaths);
+
+    if (! shouldRun.silent) {
+      shouldRun.silent = this.silent;
+      shouldRun.confirmationMessage = this.silent ? undefined : shouldRun.confirmationMessage;
+      shouldRun.optional = this.silent ? false : shouldRun.optional;
+      shouldRun.default = this.silent ? true : shouldRun.default;
+    }
 
     this.steps = [...this.steps, { step, shouldRun, dependencies, predefinedParams, mapPaths }];
 
@@ -116,7 +126,14 @@ export class StepManager<Providers extends DefaultProviders> {
 
     this.validateDependencies(step, dependencies, mapPaths);
 
-    const newStep = { name, step, shouldRun, dependencies, predefinedParams, mapPaths };
+    if (! shouldRun.silent) {
+      shouldRun.silent = this.silent;
+      shouldRun.confirmationMessage = this.silent ? undefined : shouldRun.confirmationMessage;
+      shouldRun.optional = this.silent ? false : shouldRun.optional;
+      shouldRun.default = this.silent ? true : shouldRun.default;
+    }
+
+    const newStep = {name, step, shouldRun, dependencies, predefinedParams, mapPaths };
 
     this.steps = [...this.steps, newStep];
 
@@ -131,6 +148,16 @@ export class StepManager<Providers extends DefaultProviders> {
     callback(atomicCollection);
 
     this.steps = [...this.steps, atomicCollection];
+
+    return this;
+  }
+
+  silentGroup(callback: (stepManager: StepManager<Providers>) => void): this {
+    this.silent = true;
+
+    callback(this);
+
+    this.silent = false;
 
     return this;
   }

@@ -2,6 +2,7 @@
   "name": "flarum/cli-php-util",
   "type": "library",
   "require": {
+    "ext-json": "*",
     "nikic/php-parser": "^5.0"
   },
   "autoload": {

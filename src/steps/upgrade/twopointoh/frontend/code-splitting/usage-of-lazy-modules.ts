@@ -107,6 +107,8 @@ The tool has attempted to update your code accordingly. Please review the change
 ${readMore}`;
   }
 
+  protected beforeHook = true;
+
   before(file: string, code: string): void {
     if (! file.endsWith('.js') && ! file.endsWith('.ts') && ! file.endsWith('.tsx') && ! file.endsWith('.jsx')) return;
 

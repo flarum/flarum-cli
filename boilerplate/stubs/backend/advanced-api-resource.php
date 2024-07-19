@@ -33,17 +33,17 @@ class <%= className %> extends Resource\AbstractDatabaseResource
 
     public function endpoints(): array
     {
-        return [
+        return [<% if (endpoints.includes('create')) { %>
             Endpoint\Create::make()
-                ->can('create<%= modelClassName %>'),
+                ->can('create<%= modelClassName %>'),<% } %><% if (endpoints.includes('update')) { %>
             Endpoint\Update::make()
-                ->can('update'),
+                ->can('update'),<% } %><% if (endpoints.includes('delete')) { %>
             Endpoint\Delete::make()
-                ->can('delete'),
+                ->can('delete'),<% } %><% if (endpoints.includes('show')) { %>
             Endpoint\Show::make()
-                ->authenticated(),
+                ->authenticated(),<% } %><% if (endpoints.includes('list')) { %>
             Endpoint\Index::make()
-                ->paginate(),
+                ->paginate(),<% } %>
         ];
     }
 
@@ -52,6 +52,7 @@ class <%= className %> extends Resource\AbstractDatabaseResource
         return [
 
             /**
+             * @todo migrate logic from old serializer and controllers to this API Resource.
              * @see https://docs.flarum.org/extend/api#api-resources
              */
 
@@ -61,13 +62,19 @@ class <%= className %> extends Resource\AbstractDatabaseResource
                 ->minLength(3)
                 ->maxLength(255)
                 ->writable(),
+
+<% (relations || []).forEach(([name,type]) => { %>
+            Schema\Relationship\<% if (type === 'hasOne') { %>ToOne<% } else { %>ToMany<% } %>::make('<%= name %>')
+                ->includable()
+                // ->inverse('?') // the inverse relationship name if any.
+                ->type('<%= name %>s'), // the serialized type of this relation (type of the relation model's API resource).<% }) %>
         ];
     }
 
     public function sorts(): array
     {
         return [
-            SortColumn::make('createdAt'),
+            // SortColumn::make('createdAt'),
         ];
     }
 }

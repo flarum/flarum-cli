@@ -18,8 +18,12 @@ switch ($input['op']) {
     case 'upgrade.2-0.filesystem':
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Filesystem())->handle($input['file']);
         break;
+
+    case 'upgrade.2-0.json-api':
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\JsonApi())->handle($input['file']);
+        break;
 }
 
-echo $output;
+echo json_encode($output);
 
 

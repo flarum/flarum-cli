@@ -2,7 +2,7 @@ import * as t from '@babel/types';
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { Step } from 'boilersmith/step-manager';
+import {Step, StepManager} from 'boilersmith/step-manager';
 import pick from 'pick-deep';
 import {FlarumProviders} from "../../../providers";
 import {formatCode, generateCode, ModuleImport, parseCode, populateImports} from "../../../utils/ast";
@@ -57,6 +57,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.command = command;
   }
 
+  protected beforeHook = false;
+
   before(_file: string, _code: string, _advanced: AdvancedContent): void {
     // ...
   }
@@ -88,11 +90,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         ? await globby(paths.package(target))
         : [paths.package(target)];
 
-      for (const file of files) {
-        const code = fsEditor.read(file);
-        const advanced = this.advancedContent(file, code);
+      if (this.beforeHook) {
+        for (const file of files) {
+          const code = fsEditor.read(file);
+          const advanced = this.advancedContent(file, code);
 
-        this.before(file, code, advanced);
+          this.before(file, code, advanced);
+        }
       }
 
       for (const file of files) {

@@ -12,6 +12,7 @@ import chalk from "chalk";
 import MiscBackendChanges from "../../steps/upgrade/twopointoh/backend/misc";
 import Filesystem from "../../steps/upgrade/twopointoh/backend/filesystem";
 import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
+import JsonApi from "../../steps/upgrade/twopointoh/backend/json-api";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -24,10 +25,12 @@ export default class TwoPointOh extends BaseCommand {
 
   protected requireExistingExtension = false;
 
-  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
+  skipFinalMessage = true;
+
+  protected steps(steps: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
-    return stepManager
+    return steps
       // Frontend
       .step(new FormatCode(this))
       .step(new Dependencies(this))
@@ -39,7 +42,8 @@ export default class TwoPointOh extends BaseCommand {
       // Backend
       .step(new MiscBackendChanges(this))
       .step(new Filesystem(this))
-      .step(new Mailer(this));
+      .step(new Mailer(this))
+      .step(new JsonApi(this));
   }
 
   protected welcomeMessage(): string {
@@ -54,8 +58,7 @@ export default class TwoPointOh extends BaseCommand {
     const composer = chalk.bold.bgYellow('composer update');
     const yarn = chalk.bold.bgYellow('yarn install');
 
-    return `
-    Your extension has been successfully upgraded to Flarum 2.0.
+    return `    Your extension has been successfully upgraded to Flarum 2.0.
     You may need to make some manual changes to your code. Look for added @TODO comments in your code.
     Please refer to the Flarum 2.0 upgrade guide for more information.
     https://docs.flarum.org/extend/update-2_0

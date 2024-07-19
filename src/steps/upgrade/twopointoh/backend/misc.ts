@@ -9,7 +9,7 @@ export default class MiscBackendChanges extends BaseUpgradeStep {
 
     return [
       () => ({
-        updated: this.php!.run('upgrade.2-0.misc', { file })
+        updated: this.php!.run('upgrade.2-0.misc', { file }).code
       })
     ];
   }
