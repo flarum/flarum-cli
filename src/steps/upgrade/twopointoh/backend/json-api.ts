@@ -7,7 +7,7 @@ import {FlarumProviders} from "../../../../providers";
 import {GenerateAdvancedApiResourceStub} from "../../../stubs/backend/advanced-api-resource";
 
 export default class JsonApi extends BaseUpgradeStep {
-  type = 'JSON:API changes';
+  type = 'Prepare for JSON:API changes.';
   beforeHook = true;
 
   protected modelEndpoints: Record<string, any> = {};

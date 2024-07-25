@@ -110,7 +110,7 @@ export default abstract class BaseCommand extends Command {
 
     const errorMessages = out.messages.filter((m) => m.type === 'error');
 
-    this.log('\n\n');
+    // this.log('\n\n');
 
     if (!this.skipFinalMessage && out.succeeded && errorMessages.length === 0) {
       this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));

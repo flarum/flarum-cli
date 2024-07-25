@@ -3,7 +3,7 @@ import {BaseUpgradeStep, GitCommit, Replacement} from "../../base";
 import chalk from "chalk";
 
 export default class ImportExt extends BaseUpgradeStep {
-  type = 'Replace import paths when importing from flarum extensions and warn about useExtensions';
+  type = 'Replace import paths when importing from extensions.';
 
   private importingFromExtensions: string[] = [];
   private useExtensions: string[] = [];

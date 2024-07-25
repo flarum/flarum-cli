@@ -5,7 +5,7 @@ import * as recast from "recast";
 import traverse from "@babel/traverse";
 
 export default class UsageOfLazyModules extends BaseUpgradeStep {
-  type = 'Some Flarum modules are now lazy loaded. Extending them requires a different approach.';
+  type = 'Adapt to accessing/extending lazy loaded Flarum modules.';
 
   // Array.from(flarum.reg.chunks.entries().flatMap(e => e[1].modules.map(m => e[1].namespace + ':' + m)))
   // "core:forum/components/ReplyComposer"

@@ -1,7 +1,7 @@
 import {BaseUpgradeStep, GitCommit, Replacement} from "./base";
 
 export default class Infrastructure extends BaseUpgradeStep {
-  type = 'Update the extension infrastructure';
+  type = 'Update the extension infrastructure.';
 
   replacements(file: string): Replacement[] {
     const replacements = [];

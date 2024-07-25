@@ -54,8 +54,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected php: null|PhpProvider = null;
 
-  public constructor(command: BaseCommand) {
+  protected step: number = 0;
+  protected totalSteps: number = 0;
+
+  public constructor(command: BaseCommand, step: number, totalSteps: number) {
     this.command = command;
+    this.step = step;
+    this.totalSteps = totalSteps;
   }
 
   protected beforeHook = false;
@@ -81,17 +86,37 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       this.command.error('You have uncommitted changes in your repository. Please commit or stash them before continuing.');
     }
 
+    const stepMarker = chalk.bgRed.bold('  STEP ' + this.step + '/' + this.totalSteps + '   ');
+    this.command.log(stepMarker + ' ' + chalk.bold(this.type));
+    this.command.log('');
+
     // Skip if this was already done (check by commits).
     if (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
-      const skipMarker = chalk.bgGreen.bold('SKIP');
-      this.command.log(skipMarker + ' ' + chalk.bold(this.type));
+      this.command.log('     => ' + chalk.bgGreen.bold('    SKIP    '));
       this.command.log('');
       return fs;
     }
 
+    // Show loading indicator
+    let dots = 1;
+    let nl = false;
+    const progress = () => {
+      if (! nl) {
+        this.command.log('');
+        nl = true;
+      }
+
+      const filledDots = '.'.repeat(dots) + ' '.repeat(3 - dots);
+      this.command.log('\u001b[A' + '     => ' + chalk.bold('  WORKING' + filledDots));
+
+      dots = (dots + 1) % 4;
+    };
+
     const targets = this.targets();
 
     for (const target of targets) {
+      progress();
+
       // target can have a wildcard
       const files = target.includes('*')
         // eslint-disable-next-line no-await-in-loop
@@ -100,6 +125,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       if (this.beforeHook) {
         for (const file of files) {
+          progress();
+
           if (! fsEditor.exists(file)) {
             continue;
           }
@@ -116,6 +143,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       const applyOn = async (files: string[]) => {
         for (const file of files) {
+          progress();
+
           if (deletedFiles.includes(file) || ! fsEditor.exists(file)) {
             continue;
           }
@@ -173,11 +202,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       const message = commit.message + '\n\n' + commit.description;
       await commitAll(paths.requestedDir() ?? paths.cwd(), message);
 
-      this.command.log(chalk.green(commit.message));
+      this.command.log('\u001b[A     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
       this.command.log('');
     } else {
-      const skipMarker = chalk.bgGreen.bold('NO CHANGES');
-      this.command.log(skipMarker + ' ' + chalk.bold(this.type));
+      this.command.log('\u001b[A     => ' + chalk.bgGreen.bold(' NO CHANGES '));
       this.command.log('');
     }
 
@@ -315,9 +343,9 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   }
 
   protected async pauseAndConfirm(message: string, io: IO): Promise<void> {
-    const stepMarker = chalk.bgWhite.black.bold('STEP');
+    const stepMarker = chalk.bgWhite.black.bold('    DONE    ');
 
-    this.command.log(stepMarker + ' ' + message);
+    this.command.log('\u001b[A     => ' + stepMarker + ' ' + message);
     this.command.log('');
 
     await this.command.continueWhenReady(io);

@@ -1,16 +1,11 @@
 import {AdvancedContent, BaseUpgradeStep, GitCommit, Replacement} from "../base";
 import chalk from "chalk";
-import {table} from "cli-ux/lib/styled/table";
-import flags = table.flags;
 import {StepManager} from "boilersmith/step-manager";
 import {FlarumProviders} from "../../../../providers";
-import {GenerateAdvancedApiResourceStub} from "../../../stubs/backend/advanced-api-resource";
 import {genExtScaffolder} from "../../../gen-ext-scaffolder";
-import {GenerateApiResourceExtender} from "../../../extenders/api-resource";
 import {GenerateGambitStub} from "../../../stubs/frontend/gambit";
 import {GenerateSearchGambitExtender} from "../../../js/search-gambit";
 import {LocaleStep} from "../../../locale/base";
-import s from "string";
 
 type Gambit = {
   name: string;

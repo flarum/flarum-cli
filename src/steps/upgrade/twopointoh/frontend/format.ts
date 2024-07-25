@@ -2,7 +2,7 @@ import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
 import {formatCode} from "../../../../utils/ast";
 
 export default class FormatCode extends BaseUpgradeStep {
-  type = 'Start by formatting your code with Prettier.';
+  type = 'Prettier formatting.';
 
   replacements(file: string): Replacement[] {
     if (! file.endsWith('.js') && ! file.endsWith('.ts') && ! file.endsWith('.tsx') && ! file.endsWith('.jsx')) return [];

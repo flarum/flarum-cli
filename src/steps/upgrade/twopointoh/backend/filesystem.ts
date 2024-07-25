@@ -2,7 +2,7 @@ import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
 import chalk from "chalk";
 
 export default class Filesystem extends BaseUpgradeStep {
-  type = 'Filesystem changes';
+  type = 'Filesystem dependencies changes.';
 
   replacements(file: string): Replacement[] {
     if (! file.endsWith('.php')) return [];

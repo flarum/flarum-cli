@@ -2,7 +2,7 @@ import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
 import chalk from "chalk";
 
 export default class Mailer extends BaseUpgradeStep {
-  type = 'Warn that Swift mailer was replaced with Symfony mailer';
+  type = 'Check for Swift mailer usage.';
 
   replacements(file: string): Replacement[] {
     if (! file.endsWith('.php')) return [];

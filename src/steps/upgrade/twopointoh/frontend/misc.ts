@@ -5,7 +5,7 @@ import traverse from "@babel/traverse";
 import {getFunctionName} from "../../../../utils/ast";
 
 export default class MiscFrontendChanges extends BaseUpgradeStep {
-  type = 'Miscellaneous frontend changes';
+  type = 'Miscellaneous frontend changes.';
 
   // - [`IndexPage.prototype.sidebar` -> `IndexSidebar`](https://github.com/flarum/framework/blob/72f89c0209a5c4bbdc5482ecbdc2435dcd57550f/framework/core/js/src/forum/components/IndexSidebar.tsx)
   // - [`IndexPage.prototype.navItems` -> `IndexSidebar.prototype.navItems`](https://github.com/flarum/framework/blob/72f89c0209a5c4bbdc5482ecbdc2435dcd57550f/framework/core/js/src/forum/components/IndexSidebar.tsx)

@@ -2,7 +2,7 @@ import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
 import chalk from "chalk";
 
 export default class MiscBackendChanges extends BaseUpgradeStep {
-  type = 'Miscellaneous backend changes';
+  type = 'Miscellaneous backend changes.';
 
   replacements(file: string): Replacement[] {
     if (! file.endsWith('.php')) return [];

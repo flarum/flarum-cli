@@ -28,24 +28,47 @@ export default class TwoPointOh extends BaseCommand {
 
   skipFinalMessage = true;
 
+  stepCount = 1;
+
   protected steps(steps: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
-    return steps
+    return this.prepareSteps(steps, [
       // Frontend
-      .step(new FormatCode(this))
-      .step(new Dependencies(this))
-      .step(new Infrastructure(this))
-      .step(new Compat(this))
-      .step(new ImportExt(this))
-      .step(new UsageOfLazyModules(this))
-      .step(new MiscFrontendChanges(this))
+      FormatCode,
+      Dependencies,
+      Infrastructure,
+      Compat,
+      ImportExt,
+      UsageOfLazyModules,
+      MiscFrontendChanges,
       // Backend
-      .step(new MiscBackendChanges(this))
-      .step(new Filesystem(this))
-      .step(new Mailer(this))
-      .step(new JsonApi(this))
-      .step(new Search(this));
+      MiscBackendChanges,
+      Filesystem,
+      Mailer,
+      JsonApi,
+      Search,
+    ]);
+  }
+
+  stepCounter(): number {
+    return this.stepCount++;
+  }
+
+  private prepareSteps(steps: StepManager<FlarumProviders>, collection: any[]): StepManager<FlarumProviders> {
+    let total = 0;
+    let stepCount = 0;
+
+    collection.forEach((step) => {
+      total++;
+    });
+
+    collection.forEach((step) => {
+      steps.step(new step(this, stepCount, total));
+      stepCount++;
+    });
+
+    return steps;
   }
 
   protected welcomeMessage(): string {
