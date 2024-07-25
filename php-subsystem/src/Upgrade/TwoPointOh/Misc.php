@@ -11,7 +11,7 @@ use PhpParser\NodeVisitor;
 
 class Misc extends Replacement
 {
-    function run(string $file, string $code, array $ast): ?ReplacementResult
+    function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
     {
         if (strpos($file, 'extend.php') !== false) {
             return new ReplacementResult(

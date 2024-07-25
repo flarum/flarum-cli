@@ -19,6 +19,7 @@ import {PhpProvider} from "../../../providers/php-provider";
 export type ReplacementResult = {
   imports?: ImportChange[];
   newPath?: string;
+  delete?: boolean;
   updated: string | AdvancedContent;
 };
 
@@ -73,6 +74,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
     this.php = providers.php;
 
+    // Stop if there are uncommited changes
+    const status = await simpleGit(paths.requestedDir() ?? paths.cwd()).status();
+
+    if (status?.files.length) {
+      this.command.error('You have uncommitted changes in your repository. Please commit or stash them before continuing.');
+    }
+
     // Skip if this was already done (check by commits).
     if (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
       const skipMarker = chalk.bgGreen.bold('SKIP');
@@ -92,6 +100,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       if (this.beforeHook) {
         for (const file of files) {
+          if (! fsEditor.exists(file)) {
+            continue;
+          }
+
           const code = fsEditor.read(file);
           const advanced = this.advancedContent(file, code);
 
@@ -99,36 +111,62 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         }
       }
 
-      for (const file of files) {
-        const code = fsEditor.read(file);
-        const advanced = this.advancedContent(file, code);
+      const newFiles: string[] = [];
+      const deletedFiles: string[] = [];
 
-        const relativeTarget = s(file.replace(paths.package(), '')).stripLeft('/').stripLeft('\\').toString();
+      const applyOn = async (files: string[]) => {
+        for (const file of files) {
+          if (deletedFiles.includes(file) || ! fsEditor.exists(file)) {
+            continue;
+          }
 
-        // eslint-disable-next-line no-await-in-loop
-        const result = await this.applyReplacements(relativeTarget, code, advanced);
+          const code = fsEditor.read(file);
+          const advanced = this.advancedContent(file, code);
 
-        if (result.newPath !== file) {
-          fsEditor.move(file, result.newPath!);
+          const relativeTarget = s(file.replace(paths.package(), '')).stripLeft('/').stripLeft('\\').toString();
+
+          // eslint-disable-next-line no-await-in-loop
+          const result = await this.applyReplacements(relativeTarget, code, advanced);
+
+          if (result.newPath && result.newPath !== file) {
+            fsEditor.move(file, result.newPath!);
+            newFiles.push(result.newPath!);
+          }
+
+          if (result.delete) {
+            fsEditor.delete(file);
+            deletedFiles.push(file);
+          } else {
+            const newCode = result.updated as string;
+            fsEditor.write(result.newPath!, newCode);
+          }
         }
 
-        fsEditor.write(result.newPath!, result.updated as string);
+        await new Promise((resolve, _reject) => {
+          fsEditor.commit((err) => {
+            if (err) {
+              throw new Error(err);
+            }
+
+            resolve(true);
+          });
+        });
       }
+
+      // eslint-disable-next-line no-await-in-loop
+      await applyOn(files);
+
+      // if (newFiles.length > 0) {
+      //   // eslint-disable-next-line no-await-in-loop
+      //   await applyOn(newFiles);
+      // }
     }
-
-    await new Promise((resolve, _reject) => {
-      fsEditor.commit((err) => {
-        if (err) {
-          throw new Error(err);
-        }
-
-        resolve(true);
-      });
-    });
 
     const changesMade = await simpleGit(paths.requestedDir() ?? paths.cwd()).diffSummary().then((summary) => summary.files.length > 0);
 
     if (changesMade) {
+      await simpleGit(paths.requestedDir() ?? paths.cwd()).add('.');
+
       await this.pauseAndConfirm(this.pauseMessage(), io);
 
       const commit = this.gitCommit();
@@ -152,6 +190,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     for (const callback of this.replacements(file, code)) {
       // eslint-disable-next-line no-await-in-loop
       const result = await callback(file, code, advanced);
+
+      if (result?.delete) {
+        return {
+          delete: true,
+          updated: null,
+        };
+      }
 
       if (! result) continue;
 
@@ -275,20 +320,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.command.log(stepMarker + ' ' + message);
     this.command.log('');
 
-    await this.continueWhenReady(io);
-  }
-
-  protected async continueWhenReady(io: IO): Promise<void> {
-    const continueUpgrade = await io.getParam({
-      name: 'continue',
-      type: 'confirm',
-      message: 'Ready to continue?',
-      initial: true,
-    });
-
-    if (! continueUpgrade) {
-      await this.continueWhenReady(io);
-    }
+    await this.command.continueWhenReady(io);
   }
 
   protected async alreadyCommited(path: string, message: string): Promise<boolean> {

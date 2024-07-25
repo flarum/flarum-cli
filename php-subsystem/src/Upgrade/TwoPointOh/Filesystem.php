@@ -39,7 +39,7 @@ class Filesystem extends Replacement
         return new ReplacementResult($traverser->traverse($ast));
     }
 
-    function run(string $file, string $code, array $ast): ?ReplacementResult
+    function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
     {
         $traverser = $this->traverser();
 

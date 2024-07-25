@@ -8,8 +8,8 @@ export default class Filesystem extends BaseUpgradeStep {
     if (! file.endsWith('.php')) return [];
 
     return [
-      () => ({
-        updated: this.php!.run('upgrade.2-0.filesystem', { file }).code
+      (file, code) => ({
+        updated: this.php!.run('upgrade.2-0.filesystem', { file, code }).code
       })
     ];
   }

@@ -8,8 +8,8 @@ export default class MiscBackendChanges extends BaseUpgradeStep {
     if (! file.endsWith('.php')) return [];
 
     return [
-      () => ({
-        updated: this.php!.run('upgrade.2-0.misc', { file }).code
+      (file, code) => ({
+        updated: this.php!.run('upgrade.2-0.misc', { file, code }).code
       })
     ];
   }

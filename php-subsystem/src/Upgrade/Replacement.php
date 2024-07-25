@@ -14,24 +14,23 @@ abstract class Replacement
         return ['run'];
     }
 
-    protected function run(string $file, string $code, array $ast): ?ReplacementResult {
+    protected function run(string $file, string $code, array $ast, array $data): ?ReplacementResult {
         return null;
     }
 
-    public function handle(string $file): array
+    public function handle(string $file, ?string $code, array $data = []): array
     {
         $parser = (new ParserFactory())->createForHostVersion();
         $printer = new PrettyPrinter\Standard();
 
-        $code = file_get_contents($file);
-        $data = [];
+        $code = $code ?: file_get_contents($file);
 
         foreach ($this->operations() as $operation) {
             $ast = $parser->parse($code);
             $tokens = $parser->getTokens();
 
             /** @var ReplacementResult $result */
-            $result = $this->$operation($file, $code, $ast);
+            $result = $this->$operation($file, $code, $ast, $data);
 
             if ($result) {
                 $code = is_string($result->updated)

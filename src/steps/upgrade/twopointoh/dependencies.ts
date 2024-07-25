@@ -39,13 +39,13 @@ export default class Dependencies extends BaseUpgradeStep {
     return (_file, _code, advanced) => {
       advanced = advanced as Record<string, any>;
 
-      for (const [key, value] of Object.entries(advanced.require)) {
+      for (const [key, value] of Object.entries(advanced.require || {})) {
         if (key.startsWith('flarum/') && value !== '*') {
           advanced.require[key] = '^2.0.0';
         }
       }
 
-      for (const [key, value] of Object.entries(advanced['require-dev'])) {
+      for (const [key, value] of Object.entries(advanced['require-dev'] || {})) {
         if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
           advanced['require-dev'][key] = '^2.0.0';
         }

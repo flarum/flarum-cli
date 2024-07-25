@@ -13,6 +13,7 @@ import MiscBackendChanges from "../../steps/upgrade/twopointoh/backend/misc";
 import Filesystem from "../../steps/upgrade/twopointoh/backend/filesystem";
 import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
 import JsonApi from "../../steps/upgrade/twopointoh/backend/json-api";
+import Search from "../../steps/upgrade/twopointoh/backend/search";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -43,14 +44,19 @@ export default class TwoPointOh extends BaseCommand {
       .step(new MiscBackendChanges(this))
       .step(new Filesystem(this))
       .step(new Mailer(this))
-      .step(new JsonApi(this));
+      .step(new JsonApi(this))
+      .step(new Search(this));
   }
 
   protected welcomeMessage(): string {
+    const beforeProceeding = chalk.bold.red('Before proceeding, make sure your extend.php file directly returns an array of extenders.');
+
     return `
     Welcome to the Flarum 2.0 upgrade process. This command will attempt to upgrade your extension code to be compatible with Flarum 2.0
     Make sure you have no current uncommitted changes. Each step will be committed to git, so you can easily revert if something goes wrong.
     Some changes cannot be made by the tool, so you may need to manually update your code. References to the Flarum 2.0 upgrade guide will be provided.
+
+    ${beforeProceeding}
     `;
   }
 

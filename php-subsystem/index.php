@@ -12,15 +12,19 @@ switch ($input['op']) {
         break;
 
     case 'upgrade.2-0.misc':
-        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Misc())->handle($input['file']);
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Misc())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
 
     case 'upgrade.2-0.filesystem':
-        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Filesystem())->handle($input['file']);
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Filesystem())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
 
     case 'upgrade.2-0.json-api':
-        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\JsonApi())->handle($input['file']);
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\JsonApi())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
+        break;
+
+    case 'upgrade.2-0.search':
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Search())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
 }
 

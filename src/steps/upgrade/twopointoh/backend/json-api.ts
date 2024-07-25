@@ -11,8 +11,9 @@ export default class JsonApi extends BaseUpgradeStep {
   beforeHook = true;
 
   protected modelEndpoints: Record<string, any> = {};
+  protected models: Record<string, any> = {};
 
-  before(file: string, _code: string, _advanced: AdvancedContent): void {
+  before(file: string, code: string, _advanced: AdvancedContent): void {
     // files with the patterns CreateXController, DeleteXController, ListXController, ShowXController, UpdateXController
     const matches = file.match(/(Create|Delete|List|Show|Update)([A-Z][A-z]+)+Controller\.php/);
 
@@ -25,6 +26,13 @@ export default class JsonApi extends BaseUpgradeStep {
 
       this.modelEndpoints[model] ??= [];
       this.modelEndpoints[model].push(matches[1].toLowerCase());
+      return;
+    }
+
+    if (code.includes(' extends AbstractModel') && code.includes('use Flarum\\Database\\AbstractModel') || (code.includes(' extends Model') && code.includes('use Illuminate\\Database\\Eloquent\\Model'))) {
+        const className = file.split('/').pop()!.replace('.php', '');
+        const namespace = code.match(/namespace ([^;]+);/)?.[1];
+        this.models[className] = `${namespace}\\${className}`;
     }
   }
 
@@ -34,8 +42,8 @@ export default class JsonApi extends BaseUpgradeStep {
     let collected: any = null;
 
     return [
-      async (file) => {
-        const output = this.php!.run('upgrade.2-0.json-api', { file });
+      async (file, code) => {
+        const output = this.php!.run('upgrade.2-0.json-api', { file, code });
 
         collected = output.collected;
 
@@ -48,12 +56,18 @@ export default class JsonApi extends BaseUpgradeStep {
 
         if (file.endsWith('extend.php')) return null;
 
-        if (Object.keys(collected).length > 0) {
-          const modelClassName = collected.model.split('\\').pop();
+        if (Object.keys(collected).length > 0 && collected.serializer) {
+          let modelClassName;
+
+          if (collected.model) {
+            modelClassName = collected.model.split('\\').pop();
+          } else if (this.models[collected.serializer.replace('Serializer', '')]) {
+            modelClassName = collected.serializer.replace('Serializer', '');
+          }
 
           const predefinedParams = {
             className: `${modelClassName}Resource`,
-            modelClass: collected.model,
+            modelClass: collected.model || this.models[modelClassName],
             modelType: collected.type,
             endpoints: this.modelEndpoints[modelClassName] ?? [],
             relations: collected.relations,

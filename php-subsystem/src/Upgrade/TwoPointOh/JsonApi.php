@@ -17,7 +17,7 @@ class JsonApi extends Replacement
         return ['run', 'extenders'];
     }
 
-    function run(string $file, string $code, array $ast): ?ReplacementResult
+    function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
     {
         if (strpos($file, 'extend.php') !== false) {
             return null;
@@ -60,6 +60,7 @@ class JsonApi extends Replacement
                 if ($node instanceof \PhpParser\Node\Stmt\Property) {
                     if (! $node->isStatic() && $node->props[0]->name->name === 'type') {
                         $this->collect['type'] = $node->props[0]->default->value;
+                        $this->collect['serializer'] = $node->getAttribute('parent')->name->name;
                     }
                 }
 
@@ -72,6 +73,12 @@ class JsonApi extends Replacement
 
                         if (! empty($matches[1])) {
                             $model = ltrim($matches[1], '\\');
+
+                            $types = array_values(array_filter(explode('|', $model), function ($model) {
+                                return $model !== 'null' && $model !== 'array';
+                            }));
+
+                            $model = ! empty($types[0]) ? trim($types[0]) : null;
                         }
 
                         $this->collect['model'] = $model;
@@ -90,12 +97,28 @@ class JsonApi extends Replacement
             }
         });
 
-        return new ReplacementResult($traverser->traverse($ast), ['collected' => $visitor->collect]);
+        $ast = $traverser->traverse($ast);
+
+        $collected = $visitor->collect;
+
+        if (isset($collected['model']) && strpos($collected['model'], '\\') === false) {
+            $fqn = preg_match("/use (.+\\{$collected['model']});/", $code, $matches) ? $matches[1] : null;
+
+            if ($fqn) {
+                $collected['model'] = $fqn;
+            }
+        }
+
+        return new ReplacementResult($ast, compact('collected'));
     }
 
     function extenders(string $file, string $code, array $ast): ?ReplacementResult
     {
         if (strpos($file, 'extend.php') === false) {
+            return null;
+        }
+
+        if (strpos($code, 'use Flarum\Api\Schema') !== false) {
             return null;
         }
 

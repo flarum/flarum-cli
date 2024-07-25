@@ -99,6 +99,7 @@ export default abstract class BaseCommand extends Command {
 
     if (welcomeMessage) {
       this.log(welcomeMessage);
+      await this.continueWhenReady(this.genIO());
     }
 
     const extRoot = await this.extRoot(path);
@@ -285,6 +286,19 @@ export default abstract class BaseCommand extends Command {
       cli.action.stop();
     } else {
       this.error("Run `composer install` in your extension's root directory, then try again.");
+    }
+  }
+
+  public async continueWhenReady(io: IO): Promise<void> {
+    const continueUpgrade = await io.getParam({
+      name: 'continue',
+      type: 'confirm',
+      message: 'Ready to continue?',
+      initial: true,
+    });
+
+    if (! continueUpgrade) {
+      await this.continueWhenReady(io);
     }
   }
 
