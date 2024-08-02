@@ -182,13 +182,14 @@ export default class Search extends BaseUpgradeStep {
     const exampleAfterLink = 'https://github.com/flarum/framework/blob/2.x/extensions/tags';
     const exampleReadMore = chalk.dim(`We recommend looking at a comparison between the bundled extensions (like tags) from 1.x to 2.x to have a better understanding of the changes:`);
 
-    return `Flarum 2.0 introduces a new search driver implementation. It also merges Filterers and Searchers into a single API. Gambits are now handled on the frontend side where they are converted to filters.
-The tool has attempted to automatically update your codebase, please review the changes then proceed with the upgrade.
+    return `Flarum 2.0 introduces a new search driver implementation. It also merges Filterers and Searchers into a single API.
+                     Gambits are now handled on the frontend side where they are converted to filters.
+                     The tool has attempted to automatically update your codebase, please review the changes then proceed with the upgrade.
 
-${readMore}
+                     ${readMore}
 
-${exampleReadMore}
-${exampleBeforeLink}
-${exampleAfterLink}`;
+                     ${exampleReadMore}
+                     ${exampleBeforeLink}
+                     ${exampleAfterLink}`;
   }
 }

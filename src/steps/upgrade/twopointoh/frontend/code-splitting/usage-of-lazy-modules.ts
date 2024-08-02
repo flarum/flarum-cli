@@ -7,25 +7,40 @@ import traverse from "@babel/traverse";
 export default class UsageOfLazyModules extends BaseUpgradeStep {
   type = 'Adapt to accessing/extending lazy loaded Flarum modules.';
 
-  // Array.from(flarum.reg.chunks.entries().flatMap(e => e[1].modules.map(m => e[1].namespace + ':' + m)))
-  // "core:forum/components/ReplyComposer"
-  // "core:forum/components/LogInModal"
-  // "core:forum/components/PostStream"
-  // "core:forum/components/PostStreamScrubber"
-  // "core:forum/components/SearchModal"
-  // "core:forum/components/SignUpModal"
-  // "core:forum/components/EditPostComposer"
-  // "core:common/components/EditUserModal"
-  // "core:forum/components/DiscussionComposer"
-  // "core:forum/components/DiscussionsUserPage"
-  // "core:forum/components/SettingsPage"
-  // "core:forum/components/UserSecurityPage"
-  // "core:forum/components/NotificationsPage"
-  // "core:forum/components/Composer"
-  // "flarum-tags:forum/components/TagDiscussionModal"
-  // "flarum-tags:common/components/TagSelectionModal"
-  // "flarum-tags:forum/components/ToggleButton"
-  // "flarum-emoji:forum/emojiMap"
+  // Array.from(flarum.reg.chunks.entries().flatMap(e => e[1].modules.map(m => e[1].namespace + ':' + m))).join('\n')
+  // core:forum/components/ReplyComposer
+  // core:forum/components/ComposerBody
+  // core:common/components/ConfirmDocumentUnload
+  // core:forum/components/LogInModal
+  // core:forum/components/ForgotPasswordModal
+  // core:forum/components/PostStream
+  // core:forum/components/LoadingPost
+  // core:forum/components/ReplyPlaceholder
+  // core:forum/components/PostStreamScrubber
+  // core:forum/components/SearchModal
+  // core:forum/components/SignUpModal
+  // core:forum/components/EditPostComposer
+  // core:forum/components/ComposerBody
+  // core:common/components/ConfirmDocumentUnload
+  // core:common/components/EditUserModal
+  // core:forum/components/DiscussionComposer
+  // core:forum/components/DiscussionsUserPage
+  // core:forum/components/SettingsPage
+  // core:forum/components/NotificationGrid
+  // core:forum/components/ChangePasswordModal
+  // core:forum/components/ChangeEmailModal
+  // core:forum/components/UserSecurityPage
+  // core:forum/components/AccessTokensList
+  // core:forum/components/NewAccessTokenModal
+  // core:forum/states/UserSecurityPageState
+  // core:common/components/LabelValue
+  // core:forum/components/NotificationsPage
+  // core:forum/components/Composer
+  // core:forum/components/ComposerButton
+  // flarum-tags:forum/components/TagDiscussionModal
+  // flarum-tags:common/components/TagSelectionModal
+  // flarum-tags:forum/components/ToggleButton
+  // flarum-emoji:forum/emojiMap
 
   private lazyModules: Record<string, Record<string, string[]>> = {
     flarum: {
@@ -35,18 +50,34 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
         'DiscussionsUserPage',
         'ForgotPasswordModal',
         'NotificationsPage',
+        'ComposerBody',
+        'ConfirmDocumentUnload',
+        'LoadingPost',
+        'ReplyPlaceholder',
         'PostStreamScrubber',
         'SearchModal',
         'SignUpModal',
         'DiscussionComposer',
         'EditPostComposer',
+        'ComposerBody',
         'LogInModal',
         'PostStream',
         'ReplyComposer',
         'SettingsPage',
+        'NotificationGrid',
+        'ChangePasswordModal',
+        'ChangeEmailModal',
         'UserSecurityPage',
+        'AccessTokensList',
+        'NewAccessTokenModal',
+        'UserSecurityPageState',
+        'ComposerButton',
       ],
-      common: ['EditUserModal'],
+      common: [
+        'EditUserModal',
+        'LabelValue',
+        'ConfirmDocumentUnload',
+      ],
     },
     'flarum/tags': {
       admin: [],
@@ -103,8 +134,8 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
     const lazyLoaded = chalk.bgYellow.bold('lazy loaded');
 
     return `Flarum 2.0 introduces code splitting functionality. Some modules are now ${lazyLoaded}. And extending them requires a different approach.
-The tool has attempted to update your code accordingly. Please review the changes and ensure everything is correct.
-${readMore}`;
+                     The tool has attempted to update your code accordingly. Please review the changes and ensure everything is correct.
+                     {readMore}`;
   }
 
   protected beforeHook = true;

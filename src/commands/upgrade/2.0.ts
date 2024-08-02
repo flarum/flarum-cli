@@ -14,6 +14,7 @@ import Filesystem from "../../steps/upgrade/twopointoh/backend/filesystem";
 import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
 import JsonApi from "../../steps/upgrade/twopointoh/backend/json-api";
 import Search from "../../steps/upgrade/twopointoh/backend/search";
+import LessChanges from "../../steps/upgrade/twopointoh/less";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -27,8 +28,6 @@ export default class TwoPointOh extends BaseCommand {
   protected requireExistingExtension = false;
 
   skipFinalMessage = true;
-
-  stepCount = 1;
 
   protected steps(steps: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
@@ -48,22 +47,20 @@ export default class TwoPointOh extends BaseCommand {
       Mailer,
       JsonApi,
       Search,
+      // LESS
+      LessChanges,
     ]);
-  }
-
-  stepCounter(): number {
-    return this.stepCount++;
   }
 
   private prepareSteps(steps: StepManager<FlarumProviders>, collection: any[]): StepManager<FlarumProviders> {
     let total = 0;
-    let stepCount = 0;
+    let stepCount = 1;
 
-    collection.forEach((step) => {
+    collection.forEach(() => {
       total++;
     });
 
-    collection.forEach((step) => {
+    collection.forEach((step: new (...args: any) => any) => {
       steps.step(new step(this, stepCount, total));
       stepCount++;
     });
@@ -72,7 +69,10 @@ export default class TwoPointOh extends BaseCommand {
   }
 
   protected welcomeMessage(): string {
-    const beforeProceeding = chalk.bold.red('Before proceeding, make sure your extend.php file directly returns an array of extenders.');
+    const beforeProceeding = chalk.bold.red('Before proceeding:');
+    const command = chalk.bold.bgYellow.black('fl update js-imports');
+    const makeSure = chalk.bold.dim(`- Make sure your extend.php file directly returns an array of extenders.
+    - All JS imports from flarum are frontend-specific. (You can use ${command} to update them)`);
 
     return `
     Welcome to the Flarum 2.0 upgrade process. This command will attempt to upgrade your extension code to be compatible with Flarum 2.0
@@ -80,6 +80,7 @@ export default class TwoPointOh extends BaseCommand {
     Some changes cannot be made by the tool, so you may need to manually update your code. References to the Flarum 2.0 upgrade guide will be provided.
 
     ${beforeProceeding}
+    ${makeSure}
     `;
   }
 

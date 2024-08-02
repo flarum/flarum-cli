@@ -23,16 +23,16 @@ class Filesystem extends Replacement
         // replace MemoryAdapter with InMemoryFilesystemAdapter (League\Flysystem\Memory\MemoryAdapter -> League\Flysystem\InMemory\InMemoryFilesystemAdapter)
         $traverser->addVisitor(new ReplaceUses([
             [
-                'from' => 'League\Flysystem\Adapter\NullAdapter',
-                'to' => 'League\Flysystem\InMemory\InMemoryFilesystemAdapter'
+                'from' => 'League\\Flysystem\\Adapter\\NullAdapter',
+                'to' => 'League\\Flysystem\\InMemory\\InMemoryFilesystemAdapter'
             ],
             [
-                'from' => 'League\Flysystem\Adapter\Local',
-                'to' => 'League\Flysystem\Local\LocalFilesystemAdapter'
+                'from' => 'League\\Flysystem\\Adapter\\Local',
+                'to' => 'League\\Flysystem\\Local\\LocalFilesystemAdapter'
             ],
             [
-                'from' => 'League\Flysystem\Memory\MemoryAdapter',
-                'to' => 'League\Flysystem\InMemory\InMemoryFilesystemAdapter'
+                'from' => 'League\\Flysystem\\Memory\\MemoryAdapter',
+                'to' => 'League\\Flysystem\\InMemory\\InMemoryFilesystemAdapter'
             ]
         ]));
 

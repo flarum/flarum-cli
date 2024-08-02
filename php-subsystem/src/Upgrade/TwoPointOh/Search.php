@@ -3,6 +3,7 @@
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
 use Flarum\CliPhpSubsystem\ExtenderUtil;
+use Flarum\CliPhpSubsystem\NodeVisitors\ChangeSignatures;
 use Flarum\CliPhpSubsystem\NodeVisitors\ReplaceUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
@@ -15,7 +16,7 @@ class Search extends Replacement
 
     protected function operations(): array
     {
-        return ['run', 'extenders', 'removeOldExtenders'];
+        return ['run', 'replaceNamespaces', 'changeSignatures', 'extenders', 'removeOldExtenders'];
     }
 
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -26,28 +27,7 @@ class Search extends Replacement
             'replaceNodes' => false,
         ]));
 
-        $ast = $traverser->traverse($ast);
-
         $traverser = $this->traverser();
-
-        $traverser->addVisitor(new ReplaceUses(array_merge([
-            [
-                'from' => 'Flarum\Search\AbstractSearcher',
-                'to' => 'Flarum\Search\Database\AbstractSearcher',
-            ],
-            [
-                'from' => 'Flarum\Filter\FilterState',
-                'to' => 'Flarum\Search\SearchState',
-            ],
-            [
-                'from' => 'Flarum\Query',
-                'to' => 'Flarum\Search',
-            ],
-            [
-                'from' => 'Flarum\Filter',
-                'to' => 'Flarum\Search\Filter',
-            ]
-        ], $data['replacements'] ?? [])));
 
         if (strpos($file, 'Repository') !== false || strpos($code, ' extends AbstractSearcher') !== false) {
             ///**
@@ -301,6 +281,66 @@ class Search extends Replacement
         }
 
         return new ReplacementResult($code, $collectorData);
+    }
+
+    function replaceNamespaces(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new ReplaceUses(array_merge([
+            [
+                'from' => 'Flarum\\Search\\AbstractSearcher',
+                'to' => 'Flarum\\Search\\Database\\AbstractSearcher',
+            ],
+            [
+                'from' => 'Flarum\\Filter\\FilterState',
+                'to' => 'Flarum\\Search\\SearchState',
+            ],
+            [
+                'from' => 'Flarum\\Query',
+                'to' => 'Flarum\\Search',
+                'partial' => true,
+            ],
+            [
+                'from' => 'Flarum\\Filter',
+                'to' => 'Flarum\\Search\\Filter',
+                'partial' => true,
+            ]
+        ], $data['replacements'] ?? [])));
+
+        return new ReplacementResult($traverser->traverse($ast));
+    }
+
+    function changeSignatures(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
+
+        $traverser->addVisitor(new ChangeSignatures([
+            'Flarum\\Search\\Filter\\FilterInterface' => [
+                'filter' => [
+                    'params' => [
+                        'filterState' => ['SearchState'],
+                        'filterValue' => ['array', 'string'],
+                        'negate' => ['bool'],
+                    ],
+                    'return' => ['void'],
+                ],
+                'constrain' => [
+                    'params' => [
+                        'query' => ['\\Illuminate\\Database\\Eloquent\\Builder'],
+                        'actor' => ['Flarum\\User\\User'],
+                        'negate' => ['bool'],
+                    ],
+                    'return' => ['void'],
+                ],
+            ],
+        ]));
+
+        return new ReplacementResult($traverser->traverse($ast));
     }
 
     function extenders(string $file, string $code, array $ast, array $data): ?ReplacementResult

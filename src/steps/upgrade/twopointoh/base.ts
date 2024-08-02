@@ -54,8 +54,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected php: null|PhpProvider = null;
 
-  protected step: number = 0;
-  protected totalSteps: number = 0;
+  protected step = 0;
+  protected totalSteps = 0;
 
   public constructor(command: BaseCommand, step: number, totalSteps: number) {
     this.command = command;
@@ -107,7 +107,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       }
 
       const filledDots = '.'.repeat(dots) + ' '.repeat(3 - dots);
-      this.command.log('\u001b[A' + '     => ' + chalk.bold('  WORKING' + filledDots));
+      this.command.log('\u001B[A' + '     => ' + chalk.bold('  WORKING' + filledDots));
 
       dots = (dots + 1) % 4;
     };
@@ -125,8 +125,6 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       if (this.beforeHook) {
         for (const file of files) {
-          progress();
-
           if (! fsEditor.exists(file)) {
             continue;
           }
@@ -135,6 +133,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
           const advanced = this.advancedContent(file, code);
 
           this.before(file, code, advanced);
+
+          progress();
         }
       }
 
@@ -143,8 +143,6 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       const applyOn = async (files: string[]) => {
         for (const file of files) {
-          progress();
-
           if (deletedFiles.includes(file) || ! fsEditor.exists(file)) {
             continue;
           }
@@ -170,6 +168,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
             fsEditor.write(result.newPath!, newCode);
           }
         }
+
+        progress();
 
         await new Promise((resolve, _reject) => {
           fsEditor.commit((err) => {
@@ -202,10 +202,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       const message = commit.message + '\n\n' + commit.description;
       await commitAll(paths.requestedDir() ?? paths.cwd(), message);
 
-      this.command.log('\u001b[A     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
+      this.command.log('\u001B[A     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
       this.command.log('');
     } else {
-      this.command.log('\u001b[A     => ' + chalk.bgGreen.bold(' NO CHANGES '));
+      this.command.log('\u001B[A     => ' + chalk.bgGreen.bold(' NO CHANGES '));
       this.command.log('');
     }
 
@@ -345,7 +345,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected async pauseAndConfirm(message: string, io: IO): Promise<void> {
     const stepMarker = chalk.bgWhite.black.bold('    DONE    ');
 
-    this.command.log('\u001b[A     => ' + stepMarker + ' ' + message);
+    this.command.log('\u001B[A     => ' + stepMarker + ' ' + message);
     this.command.log('');
 
     await this.command.continueWhenReady(io);
@@ -354,7 +354,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected async alreadyCommited(path: string, message: string): Promise<boolean> {
     const log = await simpleGit(path).log({
       file: '.',
-      maxCount: 10,
+      maxCount: 20,
     });
 
     return log.all.some((commit) => commit.message === message);

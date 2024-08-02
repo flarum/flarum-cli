@@ -35,8 +35,8 @@ export default class Filesystem extends BaseUpgradeStep {
     const otherReadMore = chalk.dim(`For more details, read the Flysystem 1.x to V2 & V3 upgrade guide: ${otherLink}`);
 
     return `Flarum 2.0 uses Flysystem 3.x. The tool has attempted to update your code accordingly.
-Some filesystem methods have been renamed or removed. Please review the changes and ensure everything is correct.
-${readMore}
-${otherReadMore}`;
+                     Some filesystem methods have been renamed or removed. Please review the changes and ensure everything is correct.
+                     ${readMore}
+                     ${otherReadMore}`;
   }
 }

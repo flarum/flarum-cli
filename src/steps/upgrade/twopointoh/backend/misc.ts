@@ -33,7 +33,7 @@ export default class MiscBackendChanges extends BaseUpgradeStep {
     const readMore = chalk.dim(`Read more: ${link}`);
 
     return `Various breaking backend changes have been made in 2.0. The tool has attempted to update your code accordingly.
-Please review the changes and ensure everything is correct.
-${readMore}`;
+                     Please review the changes and ensure everything is correct.
+                     ${readMore}`;
   }
 }

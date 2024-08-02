@@ -2,15 +2,22 @@
 
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
+use Flarum\CliPhpSubsystem\NodeVisitors\ChangeSignatures;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
 use PhpParser\Modifiers;
+use PhpParser\Node;
 use PhpParser\Node\ArrayItem;
 use PhpParser\Node\PropertyItem;
 use PhpParser\NodeVisitor;
 
 class Misc extends Replacement
 {
+    protected function operations(): array
+    {
+        return ['run', 'types'];
+    }
+
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
     {
         if (strpos($file, 'extend.php') !== false) {
@@ -115,5 +122,74 @@ class Misc extends Replacement
         });
 
         return $traverser->traverse($ast);
+    }
+
+    function types(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
+        $traverser->addVisitor(new NodeVisitor\ParentConnectingVisitor());
+
+        $traverser->addVisitor(new ChangeSignatures([
+            'Flarum\\Notification\\Blueprint\\BlueprintInterface' => [
+                'getFromUser' => [
+                    'return' => ['\Flarum\User\User', 'null']
+                ],
+                'getSubject' => [
+                    'return' => ['\Flarum\Database\AbstractModel', 'null']
+                ],
+                'getData' => [
+                    'return' => ['mixed']
+                ],
+                'getType' => [
+                    'return' => ['string']
+                ],
+                'getSubjectModel' => [
+                    'return' => ['string']
+                ],
+            ],
+            'Flarum\\Notification\\MailableInterface' => [
+                'getEmailView' => [
+                    'rename' => 'getEmailViews',
+                    'return' => ['array']
+                ],
+                'getEmailSubject' => [
+                    'params' => [
+                        'translator' => ['\Flarum\Locale\TranslatorInterface'],
+                    ],
+                    'return' => ['string']
+                ],
+            ],
+        ], function (Node $node) {
+            if ($node instanceof Node\Stmt\Return_
+                && $node->expr instanceof Node\Scalar\String_
+                && $node->getAttribute('parent') instanceof Node\Stmt\ClassMethod
+                && in_array($node->getAttribute('parent')->name->name, ['getEmailView', 'getEmailViews'])
+            ) {
+                $node->expr = new Node\Expr\Array_([
+                    new Node\Expr\ArrayItem(
+                        $node->expr,
+                        new Node\Scalar\String_('text')
+                    ),
+                ]);
+            }
+
+            if ($node instanceof Node\Stmt\ClassMethod
+                && $node->name->name == 'getData'
+                && empty($node->stmts)
+            ) {
+                // return []
+                $node->stmts = [
+                    new Node\Stmt\Return_(
+                        new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT])
+                    )
+                ];
+            }
+        }));
+
+        return new ReplacementResult($traverser->traverse($ast));
     }
 }

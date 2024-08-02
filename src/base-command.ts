@@ -298,7 +298,9 @@ export default abstract class BaseCommand extends Command {
     });
 
     if (! continueUpgrade) {
-      await this.continueWhenReady(io);
+      this.log('');
+      this.log('Aborted.');
+      this.exit();
     }
   }
 

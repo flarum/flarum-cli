@@ -24,7 +24,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
       this.useForm(),
       this.updateIndexPage(),
       this.updateAvatarIcon(),
-      this.updateCurrentTag(),
+      this.updateOtherRefs(),
       this.updateInitializers(),
       this.updateUploadImageButton(),
       ...this.updateExtendModal(),
@@ -49,8 +49,8 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
     const readMore = chalk.dim(`Read more: ${link}`);
 
     return `Various breaking frontend changes have been made in 2.0. The tool has attempted to update your code accordingly.
-Please review the changes and ensure everything is correct.
-${readMore}`;
+                     Please review the changes and ensure everything is correct.
+                     ${readMore}`;
   }
 
   private usePageStructure(): Replacement {
@@ -68,12 +68,12 @@ ${readMore}`;
           import: {
             name: 'PageStructure',
             defaultImport: true,
-            path: 'flarum/common/components/PageStructure',
+            path: 'flarum/forum/components/PageStructure',
           },
         }],
         updated: code
           .replace(regex, `
-            return (<PageStructure className="${pageName}" hero={$1} sidebar={$2}>
+            return (<PageStructure className="${pageName}" hero={() => ($1)} sidebar={() => ($2)}>
               $3
             </PageStructure>);`)
           .replace('className="IndexPage-', `className="${pageName}-`),
@@ -167,13 +167,14 @@ ${readMore}`;
 
   private updateIndexPage(): Replacement {
     return (_file, code) => {
-      if (! code.includes('IndexPage.prototype.sidebar')) return null;
-
-      if (! code.includes('IndexPage.prototype.navItems')) return null;
-
-      if (! code.includes('IndexPage.prototype.sidebarItems')) return null;
-
-      if (! code.includes('IndexPage.prototype.currentTag')) return null;
+      if (! code.includes('IndexPage.prototype.sidebar')
+        && ! code.includes('IndexPage.prototype.navItems')
+        && ! code.includes('IndexPage.prototype.sidebarItems')
+        && ! code.includes('IndexPage.prototype.currentTag')
+        && ! code.includes("IndexPage.prototype, 'sidebar'")
+        && ! code.includes("IndexPage.prototype, 'navItems'")
+        && ! code.includes("IndexPage.prototype, 'sidebarItems'")
+      ) return null;
 
       return {
         imports: [{
@@ -184,9 +185,12 @@ ${readMore}`;
           }
         }],
         updated: code
-          .replace(/IndexPage\.prototype\.sidebar/g, 'IndexSidebar')
-          .replace(/IndexPage\.prototype\.navItems/g, 'IndexSidebar.prototype.navItems')
           .replace(/IndexPage\.prototype\.sidebarItems/g, 'IndexSidebar.prototype.items')
+          .replace("IndexPage.prototype, 'sidebarItems'", "IndexSidebar.prototype, 'items'")
+          .replace(/IndexPage\.prototype\.sidebar/g, 'IndexSidebar')
+          .replace("IndexPage.prototype, 'sidebar'", "IndexSidebar.prototype, 'view'")
+          .replace(/IndexPage\.prototype\.navItems/g, 'IndexSidebar.prototype.navItems')
+          .replace("IndexPage.prototype, 'navItems'", "IndexSidebar.prototype, 'navItems'")
           .replace(/IndexPage\.prototype\.currentTag/g, 'app.currentTag'),
       };
     };
@@ -303,12 +307,14 @@ ${readMore}`;
     };
   }
 
-  private updateCurrentTag(): Replacement {
+  private updateOtherRefs(): Replacement {
     return (_file, code) => {
-      if (!code.includes('this.currentTag')) return null;
+      if (!code.includes('this.currentTag') && !code.includes('app.search.')) return null;
 
       return {
-        updated: code.replace(/this\.currentTag/g, 'app.currentTag'),
+        updated: code
+          .replace(/this\.currentTag/g, 'app.currentTag')
+          .replace('app.search.', 'app.search.state.'),
       };
     };
   }

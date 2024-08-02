@@ -118,14 +118,16 @@ export default class JsonApi extends BaseUpgradeStep {
     const exampleAfterLink = 'https://github.com/flarum/framework/blob/2.x/extensions/tags';
     const exampleReadMore = chalk.dim(`We recommend looking at a comparison between the bundled extensions (like tags) from 1.x to 2.x to have a better understanding of the changes:`);
 
-    return `Flarum 2.0 completely refactors the JSON:API implementation. The way resource CRUD operations, serialization and extending other resources is done has completely changed.
-The tool cannot completely automate this change, but it has added some boilerplate code and TODO comments to help you get started.
-You should make whatever changes you can now, then properly test and adapt your code once the upgrade process is over.
+    return `Flarum 2.0 completely refactors the JSON:API implementation. The way resource CRUD operations,
+                     serialization and extending other resources is done has completely changed.
 
-${readMore}
+                     The tool cannot completely automate this change, but it has added some boilerplate code and TODO comments to help you get started.
+                     You should make whatever changes you can now, then properly test and adapt your code once the upgrade process is over.
 
-${exampleReadMore}
-${exampleBeforeLink}
-${exampleAfterLink}`;
+                     ${readMore}
+
+                     ${exampleReadMore}
+                     ${exampleBeforeLink}
+                     ${exampleAfterLink}`;
   }
 }

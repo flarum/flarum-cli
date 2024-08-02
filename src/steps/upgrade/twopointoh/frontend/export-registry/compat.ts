@@ -40,8 +40,8 @@ export default class Compat extends BaseUpgradeStep {
     const format = chalk.bgCyan.bold('ext:vendor/extension/module-path');
 
     return `The compat API has been removed. Modules from extensions are now automatically accessible from other extensions using the format ${format}.
-If you were using the compat API, it has been replaced with simple imports to ensure the modules are available for discovery.
-Please review the changes and ensure everything is correct.`;
+                     If you were using the compat API, it has been replaced with simple imports to ensure the modules are available for discovery.
+                     Please review the changes and ensure everything is correct.`;
   }
 
   replaceCompat(): Replacement {

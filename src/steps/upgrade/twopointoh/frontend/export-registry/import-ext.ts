@@ -45,9 +45,10 @@ export default class ImportExt extends BaseUpgradeStep {
     const exampleImport = chalk.bgCyan.bold('import Tag from \'ext:flarum/tags/models/Tag\';');
     const example = chalk.dim(`For example: ${exampleImport} (Documentation: https://docs.flarum.org/extend/registry)`);
 
-    return `Imports from flarum extensions have been updated. The webpack config's ${useExtensions} option has been removed.
-The tool cannot recognize imports from other extensions, you must manually update them. You can import from an extension using the ${format} format.
-${example}`;
+    return `The format from importing from extensions has changed. The webpack config's ${useExtensions} option has been removed.
+                     The tool cannot recognize imports from other extensions, you must manually update them.
+                     You can import from an extension using the ${format} format.
+                     ${example}`;
   }
 
   removeUseExtensionsOption(): Replacement {
@@ -95,7 +96,7 @@ ${example}`;
     return (_file, code) => {
       // replace `import module from 'flarum/ext/module-path';` with `import module from 'ext:flarum/extension/module-path';`
       // extension must not be one of [forum, admin, common]
-      const regex = new RegExp(/import\s+(\w+)\s+from\s+["'](flarum\/(?!.*\b(?:common|admin|forum|utils|helpers|components|models)\b).*\/[\w/]+)["']/gim);
+      const regex = new RegExp(/import\s+(\w+)\s+from\s+["'](flarum\/(?!\b(?:common|admin|forum|utils|helpers|components|models)\b).*\/[\w/]+)["']/gim);
 
       // First collect all the imports that are from extensions
       const imports = code.match(regex);

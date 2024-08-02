@@ -102,7 +102,7 @@ class JsonApi extends Replacement
         $collected = $visitor->collect;
 
         if (isset($collected['model']) && strpos($collected['model'], '\\') === false) {
-            $fqn = preg_match("/use (.+\\{$collected['model']});/", $code, $matches) ? $matches[1] : null;
+            $fqn = preg_match("/use (.+\\\\{$collected['model']});/", $code, $matches) ? $matches[1] : null;
 
             if ($fqn) {
                 $collected['model'] = $fqn;
@@ -169,6 +169,9 @@ class JsonApi extends Replacement
                     $uses = [
                         new \PhpParser\Node\Stmt\Use_([
                             new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Resource'))
+                        ]),
+                        new \PhpParser\Node\Stmt\Use_([
+                            new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Endpoint'))
                         ]),
                         new \PhpParser\Node\Stmt\Use_([
                             new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Schema'))
