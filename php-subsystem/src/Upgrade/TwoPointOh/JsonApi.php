@@ -2,6 +2,7 @@
 
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
+use Flarum\CliPhpSubsystem\NodeUtil;
 use Flarum\CliPhpSubsystem\NodeVisitors\ReplaceUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
@@ -51,7 +52,15 @@ class JsonApi extends Replacement
             {
                 if ($node instanceof \PhpParser\Node\Stmt\Class_ && $node->extends) {
                     if (in_array($node->extends->getAttribute('resolvedName')->name, self::STALE)) {
-                        $node->setAttribute('comments', [new \PhpParser\Comment\Doc('/** @TODO: Remove this in favor of the api resource class that was added. */')]);
+                        $node->setAttribute('comments', [new \PhpParser\Comment\Doc(<<<PHPDOC
+                        /**
+                         * @TODO: Remove this in favor of one of the API resource classes that were added.
+                         * or extend an existing API Resource to add this to.
+                         * or use a vanilla RequestHandlerInterface controller.
+                         *
+                         * @link https://docs.flarum.org/extend/api#endpoints
+                         */
+                        PHPDOC)]);
                     } else {
                         return NodeVisitor::DONT_TRAVERSE_CHILDREN;
                     }
@@ -142,7 +151,7 @@ class JsonApi extends Replacement
                     if ($node->class instanceof \PhpParser\Node\Name) {
                         $class = $node->class->getAttribute('resolvedName')->name;
 
-                        if ($class === 'Flarum\Extend\ApiSerializer' || $class === 'Flarum\Extend\ApiController') {
+                        if (in_array($class, ['Flarum\Extend\ApiSerializer', 'Flarum\Extend\ApiController', 'Flarum\Foundation\AbstractValidator'])) {
                             $parent = $node->getAttribute('parent');
 
                             while ($parent && ! $parent instanceof \PhpParser\Node\Expr\ArrayItem) {
@@ -166,31 +175,11 @@ class JsonApi extends Replacement
                 }
 
                 if ($node instanceof \PhpParser\Node\Stmt\Namespace_) {
-                    $uses = [
-                        new \PhpParser\Node\Stmt\Use_([
-                            new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Resource'))
-                        ]),
-                        new \PhpParser\Node\Stmt\Use_([
-                            new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Endpoint'))
-                        ]),
-                        new \PhpParser\Node\Stmt\Use_([
-                            new \PhpParser\Node\Stmt\UseUse(new Name('Flarum\Api\Schema'))
-                        ]),
-                    ];
-
-                    $lastUseStatement = null;
-
-                    foreach ($node->stmts as $index => $stmt) {
-                        if ($stmt instanceof \PhpParser\Node\Stmt\Use_) {
-                            $lastUseStatement = $index;
-                        } elseif (! is_null($lastUseStatement)) {
-                            break;
-                        }
-                    }
-
-                    if (! is_null($lastUseStatement)) {
-                        array_splice($node->stmts, $lastUseStatement + 1, 0, $uses);
-                    }
+                    NodeUtil::addUsesToNamespace($node, [
+                        'Flarum\Api\Resource',
+                        'Flarum\Api\Endpoint',
+                        'Flarum\Api\Schema',
+                    ]);
                 }
             }
         });

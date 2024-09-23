@@ -387,7 +387,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         longDescription: "Files, tools, and scripts to build Flarum's frontend.",
         dependsOn: [],
         filesToReplace: [
-          'js/webpack.config.js',
+          'js/webpack.config.cjs',
           { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
           { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
           { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },

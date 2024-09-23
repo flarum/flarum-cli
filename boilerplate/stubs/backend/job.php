@@ -18,6 +18,6 @@ class <%= className %> implements ShouldQueue
 
     public function handle()
     {
-        // See https://laravel.com/docs/10.x/queues for more information.
+        // See https://laravel.com/docs/11.x/queues for more information.
     }
 }

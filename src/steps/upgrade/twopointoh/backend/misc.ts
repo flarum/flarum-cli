@@ -31,9 +31,14 @@ export default class MiscBackendChanges extends BaseUpgradeStep {
   pauseMessage(): string {
     const link = 'https://docs.flarum.org/extend/update-2_0#miscellaneous-1';
     const readMore = chalk.dim(`Read more: ${link}`);
+    const requiresManualChangeLink = 'https://laravel.com/docs/11.x/upgrade#modifying-columns';
 
     return `Various breaking backend changes have been made in 2.0. The tool has attempted to update your code accordingly.
                      Please review the changes and ensure everything is correct.
-                     ${readMore}`;
+                     ${readMore}
+
+                     Additionally, check every reference to a column definition change in your migrations, and make sure
+                     they are using the entire column definition. For more details, see:
+                     ${chalk.underline(requiresManualChangeLink)}`;
   }
 }

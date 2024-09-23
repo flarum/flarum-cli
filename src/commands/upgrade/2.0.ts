@@ -15,12 +15,18 @@ import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
 import JsonApi from "../../steps/upgrade/twopointoh/backend/json-api";
 import Search from "../../steps/upgrade/twopointoh/backend/search";
 import LessChanges from "../../steps/upgrade/twopointoh/less";
+import PhpUnit from "../../steps/upgrade/twopointoh/backend/phpunit";
+import {Flags} from "@oclif/core";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
 
   static flags = {
     ...BaseCommand.flags,
+    'step': Flags.string({
+      description: 'Optionally specify a specific step to run',
+      required: false,
+    })
   };
 
   static args = [...BaseCommand.args];
@@ -47,6 +53,7 @@ export default class TwoPointOh extends BaseCommand {
       Mailer,
       JsonApi,
       Search,
+      PhpUnit,
       // LESS
       LessChanges,
     ]);
@@ -60,9 +67,24 @@ export default class TwoPointOh extends BaseCommand {
       total++;
     });
 
-    collection.forEach((step: new (...args: any) => any) => {
-      steps.step(new step(this, stepCount, total));
+    collection = collection.map((Step: new (...args: any) => any) => {
+      const step = new Step(this, stepCount, total);
       stepCount++;
+      return step;
+    });
+
+    if (this.flags.step) {
+      const step = Number.parseInt(this.flags.step as string, 10);
+
+      if (step > 0 && step <= total) {
+        return steps.step(collection[step - 1]);
+      }
+
+      this.error(`Invalid step number. Please provide a number between 1 and ${total}`);
+    }
+
+    collection.forEach((step) => {
+      steps.step(step);
     });
 
     return steps;
@@ -72,7 +94,8 @@ export default class TwoPointOh extends BaseCommand {
     const beforeProceeding = chalk.bold.red('Before proceeding:');
     const command = chalk.bold.bgYellow.black('fl update js-imports');
     const makeSure = chalk.bold.dim(`- Make sure your extend.php file directly returns an array of extenders.
-    - All JS imports from flarum are frontend-specific. (You can use ${command} to update them)`);
+    - All JS imports from flarum are frontend-specific. (You can use ${command} to update them)
+    - You have the full upgrade guide at least once: https://docs.flarum.org/extend/update-2_0`);
 
     return `
     Welcome to the Flarum 2.0 upgrade process. This command will attempt to upgrade your extension code to be compatible with Flarum 2.0

@@ -33,7 +33,7 @@ export default class Mailer extends BaseUpgradeStep {
     const readMore = chalk.dim(`Read more: ${link}`);
 
     return `Flarum 2.0 uses Symfony mailer instead of Swift mailer. TODO comments have been added to your code to indicate where Swift mailer is currently being used.
-Update your code to use Symfony mailer instead. Then proceed. Or proceed now and update your code later.
-${readMore}`;
+                     Update your code to use Symfony mailer instead. Then proceed. Or proceed now and update your code later.
+                     ${readMore}`;
   }
 }

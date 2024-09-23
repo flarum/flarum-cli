@@ -38,4 +38,27 @@ class NodeUtil
 
         return $returnType;
     }
+
+    public static function addUsesToNamespace(Node\Stmt\Namespace_ $node, array $uses): void
+    {
+        $uses = array_map(function (string $fqn) {
+            return new \PhpParser\Node\Stmt\Use_([
+                new \PhpParser\Node\Stmt\UseUse(new Name($fqn))
+            ]);
+        }, $uses);
+
+        $lastUseStatement = null;
+
+        foreach ($node->stmts as $index => $stmt) {
+            if ($stmt instanceof \PhpParser\Node\Stmt\Use_) {
+                $lastUseStatement = $index;
+            } elseif (! is_null($lastUseStatement)) {
+                break;
+            }
+        }
+
+        if (! is_null($lastUseStatement)) {
+            array_splice($node->stmts, $lastUseStatement + 1, 0, $uses);
+        }
+    }
 }

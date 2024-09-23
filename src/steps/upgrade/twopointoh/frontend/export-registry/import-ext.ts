@@ -9,7 +9,7 @@ export default class ImportExt extends BaseUpgradeStep {
   private useExtensions: string[] = [];
 
   replacements(file: string): Replacement[] {
-    if (file.endsWith('webpack.config.js')) {
+    if (file.endsWith('webpack.config.js') || file.endsWith('webpack.config.cjs')) {
       return [this.removeUseExtensionsOption()];
     }
 
@@ -27,6 +27,7 @@ export default class ImportExt extends BaseUpgradeStep {
   targets(): string[] {
     return [
       'js/webpack.config.js',
+      'js/webpack.config.cjs',
       'js/src/**/*',
       'js/tsconfig.json',
     ];

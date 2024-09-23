@@ -135,7 +135,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
     return `Flarum 2.0 introduces code splitting functionality. Some modules are now ${lazyLoaded}. And extending them requires a different approach.
                      The tool has attempted to update your code accordingly. Please review the changes and ensure everything is correct.
-                     {readMore}`;
+                     ${readMore}`;
   }
 
   protected beforeHook = true;

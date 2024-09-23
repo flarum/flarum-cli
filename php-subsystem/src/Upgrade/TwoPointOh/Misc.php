@@ -13,6 +13,32 @@ use PhpParser\NodeVisitor;
 
 class Misc extends Replacement
 {
+    protected $carbonDiffMethods = [
+        'diffAsDateInterval',
+        'diffAsCarbonInterval',
+        'diff',
+        'diffInUnit',
+        'diffInYears',
+        'diffInQuarters',
+        'diffInMonths',
+        'diffInWeeks',
+        'diffInDays',
+        'diffInWeekdays',
+        'diffInWeekendDays',
+        'diffInHours',
+        'diffInMinutes',
+        'diffInSeconds',
+        'diffInMicroseconds',
+        'diffInMilliseconds',
+    ];
+    protected $carbonDiffMethodsWithClosure = [
+        'diffInDaysFiltered',
+        'diffInHoursFiltered',
+    ];
+    protected $carbonDiffMethodsWithClosureAndInterval = [
+        'diffFiltered'
+    ];
+
     protected function operations(): array
     {
         return ['run', 'types'];
@@ -27,22 +53,55 @@ class Misc extends Replacement
         }
 
         return new ReplacementResult(
-            $this->updateDatesToCasts($ast)
+            $this->misc($ast)
         );
     }
 
-    private function updateDatesToCasts(array $ast): array
+    private function misc(array $ast): array
     {
         $traverser = $this->traverser();
 
-        $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
-            public function enterNode(\PhpParser\Node $node)
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
+
+        $traverser->addVisitor(new class ($this->carbonDiffMethods, $this->carbonDiffMethodsWithClosure, $this->carbonDiffMethodsWithClosureAndInterval) extends \PhpParser\NodeVisitorAbstract {
+            protected $carbonDiffMethods;
+            protected $carbonDiffMethodsWithClosure;
+            protected $carbonDiffMethodsWithClosureAndInterval;
+
+            public function __construct(array $carbonDiffMethods, array $carbonDiffMethodsWithClosure, array $carbonDiffMethodsWithClosureAndInterval)
             {
+                $this->carbonDiffMethods = $carbonDiffMethods;
+                $this->carbonDiffMethodsWithClosure = $carbonDiffMethodsWithClosure;
+                $this->carbonDiffMethodsWithClosureAndInterval = $carbonDiffMethodsWithClosureAndInterval;
+            }
+
+            public function leaveNode(\PhpParser\Node $node)
+            {
+                if ($node instanceof Node\Stmt\Namespace_) {
+                    foreach ($node->stmts as $index => $stmt) {
+                        if ($stmt instanceof Node\Stmt\Use_) {
+                            if ($stmt->uses[0]->name->name === 'Staudenmeir\EloquentEagerLimit\HasEagerLimit') {
+                                unset($node->stmts[$index]);
+                            }
+                        }
+                    }
+                }
+
                 if ($node instanceof \PhpParser\Node\Stmt\Class_) {
                     $dates = null;
                     $datesIndex = null;
 
                     foreach ($node->stmts as $index => $stmt) {
+                        if ($stmt instanceof Node\Stmt\TraitUse) {
+                            foreach ($stmt->traits as $trait) {
+                                if ($trait->getAttribute('resolvedName')->name === 'Staudenmeir\EloquentEagerLimit\HasEagerLimit') {
+                                    unset($node->stmts[$index]);
+                                }
+                            }
+                        }
+
                         if ($stmt instanceof \PhpParser\Node\Stmt\Property) {
                             if ($stmt->props[0]->name->name === 'dates') {
                                 $dates = $stmt->props[0]->default->items;
@@ -51,6 +110,9 @@ class Misc extends Replacement
                         }
                     }
 
+                    /*
+                     * convert $dates to $casts
+                     */
                     if ($dates) {
                         $datesAsCasts = array_map(function (ArrayItem $date) {
                             return new \PhpParser\Node\Expr\ArrayItem(
@@ -77,8 +139,48 @@ class Misc extends Replacement
                                 [new PropertyItem('casts', new \PhpParser\Node\Expr\Array_($datesAsCasts))]
                             );
                         }
+                    }
+                }
 
-                        return NodeVisitor::STOP_TRAVERSAL;
+                // Make the $absolute argument true (that was the default in v2, was changed to false in v3 :`)
+                if ($node instanceof Node\Expr\MethodCall) {
+                    // here it's the second argument.
+                    if (in_array($node->name->name, $this->carbonDiffMethods) && empty($node->args[1])) {
+                        if (empty($node->args[0])) {
+                            $node->args[0] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
+                        }
+
+                        $node->args[1] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('true')));
+                    }
+
+                    // here it's the third argument.
+                    if (in_array($node->name->name, $this->carbonDiffMethodsWithClosure) && empty($node->args[2])) {
+                        if (empty($node->args[0])) {
+                            return; // impossible
+                        }
+
+                        if (empty($node->args[1])) {
+                            $node->args[1] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
+                        }
+
+                        $node->args[2] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('true')));
+                    }
+
+                    // here it's the fourth argument.
+                    if (in_array($node->name->name, $this->carbonDiffMethodsWithClosureAndInterval) && empty($node->args[3])) {
+                        if (empty($node->args[0])) {
+                            return; // impossible
+                        }
+
+                        if (empty($node->args[1])) {
+                            return; // impossible
+                        }
+
+                        if (empty($node->args[2])) {
+                            $node->args[2] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
+                        }
+
+                        $node->args[3] = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('true')));
                     }
                 }
             }

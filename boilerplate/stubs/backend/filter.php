@@ -20,11 +20,6 @@ class <%= className %> implements FilterInterface
 
     public function filter(SearchState $state, string|array $value, bool $negate): void
     {
-        $this->constrain($state->getQuery(), $state->getActor(), $negate);
-    }
-
-    protected function constrain(Builder $query, User $actor, bool $negate): void
-    {
         // @TODO: implement filter logic
     }
 }

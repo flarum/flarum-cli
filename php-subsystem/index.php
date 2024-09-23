@@ -26,6 +26,10 @@ switch ($input['op']) {
     case 'upgrade.2-0.search':
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Search())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
+
+    case 'upgrade.2-0.phpunit':
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\PhpUnit())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
+        break;
 }
 
 echo json_encode($output);

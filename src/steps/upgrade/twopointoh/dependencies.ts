@@ -1,4 +1,5 @@
 import {BaseUpgradeStep, GitCommit, Replacement} from "./base";
+import chalk from "chalk";
 
 export default class Dependencies extends BaseUpgradeStep {
   type = 'Update the extension dependencies to the latest versions.';
@@ -32,7 +33,14 @@ export default class Dependencies extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    return "Dependencies updated. Please review the changes and update any other dependency versions as needed.";
+    const composerInstall = chalk.bgYellowBright('composer install');
+    const composerUpdate = chalk.bgYellowBright('composer update');
+    const yarn = chalk.bgYellowBright('yarn');
+    const npm = chalk.bgYellowBright('npm install');
+
+    return `Dependencies updated. Please review the changes and update any other dependency versions as needed.
+                     It is recommended to run ${composerInstall} or ${composerUpdate} and ${yarn} or ${npm} now.
+                     But you may also leave that until the upgrade process is over.`;
   }
 
   updateComposerJson(): Replacement {

@@ -70,10 +70,17 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
             defaultImport: true,
             path: 'flarum/forum/components/PageStructure',
           },
+        }, {
+          replacesPath: null,
+          import: {
+            name: 'IndexSidebar',
+            defaultImport: true,
+            path: 'flarum/forum/components/IndexSidebar',
+          },
         }],
         updated: code
           .replace(regex, `
-            return (<PageStructure className="${pageName}" hero={() => ($1)} sidebar={() => ($2)}>
+            return (<PageStructure className="${pageName}" hero={() => ($1)} sidebar={() => <IndexSidebar />}>
               $3
             </PageStructure>);`)
           .replace('className="IndexPage-', `className="${pageName}-`),
@@ -314,7 +321,9 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
       return {
         updated: code
           .replace(/this\.currentTag/g, 'app.currentTag')
-          .replace('app.search.', 'app.search.state.'),
+          .replace('app.search.', 'app.search.state.')
+          .replace('app.extensionData', 'app.registry')
+          .replace("extend(BasicsPage.prototype, 'homePageItems'", "extend(BasicsPage, 'homePageItems'")
       };
     };
   }
