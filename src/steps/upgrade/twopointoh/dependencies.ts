@@ -71,6 +71,7 @@ export default class Dependencies extends BaseUpgradeStep {
 
       const map: Record<string, string> = {
         'flarum-webpack-config': '^3.0.0',
+        'flarum-tsconfig': '^2.0.0',
       }
 
       const dependencies = advanced.dependencies || advanced.devDependencies;

@@ -4,9 +4,11 @@ namespace <%= classNamespace %>;
 
 use Flarum\Database\AbstractModel;
 use Flarum\Notification\Blueprint\BlueprintInterface;
+use Flarum\Notification\AlertableInterface;
+// use Flarum\Notification\MailableInterface;
 use Flarum\User\User;
 
-class <%= className %> implements BlueprintInterface
+class <%= className %> implements BlueprintInterface, AlertableInterface/*, MailableInterface*/
 {
     public function __construct(
 

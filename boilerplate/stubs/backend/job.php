@@ -2,17 +2,12 @@
 
 namespace <%= classNamespace %>;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\SerializesModels;
+use Flarum\Queue\AbstractJob;
 
-class <%= className %> implements ShouldQueue
+class <%= className %>
 {
-    use Queueable;
-    use SerializesModels;
-
     public function __construct(
-
+        //
     ) {
     }
 

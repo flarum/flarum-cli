@@ -41,7 +41,7 @@ class Misc extends Replacement
 
     protected function operations(): array
     {
-        return ['run', 'types'];
+        return ['run', 'types', 'alertable'];
     }
 
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -291,6 +291,63 @@ class Misc extends Replacement
                 ];
             }
         }));
+
+        return new ReplacementResult($traverser->traverse($ast));
+    }
+
+    function alertable(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        if (strpos($file, 'extend.php') !== false) {
+            return null;
+        }
+
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
+        $traverser->addVisitor(new NodeVisitor\ParentConnectingVisitor());
+
+        $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
+            protected $valid = false;
+
+            public function enterNode(Node $node)
+            {
+                // Does this class implement the Flarum\Notification\Blueprint\BlueprintInterface ?
+                if ($node instanceof Node\Stmt\Class_) {
+                    foreach ($node->implements as $interface) {
+                        if ($interface->getAttribute('resolvedName')->name === 'Flarum\Notification\Blueprint\BlueprintInterface') {
+                            $this->valid = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            public function leaveNode(\PhpParser\Node $node)
+            {
+                if (! $this->valid) {
+                    return;
+                }
+
+                if ($node instanceof Node\Stmt\Namespace_) {
+                    // Add the Flarum\Notification\AlertableInterface import
+                    $node->stmts = array_merge(
+                        [
+                            new Node\Stmt\Use_([
+                                new Node\Stmt\UseUse(new Node\Name('Flarum\Notification\AlertableInterface'))
+                            ])
+                        ],
+                        $node->stmts
+                    );
+                }
+
+                if ($node instanceof \PhpParser\Node\Stmt\Class_) {
+                    // Add the AlertableInterface implementation
+                    $node->implements[] = new Node\Name('AlertableInterface');
+                }
+            }
+        });
 
         return new ReplacementResult($traverser->traverse($ast));
     }
