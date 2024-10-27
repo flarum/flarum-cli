@@ -46,6 +46,7 @@ class JsonApi extends Replacement
                 'Flarum\Api\Controller\AbstractCreateController',
                 'Flarum\Api\Controller\AbstractUpdateController',
                 'Flarum\Api\Controller\AbstractDeleteController',
+                'Flarum\Api\Controller\AbstractListController',
             ];
 
             public function enterNode(\PhpParser\Node $node)
@@ -55,10 +56,9 @@ class JsonApi extends Replacement
                         $node->setAttribute('comments', [new \PhpParser\Comment\Doc(<<<PHPDOC
                         /**
                          * @TODO: Remove this in favor of one of the API resource classes that were added.
-                         * or extend an existing API Resource to add this to.
-                         * or use a vanilla RequestHandlerInterface controller.
-                         *
-                         * @link https://docs.flarum.org/extend/api#endpoints
+                         *      Or extend an existing API Resource to add this to.
+                         *      Or use a vanilla RequestHandlerInterface controller.
+                         *      @link https://docs.flarum.org/extend/api#endpoints
                          */
                         PHPDOC)]);
                     } else {
@@ -87,7 +87,7 @@ class JsonApi extends Replacement
                                 return $model !== 'null' && $model !== 'array';
                             }));
 
-                            $model = ! empty($types[0]) ? trim($types[0]) : null;
+                            $model = ! empty($types[0]) && !in_array($types[0], ['object', 'array']) ? trim($types[0]) : null;
                         }
 
                         $this->collect['model'] = $model;
@@ -176,8 +176,9 @@ class JsonApi extends Replacement
 
                 if ($node instanceof \PhpParser\Node\Stmt\Namespace_) {
                     NodeUtil::addUsesToNamespace($node, [
-                        'Flarum\Api\Resource',
+                        'Flarum\Api\Context',
                         'Flarum\Api\Endpoint',
+                        'Flarum\Api\Resource',
                         'Flarum\Api\Schema',
                     ]);
                 }

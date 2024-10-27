@@ -5,21 +5,21 @@ namespace <%= classNamespace %>;
 use Flarum\Api\Context;
 use Flarum\Api\Endpoint;
 use Flarum\Api\Resource;
-use Flarum\Api\Schema;
+use Flarum\Api\Schema;<% if (modelClassName) { %>
 use Flarum\Api\Sort\SortColumn;
 use <%= modelClass %>;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;<% } %>
 use Tobyz\JsonApiServer\Context as OriginalContext;
 
 /**
- * @extends Resource\AbstractDatabaseResource<<%= modelClassName %>>
+ * @extends <% if (modelClassName) { %>Resource\AbstractDatabaseResource<<%= modelClassName %>><% } else { %>Resource\AbstractResource<object><% } %>
  */
-class <%= className %> extends Resource\AbstractDatabaseResource
+class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatabaseResource<% } else { %>Resource\AbstractResource<% if (interfaces.length > 0) %> implements <%= interfaces.join(', ') %><% } %>
 {
     public function type(): string
     {
         return '<%= modelType %>';
-    }
+    }<% if (modelClassName) { %>
 
     public function model(): string
     {
@@ -29,13 +29,13 @@ class <%= className %> extends Resource\AbstractDatabaseResource
     public function scope(Builder $query, OriginalContext $context): void
     {
         $query->whereVisibleTo($context->getActor());
-    }
+    }<% } %>
 
     public function endpoints(): array
     {
         return [<% if (endpoints.includes('create')) { %>
-            Endpoint\Create::make()
-                ->can('create<%= modelClassName %>'),<% } %><% if (endpoints.includes('update')) { %>
+            Endpoint\Create::make()<% if (modelClassName) { %>
+                ->can('create<%= modelClassName %>'),<% } %><% } %><% if (endpoints.includes('update')) { %>
             Endpoint\Update::make()
                 ->can('update'),<% } %><% if (endpoints.includes('delete')) { %>
             Endpoint\Delete::make()
@@ -69,12 +69,12 @@ class <%= className %> extends Resource\AbstractDatabaseResource
                 // ->inverse('?') // the inverse relationship name if any.
                 ->type('<%= name %>s'), // the serialized type of this relation (type of the relation model's API resource).<% }) %>
         ];
-    }
+    }<% if (modelClassName) { %>
 
     public function sorts(): array
     {
         return [
             // SortColumn::make('createdAt'),
         ];
-    }
+    }<% } %>
 }

@@ -45,22 +45,42 @@ export default class Dependencies extends BaseUpgradeStep {
 
   updateComposerJson(): Replacement {
     return (_file, _code, advanced) => {
-      advanced = advanced as Record<string, any>;
+      const composer = advanced as Record<string, any>;
 
-      for (const [key, value] of Object.entries(advanced.require || {})) {
+      const moves = {
+        'blomstra/gdpr': 'flarum/gdpr',
+      };
+
+      for (let [key, value] of Object.entries(composer.require || {})) {
+        Object.entries(moves).forEach(([from, to]) => {
+          if (key === from) {
+            composer.require[to] = value;
+            delete composer.require[key];
+            key = to;
+          }
+        });
+
         if (key.startsWith('flarum/') && value !== '*') {
-          advanced.require[key] = '^2.0.0';
+          composer.require[key] = '^2.0.0';
         }
       }
 
-      for (const [key, value] of Object.entries(advanced['require-dev'] || {})) {
+      for (let [key, value] of Object.entries(composer['require-dev'] || {})) {
+        Object.entries(moves).forEach(([from, to]) => {
+          if (key === from) {
+            composer['require-dev'][to] = value;
+            delete composer['require-dev'][key];
+            key = to;
+          }
+        });
+
         if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
-          advanced['require-dev'][key] = '^2.0.0';
+          composer['require-dev'][key] = '^2.0.0';
         }
       }
 
       return {
-        updated: advanced,
+        updated: composer,
       };
     }
   }

@@ -46,7 +46,7 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
 
       // eslint-disable-next-line no-await-in-loop
       params[classParam] = await io.getParam(paramDef as ParamDef);
-      params[`${classParam}Name`] = (params[classParam] as string).split('\\').pop();
+      params[`${classParam}Name`] = (params[classParam] as string)?.split('\\').pop();
       paramDefs = paramDefs.filter((param) => param.name !== classParam && param.name !== `${classParam}Name`);
     }
 

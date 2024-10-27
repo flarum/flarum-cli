@@ -70,7 +70,16 @@ export class GenerateAdvancedApiResourceStub extends BasePhpStubStep {
   protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fs, paths, io);
 
+    const interfaceMap: Record<string, string> = {
+      list: 'Resource\\Contracts\\Listable',
+      show: 'Resource\\Contracts\\Findable',
+      create: 'Resource\\Contracts\\Creatable',
+      update: 'Resource\\Contracts\\Updatable',
+      delete: 'Resource\\Contracts\\Deletable',
+    };
+
     params.modelType ||= pluralKebabCaseModel(params.modelClassName as string);
+    params.interfaces = (params.endpoints as string[]).map((endpoint) => interfaceMap[endpoint]);
 
     return params;
   }

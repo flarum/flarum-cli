@@ -257,7 +257,11 @@ export default abstract class BaseCommand extends Command {
     );
   }
 
+  protected confirmed = false;
+
   protected async confirmExtDir(extRoot: string): Promise<void> {
+    if (this.confirmed) return;
+
     const verify = await this.genIO().getParam({
       name: 'verify',
       type: 'confirm',
@@ -266,6 +270,8 @@ export default abstract class BaseCommand extends Command {
     });
 
     if (!verify) this.exit();
+
+    this.confirmed = true;
   }
 
   protected async ensureComposerInstallRan(extRoot: string): Promise<void> {

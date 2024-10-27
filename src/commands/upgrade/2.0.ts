@@ -94,8 +94,9 @@ export default class TwoPointOh extends BaseCommand {
     const beforeProceeding = chalk.bold.red('Before proceeding:');
     const command = chalk.bold.bgYellow.black('fl update js-imports');
     const makeSure = chalk.bold.dim(`- Make sure your extend.php file directly returns an array of extenders.
-    - All JS imports from flarum are frontend-specific. (You can use ${command} to update them)
-    - You have the full upgrade guide at least once: https://docs.flarum.org/extend/update-2_0`);
+    - All JS imports from Flarum are frontend-specific. (You can use ${command} to update them)
+    - You have read the full upgrade guide at least once: https://docs.flarum.org/extend/update-2_0
+    - For better results, make sure your CRUD controllers if any are properly named: Create{Model}Controller, Update{Model}Controller, etc.`);
 
     return `
     Welcome to the Flarum 2.0 upgrade process. This command will attempt to upgrade your extension code to be compatible with Flarum 2.0

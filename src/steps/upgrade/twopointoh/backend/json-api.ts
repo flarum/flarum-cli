@@ -57,13 +57,9 @@ export default class JsonApi extends BaseUpgradeStep {
         if (file.endsWith('extend.php')) return null;
 
         if (Object.keys(collected).length > 0 && collected.serializer) {
-          let modelClassName;
-
-          if (collected.model) {
-            modelClassName = collected.model.split('\\').pop();
-          } else if (this.models[collected.serializer.replace('Serializer', '')]) {
-            modelClassName = collected.serializer.replace('Serializer', '');
-          }
+          const modelClassName = collected.model
+            ? collected.model.split('\\').pop()
+            : collected.serializer.replace('Serializer', '');
 
           const predefinedParams = {
             className: `${modelClassName}Resource`,

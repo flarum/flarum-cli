@@ -316,14 +316,14 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
   private updateOtherRefs(): Replacement {
     return (_file, code) => {
-      if (!code.includes('this.currentTag') && !code.includes('app.search.')) return null;
-
       return {
         updated: code
           .replace(/this\.currentTag/g, 'app.currentTag')
           .replace('app.search.', 'app.search.state.')
           .replace('app.extensionData', 'app.registry')
           .replace("extend(BasicsPage.prototype, 'homePageItems'", "extend(BasicsPage, 'homePageItems'")
+          .replace('className="NotificationList', 'className="HeaderList')
+          .replace('className="NotificationGroup', 'className="HeaderListGroup')
       };
     };
   }
