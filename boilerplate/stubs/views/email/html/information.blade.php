@@ -4,3 +4,7 @@
 <% if (!content) { %>   <!-- Required content -->
 <% } else { %>  <%- content %><% } %>
 @endsection
+
+{{--@section('contentPreview')--}}
+{{--    <!-- Optional content -->--}}
+{{--@endsection--}}
