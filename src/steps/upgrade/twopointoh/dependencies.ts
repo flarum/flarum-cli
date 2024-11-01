@@ -102,6 +102,15 @@ export default class Dependencies extends BaseUpgradeStep {
         }
       }
 
+      // Remove duplicates from devDependencies
+      if (advanced.dependencies && advanced.devDependencies) {
+        for (const [key] of Object.entries(advanced.dependencies)) {
+          if (advanced.devDependencies[key]) {
+            delete advanced.devDependencies[key];
+          }
+        }
+      }
+
       return {
         updated: advanced,
       };

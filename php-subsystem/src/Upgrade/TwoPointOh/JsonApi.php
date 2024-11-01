@@ -3,12 +3,8 @@
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
 use Flarum\CliPhpSubsystem\NodeUtil;
-use Flarum\CliPhpSubsystem\NodeVisitors\ReplaceUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
-use PhpParser\Node;
-use PhpParser\Node\Identifier;
-use PhpParser\Node\Name;
 use PhpParser\NodeVisitor;
 
 class JsonApi extends Replacement

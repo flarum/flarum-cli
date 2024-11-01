@@ -6,7 +6,7 @@ import {Step, StepManager} from 'boilersmith/step-manager';
 import pick from 'pick-deep';
 import {FlarumProviders} from "../../../providers";
 import {formatCode, generateCode, ModuleImport, parseCode, populateImports} from "../../../utils/ast";
-import {create} from "mem-fs-editor";
+import {create, Editor} from "mem-fs-editor";
 import {commitAll} from "../../monorepo/create";
 import BaseCommand from "../../../base-command";
 import globby from "globby";
@@ -18,7 +18,8 @@ import {PhpProvider} from "../../../providers/php-provider";
 
 export type ReplacementResult = {
   imports?: ImportChange[];
-  newPath?: string;
+  newPath?: string|null;
+  newFiles?: { path: string, code: string }[];
   delete?: boolean;
   updated: string | AdvancedContent;
 };
@@ -74,8 +75,12 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract gitCommit(): GitCommit;
   abstract pauseMessage(): string;
 
+  protected fsEditor: null|Editor = null;
+
   async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
+
+    this.fsEditor = fsEditor;
 
     this.php = providers.php;
 
@@ -160,6 +165,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
             newFiles.push(result.newPath!);
           }
 
+          if (result.newFiles) {
+            result.newFiles.forEach((newFile) => {
+              fsEditor.write(newFile.path, newFile.code);
+              newFiles.push(newFile.path);
+            });
+          }
+
           if (result.delete) {
             fsEditor.delete(file);
             deletedFiles.push(file);
@@ -214,15 +226,21 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   async applyReplacements(file: string, code: string, advanced: AdvancedContent): Promise<ReplacementResult> {
     let newPath = file;
+    let newFiles: any = undefined;
 
     for (const callback of this.replacements(file, code)) {
       // eslint-disable-next-line no-await-in-loop
       const result = await callback(file, code, advanced);
 
+      if (result?.newFiles) {
+        newFiles = result.newFiles;
+      }
+
       if (result?.delete) {
         return {
           delete: true,
           updated: null,
+          newFiles,
         };
       }
 
@@ -254,6 +272,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
     return {
       newPath,
+      newFiles,
       updated: code,
     };
   }

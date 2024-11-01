@@ -15,6 +15,10 @@ switch ($input['op']) {
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Misc())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
 
+    case 'upgrade.2-0.email-views':
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\EmailViews())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
+        break;
+
     case 'upgrade.2-0.filesystem':
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Filesystem())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;

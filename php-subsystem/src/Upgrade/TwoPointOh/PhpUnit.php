@@ -3,6 +3,7 @@
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
 use Flarum\CliPhpSubsystem\NodeUtil;
+use Flarum\CliPhpSubsystem\NodeVisitors\AddUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
 use PhpParser\Comment\Doc;
@@ -14,9 +15,11 @@ class PhpUnit extends Replacement
 {
     protected $dataProviders = [];
 
+    protected $usedModels = [];
+
     protected function operations(): array
     {
-        return ['run', 'postRun'];
+        return ['run', 'postRun', 'tablesToModels', 'postTablesToModels'];
     }
 
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -151,6 +154,87 @@ class PhpUnit extends Replacement
                 return $node;
             }
         });
+
+        return new ReplacementResult($traverser->traverse($ast));
+    }
+
+    function tablesToModels(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        if (strpos($file, '.php') === false) {
+            return null;
+        }
+
+        $traverser = $this->traverser();
+
+        // Replace the following example:
+        // $this->prepareDatabase([
+        //     'users' => [...],
+        //     'discussions' => [...],
+        // ]);
+        // with:
+        // $this->prepareDatabase([
+        //     User::class => [...],
+        //     Discussion::class => [...],
+        // ]);
+
+        $traverser->addVisitor($visitor = new class extends \PhpParser\NodeVisitorAbstract {
+            protected $models = [
+                'users' => 'Flarum\\User\\User',
+                'discussions' => 'Flarum\\Discussion\\Discussion',
+                'groups' => 'Flarum\\Group\\Group',
+                'tags' => 'Flarum\\Tags\\Tag',
+                'flags' => 'Flarum\\Flags\\Flag',
+                'posts' => 'Flarum\\Post\\Post',
+                'access_tokens' => 'Flarum\\Http\\AccessToken',
+            ];
+
+            public $usedModels = [];
+
+            public function leaveNode(Node $node)
+            {
+                if ($node instanceof Node\Expr\MethodCall) {
+                    if ($node->var instanceof Node\Expr\Variable && $node->var->name === 'this') {
+                        if ($node->name instanceof Node\Identifier && $node->name->name === 'prepareDatabase') {
+                            if ($node->args[0]->value instanceof Node\Expr\Array_) {
+                                foreach ($node->args[0]->value->items as $item) {
+                                    if ($item->key instanceof Node\Scalar\String_) {
+                                        $table = $item->key->value;
+
+                                        if (isset($this->models[$table])) {
+                                            $exploded = explode('\\', $this->models[$table]);
+                                            $className = end($exploded);
+                                            $item->key = new Node\Expr\ClassConstFetch(new Node\Name($className), 'class');
+                                            $this->usedModels[$this->models[$table]] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        $ast = $traverser->traverse($ast);
+
+        $this->usedModels = $visitor->usedModels;
+
+        return new ReplacementResult($ast);
+    }
+
+    function postTablesToModels(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        if (strpos($file, '.php') === false) {
+            return null;
+        }
+
+        if (empty($this->usedModels)) {
+            return null;
+        }
+
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new AddUses(array_keys($this->usedModels)));
 
         return new ReplacementResult($traverser->traverse($ast));
     }

@@ -76,5 +76,10 @@ class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatab
         return [
             // SortColumn::make('createdAt'),
         ];
+    }<% } else { %>
+
+    public function getId(object $model, OriginalContext $context): string
+    {
+        return $model->id;
     }<% } %>
 }
