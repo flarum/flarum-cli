@@ -1,10 +1,8 @@
-@extends('flarum.forum::email.html.notification.base')
+<x-mail::html.notification>
+    <x-slot:body>
+<% if (!content) { %>        <!-- Required content -->
+<% } else { %>        <%- content %><% } %>
+    </x-slot:body>
 
-@section('notificationContent')
-<% if (!content) { %>   <!-- Required content -->
-<% } else { %>  <%- content %><% } %>
-@endsection
-
-{{--@section('contentPreview')--}}
-{{--    <!-- Optional content -->--}}
-{{--@endsection--}}
+    <x-slot:preview><!-- Optional content --></x-slot:preview>
+</x-mail::html.notification>

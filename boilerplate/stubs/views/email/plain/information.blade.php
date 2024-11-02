@@ -1,6 +1,7 @@
-@extends('flarum.forum::email.plain.information.base')
-
-@section('informationContent')
+<x-mail::plain.information>
+<x-slot:body>
 <% if (!content) { %><!-- Required content -->
 <% } else { %><%- content %><% } %>
-@endsection
+</x-slot:body>
+</x-mail::plain.information>
+

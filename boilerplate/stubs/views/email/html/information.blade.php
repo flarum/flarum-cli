@@ -1,10 +1,8 @@
-@extends('flarum.forum::email.plain.information.base')
+<x-mail::html.information>
+    <x-slot:body>
+        <% if (!content) { %>        <!-- Required content -->
+        <% } else { %>        <%- content %><% } %>
+    </x-slot:body>
 
-@section('informationContent')
-<% if (!content) { %>   <!-- Required content -->
-<% } else { %>  <%- content %><% } %>
-@endsection
-
-{{--@section('contentPreview')--}}
-{{--    <!-- Optional content -->--}}
-{{--@endsection--}}
+    <x-slot:preview><!-- Optional content --></x-slot:preview>
+</x-mail::html.information>

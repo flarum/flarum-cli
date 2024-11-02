@@ -70,14 +70,15 @@ class EmailViews extends Replacement
                     if (count($hasViews) === 1) {
                         $view = $node->stmts[0]->expr->items[0]->value->value;
                         $viewNamespace = explode('::', $view)[0];
-                        $viewName = explode('::', $view)[1];
+                        $viewName = explode('.', explode('::', $view)[1])[1];
                         $newView = $viewNamespace . '::email.{type}.' . $viewName;
-                        $node->stmts[0]->expr->items[0]->value->value = str_replace('{type}', $node->stmts[0]->expr->items[0]->key->value, $newView);
-                        $otherType = $node->stmts[0]->expr->items[0]->key->value === 'text' ? 'html' : 'text';
+                        $type = $node->stmts[0]->expr->items[0]->key->value === 'text' ? 'plain' : 'html';
+                        $node->stmts[0]->expr->items[0]->value->value = str_replace('{type}', $type, $newView);
+                        $otherType = $type === 'plain' ? 'html' : 'plain';
 
                         $node->stmts[0]->expr->items[] = new ArrayItem(
                             new Node\Scalar\String_(str_replace('{type}', $otherType, $newView)),
-                            new Node\Scalar\String_($otherType)
+                            new Node\Scalar\String_($otherType === 'plain' ? 'text' : 'html')
                         );
                     }
                 }

@@ -21,6 +21,10 @@ export default class EmailViews extends BaseUpgradeStep {
 
     return [
       async (file, code) => {
+        if (! code.includes('MailableInterface')) {
+          return null;
+        }
+
         const output = this.php!.run('upgrade.2-0.email-views', { file, code });
 
         this.collected[file] = output.collected;
@@ -30,10 +34,10 @@ export default class EmailViews extends BaseUpgradeStep {
         }
       },
       async (file, code) => {
-        if (! Object.keys(this.collected).length) return null;
+        if (Object.keys(this.collected).length === 0) return null;
 
         const fileName = file.split('/').pop();
-        let newFiles: any[] = [];
+        const newFiles: any[] = [];
 
         Object.keys(this.collected).forEach((classFile) => {
           if (! this.collected[classFile]) {
@@ -54,8 +58,9 @@ export default class EmailViews extends BaseUpgradeStep {
 
             if (fileName === `${viewFileName}.blade.php`) {
               const templateContent = this.fsEditor!.read(__dirname + this.templates[viewType]);
+              const viewTypePath = viewType === 'text' ? 'plain' : 'html';
               newFiles.push({
-                path: file.split('/views/')[0] + '/views/email/' + viewType + '/' + viewFileName + '.blade.php',
+                path: file.split('/views/')[0] + '/views/email/' + viewTypePath + '/' + viewFileName + '.blade.php',
                 code: ejs.render(templateContent, { content: code.trimEnd() }),
               });
             }
