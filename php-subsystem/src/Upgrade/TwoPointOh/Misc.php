@@ -16,7 +16,6 @@ class Misc extends Replacement
     protected $carbonDiffMethods = [
         'diffAsDateInterval',
         'diffAsCarbonInterval',
-        'diff',
         'diffInUnit',
         'diffInYears',
         'diffInQuarters',
@@ -263,6 +262,21 @@ class Misc extends Replacement
                         'translator' => ['\Flarum\Locale\TranslatorInterface'],
                     ],
                     'return' => ['string']
+                ],
+            ],
+            'Flarum\\Post\\MergeableInterface' => [
+                'saveAfter' => [
+                    'return' => ['static']
+                ],
+            ],
+            'Flarum\\Post\\AbstractEventPost' => [
+                '$type' => [
+                    'type' => ['string']
+                ],
+            ],
+            'Flarum\\Foundation\\AbstractValidator' => [
+                'getRules' => [
+                    'return' => ['array']
                 ],
             ],
         ], function (Node $node) {

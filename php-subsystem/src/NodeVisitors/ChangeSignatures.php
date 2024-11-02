@@ -27,6 +27,13 @@ class ChangeSignatures extends NodeVisitorAbstract
                 return $interface->getAttribute('resolvedName')->name;
             }, $node->implements);
 
+            $extends = $node->extends ? $node->extends->getAttribute('resolvedName')->name : null;
+
+            if ($extends && isset($this->changes[$extends])) {
+                $this->valid = true;
+                return;
+            }
+
             foreach ($implements as $interface) {
                 if (isset($this->changes[$interface])) {
                     $this->valid = true;
@@ -45,6 +52,11 @@ class ChangeSignatures extends NodeVisitorAbstract
         if ($node instanceof \PhpParser\Node\Stmt\ClassMethod) {
             foreach ($this->changes as $methods) {
                 foreach ($methods as $method => $types) {
+                    // property not method.
+                    if (strpos($method, '$') === 0) {
+                        continue;
+                    }
+
                     if ($method !== $node->name->name) {
                         continue;
                     }
@@ -65,6 +77,24 @@ class ChangeSignatures extends NodeVisitorAbstract
 
                     if (isset($types['rename'])) {
                         $node->name->name = $types['rename'];
+                    }
+                }
+            }
+        }
+
+        if ($node instanceof Node\Stmt\Property) {
+            foreach ($this->changes as $properties) {
+                foreach ($properties as $property => $changes) {
+                    if (strpos($property, '$') !== 0) {
+                        continue;
+                    }
+
+                    if ($property !== '$' . $node->props[0]->name->name) {
+                        continue;
+                    }
+
+                    if (! empty($changes['type']) && ($type = NodeUtil::makeType($changes['type']))) {
+                        $node->type = $type;
                     }
                 }
             }
