@@ -62,6 +62,8 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
       // eslint-disable-next-line
       const regex = /return \(\s*<div className="IndexPage">\s*{?(.*?hero.*?)}?\s*<div className="container">\s*<div className="sideNavContainer">\s*(<nav.*<\/nav>)\s*<div className="IndexPage-results sideNavOffset">(.*?)<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*\);/gs;
 
+      if (! regex.test(code)) return null;
+
       return {
         imports: [{
           replacesPath: null,
