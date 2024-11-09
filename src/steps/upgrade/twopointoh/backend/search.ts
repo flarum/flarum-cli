@@ -6,11 +6,14 @@ import {genExtScaffolder} from "../../../gen-ext-scaffolder";
 import {GenerateGambitStub} from "../../../stubs/frontend/gambit";
 import {GenerateSearchGambitExtender} from "../../../js/search-gambit";
 import {LocaleStep} from "../../../locale/base";
+import s from "string";
+import {pluralKebabCaseModel} from "../../../../utils/model-name";
 
 type Gambit = {
   name: string;
   pattern: string;
   filterKey?: string;
+  filterFile: string;
 }
 
 export default class Search extends BaseUpgradeStep {
@@ -19,7 +22,7 @@ export default class Search extends BaseUpgradeStep {
   generatedFrontendStuff = false;
 
   protected gambits: Gambit[] = [];
-  protected data: { collectedData: any, replacements: { from: string, to: string }[] } = { collectedData: {}, replacements: [] };
+  protected data: { collectedData: any, replacements: { from: string, to: string }[], filterClasses: string[] } = { collectedData: {}, replacements: [], filterClasses: [] };
   protected searchers: Record<string, string> = {};
 
   before(file: string, code: string, _advanced: AdvancedContent): void {
@@ -34,6 +37,7 @@ export default class Search extends BaseUpgradeStep {
     return [
       (file, code) => {
         if (code.includes(' extends AbstractRegexGambit') || /implements ([\dA-z]+,\s*)*GambitInterface/.test(code)) {
+          const isOnlyGambit = !code.includes('FilterInterface');
           const oldName = file.split('/')
             .pop()!
             .replace('.php', '');
@@ -42,29 +46,39 @@ export default class Search extends BaseUpgradeStep {
             .replace('GambitFilter', 'Gambit')
             .replace('Filter', 'Gambit');
           const filterName = name.replace('Gambit', 'Filter');
-          const pattern = code.match(/protected function getGambitPattern\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
-          const filterKey = code.match(/function getFilterKey\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
+          const pattern = code.match(/ function getGambitPattern\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
+          const filterKey = isOnlyGambit
+            ? (pattern || '').replace('is:', '').split(':')[0]
+            : code.match(/function getFilterKey\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
 
           if (pattern || /^\s+public function apply\(SearchState \$.+$/m.test(code)) {
-            if (pattern) this.gambits.push({name, pattern, filterKey});
+            const newPath = file.replace(/FilterGambit/g, 'Filter')
+              .replace(/GambitFilter/g, 'Filter')
+              .replace(/Gambit/g, 'Filter');
+
+            if (pattern) this.gambits.push({name, pattern, filterKey, filterFile: newPath});
 
             // old fully qualified class name to new fully qualified class name
             const namespace = code.match(/namespace ([^;]+);/)?.[1];
             this.data.replacements.push({ from: `${namespace}\\${oldName}`, to: `${namespace}\\${filterName}` });
 
+            this.data.filterClasses.push(file, newPath);
+
             return {
-              newPath: file.replace('FilterGambit', 'Filter')
-                .replace('GambitFilter', 'Filter')
-                .replace('Gambit', 'Filter'),
+              newPath,
               updated: code
                 .replace(oldName, filterName)
                 .replace(' extends AbstractRegexGambit', '')
                 .replace('use Flarum\\Search\\AbstractRegexGambit;\n', '')
                 .replace('use Flarum\\Search\\GambitInterface;\n', '')
                 .replace(/implements ([\dA-z]+,\s*)*GambitInterface(,\s*)?/, 'implements $1')
-                .replace(/\s*protected function getGambitPattern\(\)(?:: string)?\s*{\s*return '.*';\s*}/, '')
-                .replace(/\s*protected function conditions\(([^)]*)\)\s*{.*?[^ ] {4}}/s, '')
+                .replace(/\s*\w+ function getGambitPattern\(\)(?:: string)?\s*{\s*return '.*';\s*}/, '')
+                .replace(/(\s*protected function )conditions(\([^)]*\)\s*{.*?[^ ] {4}})/s, isOnlyGambit
+                  ? '$1filter$2'
+                  : ''
+                )
                 .replace(/\s*public function apply\(([^)]*)\)\s*{.*?[^ ] {4}}/s, '')
+                .replace(/namespace (.*)Gambit([^;]+);/, `namespace $1Filter$2;`)
             }
           }
         }
@@ -73,7 +87,9 @@ export default class Search extends BaseUpgradeStep {
       },
 
       async (file, code) => {
-        const output = this.php!.run('upgrade.2-0.search', { file, code, data: this.data });
+        const data: any = this.data;
+        data.gambits = this.gambits;
+        const output = this.php!.run('upgrade.2-0.search', { file, code, data });
 
         if (output.searchers) {
           this.data.collectedData.searchers = { ...this.data.collectedData.searchers, ...output.searchers };
@@ -81,6 +97,10 @@ export default class Search extends BaseUpgradeStep {
 
         if (output.repositories) {
           this.data.collectedData.repositories = { ...this.data.collectedData.repositories, ...output.repositories };
+        }
+
+        if (output.extendData) {
+          this.data.collectedData.extendData = { ...this.data.collectedData.extendData, ...output.extendData };
         }
 
         return {
@@ -114,7 +134,7 @@ export default class Search extends BaseUpgradeStep {
       },
 
       async (_file) => {
-        if (this.gambits.length > 0 && ! this.generatedFrontendStuff) {
+        if (this.gambits.length > 0 && Object.keys(this.data.collectedData.extendData?.searchers || {}).length > 0) {
           const result = await this.command.runSteps(
             (new StepManager<FlarumProviders>()).silentGroup((steps) => {
               this.gambits.forEach((gambit, index) => {
@@ -122,6 +142,19 @@ export default class Search extends BaseUpgradeStep {
 
                 if (gambitKey.includes(':')) {
                   gambitKey = gambitKey.split(':')[0];
+                }
+
+                const relatedSearcher = Object.keys(this.data.collectedData.extendData.searchers).find((searcher) => {
+                  const filters = this.data.collectedData.extendData.searchers[searcher].filters || [];
+                  return filters.some((filter: any) => {
+                    return gambit.filterFile.includes(filter.class.name.replaceAll('\\', '/'));
+                  });
+                });
+
+                let type = 'discussions';
+
+                if (relatedSearcher) {
+                  type = pluralKebabCaseModel(relatedSearcher.split('\\').pop()!.replace('Searcher', ''));
                 }
 
                 steps
@@ -139,12 +172,14 @@ export default class Search extends BaseUpgradeStep {
                     },
                   ], {
                     frontend: 'common',
-                    modelType: 'discussions',
+                    modelType: type,
                   })
                   .step(new LocaleStep(genExtScaffolder()), {}, [], {
                     key: `lib.gambits.${gambit.filterKey}.key`,
                     value: gambitKey
                   });
+
+                delete this.gambits[index];
               });
             })
           );
@@ -176,7 +211,7 @@ export default class Search extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#searchfilter-system';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#searchfilter-system';
     const readMore = chalk.dim(`Read more: ${link}`);
     const exampleBeforeLink = 'https://github.com/flarum/framework/blob/1.x/extensions/tags';
     const exampleAfterLink = 'https://github.com/flarum/framework/blob/2.x/extensions/tags';

@@ -32,6 +32,6 @@ class <%= className %> extends TestCase
     #[Test]
     public function works_as_expected()
     {
-        // See https://docs.flarum.org/extend/testing.html#backend-tests for more information.
+        // See https://docs.flarum.org/2.x/extend/testing.html#backend-tests for more information.
     }
 }

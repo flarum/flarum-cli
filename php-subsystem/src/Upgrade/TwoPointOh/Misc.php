@@ -273,6 +273,9 @@ class Misc extends Replacement
                 '$type' => [
                     'type' => ['string']
                 ],
+                'saveAfter' => [
+                    'return' => ['static'],
+                ],
             ],
             'Flarum\\Foundation\\AbstractValidator' => [
                 'getRules' => [

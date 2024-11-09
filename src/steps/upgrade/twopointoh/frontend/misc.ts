@@ -45,7 +45,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#miscellaneous';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#miscellaneous';
     const readMore = chalk.dim(`Read more: ${link}`);
 
     return `Various breaking frontend changes have been made in 2.0. The tool has attempted to update your code accordingly.
@@ -318,6 +318,15 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
   private updateOtherRefs(): Replacement {
     return (_file, code) => {
+      if (code.includes("extend(Search.prototype, 'sourceItems'")) {
+        code = code
+          .replace(/SearchSource/g, 'GlobalSearchSource')
+          .replace('flarum/forum/components/Search', 'flarum/common/components/GlobalSearch')
+          .replace('import Search from ', 'import GlobalSearch from ')
+          .replace('import Search,', 'import GlobalSearch,')
+          .replace(/Search.prototype/g, 'GlobalSearch.prototype');
+      }
+
       return {
         updated: code
           .replace(/this\.currentTag/g, 'app.currentTag')
@@ -326,6 +335,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
           .replace("extend(BasicsPage.prototype, 'homePageItems'", "extend(BasicsPage, 'homePageItems'")
           .replace('className="NotificationList', 'className="HeaderList')
           .replace('className="NotificationGroup', 'className="HeaderListGroup')
+          .replace('flarum/forum/states/SearchState', 'flarum/common/states/SearchState')
       };
     };
   }

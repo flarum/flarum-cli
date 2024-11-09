@@ -53,7 +53,7 @@ class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatab
 
             /**
              * @todo migrate logic from old serializer and controllers to this API Resource.
-             * @see https://docs.flarum.org/extend/api#api-resources
+             * @see https://docs.flarum.org/2.x/extend/api#api-resources
              */
 
             // Example:

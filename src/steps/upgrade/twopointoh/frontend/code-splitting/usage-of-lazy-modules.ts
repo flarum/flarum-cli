@@ -130,7 +130,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const readMore = chalk.dim('Read more about code splitting in Flarum 2.0: https://docs.flarum.org/extend/code-splitting');
+    const readMore = chalk.dim('Read more about code splitting in Flarum 2.0: https://docs.flarum.org/2.x/extend/code-splitting');
     const lazyLoaded = chalk.bgYellow.bold('lazy loaded');
 
     return `Flarum 2.0 introduces code splitting functionality. Some modules are now ${lazyLoaded}. And extending them requires a different approach.
@@ -280,7 +280,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
               if (! t.isIdentifier(firstArg) || firstArg.name !== module) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                call.comments = [recast.types.builders.commentLine(' @TODO: Modify this to use lazy loading, checkout https://docs.flarum.org/extend/code-splitting#async-composers', true, false)];
+                call.comments = [recast.types.builders.commentLine(' @TODO: Modify this to use lazy loading, checkout https://docs.flarum.org/2.x/extend/code-splitting#async-composers', true, false)];
 
                 return;
               }
@@ -318,7 +318,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
                 newLines.push(lineToComment);
               }
 
-              const comment = ' @TODO: Move all direct access to the module object here. Including subsequent calls to app.composer.show(), checkout https://docs.flarum.org/extend/code-splitting#async-composers';
+              const comment = ' @TODO: Move all direct access to the module object here. Including subsequent calls to app.composer.show(), checkout https://docs.flarum.org/2.x/extend/code-splitting#async-composers';
 
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
@@ -363,7 +363,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
         const exists = match && match.length > 1;
 
         if (exists) {
-          code = code.replace(new RegExp(`(^${importedAs}[^'"].*$)`, 'gm'), `$1 // @TODO: Check if this usage is correct. Lazy loaded modules must be loaded using the async import function. https://docs.flarum.org/extend/code-splitting`);
+          code = code.replace(new RegExp(`(^${importedAs}[^'"].*$)`, 'gm'), `$1 // @TODO: Check if this usage is correct. Lazy loaded modules must be loaded using the async import function. https://docs.flarum.org/2.x/extend/code-splitting`);
         }
       });
 

@@ -108,7 +108,7 @@ export default class JsonApi extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#jsonapi';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#jsonapi';
     const readMore = chalk.dim(`Read more: ${link}`);
     const exampleBeforeLink = 'https://github.com/flarum/framework/blob/1.x/extensions/tags';
     const exampleAfterLink = 'https://github.com/flarum/framework/blob/2.x/extensions/tags';

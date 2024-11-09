@@ -27,7 +27,11 @@ export default class TwoPointOh extends BaseCommand {
     'step': Flags.string({
       description: 'Optionally specify a specific step to run',
       required: false,
-    })
+    }),
+    'force-steps': Flags.boolean({
+      description: 'Force run steps even if already ran',
+      required: false,
+    }),
   };
 
   static args = [...BaseCommand.args];
@@ -70,7 +74,7 @@ export default class TwoPointOh extends BaseCommand {
     });
 
     collection = collection.map((Step: new (...args: any) => any) => {
-      const step = new Step(this, stepCount, total);
+      const step = new Step(this, stepCount, total, this.flags['force-steps']);
       stepCount++;
       return step;
     });
@@ -97,7 +101,7 @@ export default class TwoPointOh extends BaseCommand {
     const command = chalk.bold.bgYellow.black('fl update js-imports');
     const makeSure = chalk.bold.dim(`- Make sure your extend.php file directly returns an array of extenders.
     - All JS imports from Flarum are frontend-specific. (You can use ${command} to update them)
-    - You have read the full upgrade guide at least once: https://docs.flarum.org/extend/update-2_0
+    - You have read the full upgrade guide at least once: https://docs.flarum.org/2.x/extend/update-2_0
     - For better results, make sure your CRUD controllers if any are properly named: Create{Model}Controller, Update{Model}Controller, etc.`);
 
     return `
@@ -117,7 +121,7 @@ export default class TwoPointOh extends BaseCommand {
     return `    Your extension has been successfully upgraded to Flarum 2.0.
     You may need to make some manual changes to your code. Look for added @TODO comments in your code.
     Please refer to the Flarum 2.0 upgrade guide for more information.
-    https://docs.flarum.org/extend/update-2_0
+    https://docs.flarum.org/2.x/extend/update-2_0
 
     Make sure to run ${composer} and ${yarn} then test your extension to ensure everything is working as expected.
     `;

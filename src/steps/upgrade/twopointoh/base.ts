@@ -57,11 +57,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected step = 0;
   protected totalSteps = 0;
+  protected forceStep = false;
 
-  public constructor(command: BaseCommand, step: number, totalSteps: number) {
+  public constructor(command: BaseCommand, step: number, totalSteps: number, forceStep: boolean) {
     this.command = command;
     this.step = step;
     this.totalSteps = totalSteps;
+    this.forceStep = forceStep;
   }
 
   protected beforeHook = false;
@@ -96,7 +98,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.command.log('');
 
     // Skip if this was already done (check by commits).
-    if (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
+    if (!this.forceStep && await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
       this.command.log('     => ' + chalk.bgGreen.bold('    SKIP    '));
       this.command.log('');
       return fs;

@@ -3,10 +3,12 @@
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
 use Flarum\CliPhpSubsystem\ExtenderUtil;
+use Flarum\CliPhpSubsystem\NodeUtil;
 use Flarum\CliPhpSubsystem\NodeVisitors\ChangeSignatures;
 use Flarum\CliPhpSubsystem\NodeVisitors\ReplaceUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
+use PhpParser\Modifiers;
 use PhpParser\Node;
 use PhpParser\NodeVisitor;
 
@@ -16,7 +18,72 @@ class Search extends Replacement
 
     protected function operations(): array
     {
-        return ['run', 'replaceNamespaces', 'changeSignatures', 'extenders', 'removeOldExtenders'];
+        return ['gambitToFilter', 'run', 'replaceNamespaces', 'changeSignatures', 'extenders', 'removeOldExtenders'];
+    }
+
+    function gambitToFilter(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $filterClasses = ! empty($data['filterClasses'])
+            ? $data['filterClasses']
+            : [];
+
+        if (! in_array($file, $filterClasses)) {
+            return null;
+        }
+
+        $data['filterKey'] = $data['gambits'][0]['filterKey'] ?? '';
+
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
+
+        $traverser->addVisitor(new class ($data) extends \PhpParser\NodeVisitorAbstract {
+            public $data = [];
+
+            public function __construct($data)
+            {
+                $this->data = $data;
+            }
+
+            public function leaveNode(Node $node)
+            {
+                if ($node instanceof Node\Stmt\Namespace_) {
+                    NodeUtil::addUsesToNamespace($node, [
+                        'Flarum\\Search\\Filter\\FilterInterface' => 'Flarum\\Search\\Filter\\FilterInterface',
+                    ]);
+                }
+
+                if ($node instanceof Node\Stmt\Class_) {
+                    $implementsFilterInterface = false;
+
+                    foreach ($node->implements as $interface) {
+                        if ($interface->name === 'FilterInterface') {
+                            $implementsFilterInterface = true;
+                        }
+                    }
+
+                    if (! $implementsFilterInterface) {
+                        $node->implements[] = new Node\Name('FilterInterface', [
+                            'resolvedName' => new Node\Name('Flarum\\Search\\Filter\\FilterInterface'),
+                        ]);
+
+                        $node->stmts[] = new Node\Stmt\ClassMethod('getFilterKey', [
+                            'type' => Modifiers::PUBLIC,
+                            'stmts' => [
+                                new Node\Stmt\Return_(
+                                    new Node\Scalar\String_($this->data['filterKey'])
+                                ),
+                            ],
+                            'returnType' => new Node\Name('string'),
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return new ReplacementResult($traverser->traverse($ast));
     }
 
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -26,8 +93,6 @@ class Search extends Replacement
         $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
             'replaceNodes' => false,
         ]));
-
-        $traverser = $this->traverser();
 
         if (strpos($file, 'Repository') !== false || strpos($code, ' extends AbstractSearcher') !== false) {
             ///**
@@ -161,74 +226,106 @@ class Search extends Replacement
                     $this->returnExtendersNode = $returnExtendersNode;
                 }
 
-                public function enterNode(Node $node)
+                private function findNew(Node $node): ?Node\Expr\New_
+                {
+                    if ($node instanceof Node\Expr\New_) {
+                        return $node;
+                    }
+
+                    if ($node instanceof Node\Expr\MethodCall) {
+                        return $this->findNew($node->var);
+                    }
+
+                    return null;
+                }
+
+                public function leaveNode(Node $node)
                 {
                     if ($node instanceof Node\Expr\MethodCall) {
-                        if ($node->var instanceof Node\Expr\New_) {
-                            $resolvedName = $node->var->class->getAttribute('resolvedName');
+                        $method = $node->name->name;
 
-                            if (! $resolvedName) {
-                                return $node;
-                            }
+                        if (! in_array($method, ['addFilter', 'addFilterMutator', 'addGambit', 'setFullTextGambit'])) {
+                            return $node;
+                        }
 
-                            $class = $resolvedName->name;
-                            $method = $node->name->name;
+                        $new = $this->findNew($node);
 
-                            if ($class === 'Flarum\Extend\Filter') {
-                                $filterer = $node->var->args[0]->value->class->getAttribute('resolvedName')->name;
+                        if (! $new) {
+                            return $node;
+                        }
 
+                        $resolvedName = $new->class->getAttribute('resolvedName');
+
+                        if (! $resolvedName) {
+                            return $node;
+                        }
+
+                        $class = $resolvedName->name;
+
+                        if (! in_array($class, ['Flarum\\Extend\\Filter', 'Flarum\\Extend\\SimpleFlarumSearch'])) {
+                            return $node;
+                        }
+
+                        if ($class === 'Flarum\Extend\Filter') {
+                            $filterer = $new->args[0]->value->class->getAttribute('resolvedName')->name;
+
+                            if ($filterer === 'Flarum\\Discussion\\Filter\\DiscussionFilterer') {
+                                $searcher = 'Flarum\\Discussion\\Search\\DiscussionSearcher';
+                            } elseif ($filterer === 'Flarum\\Post\\Filter\\PostFilterer') {
+                                $searcher = 'Flarum\\Post\\Filter\\PostSearcher';
+                            } else {
                                 $searcher = str_replace('Filterer', 'Searcher', $filterer);
-
-                                $arg = $node->args[0];
-
-                                if ($arg->value instanceof Node\Expr\ClassConstFetch) {
-                                    $arg->value->class->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->class->name);
-                                    $arg->value->class->name = str_replace('Gambit', 'Filter', $arg->value->class->name);
-                                } elseif ($arg->value instanceof Node\Scalar\String_) {
-                                    $arg->value->value = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->value);
-                                    $arg->value->value = str_replace('Gambit', 'Filter', $arg->value->value);
-                                }
-
-                                if ($method === 'addFilter') {
-                                    $this->data['searchers'][$searcher]['filters'][] = $arg->value;
-                                } elseif ($method === 'addFilterMutator') {
-                                    $this->data['searchers'][$searcher]['mutators'][] = $arg->value;
-                                }
-
-                                $this->data['to_delete'][] = $node;
-                            } elseif ($class === 'Flarum\Extend\SimpleFlarumSearch') {
-                                $searcher = $node->var->args[0]->value->class->getAttribute('resolvedName')->name;
-
-                                $arg = $node->args[0];
-
-                                if ($arg->value instanceof Node\Expr\ClassConstFetch) {
-                                    $arg->value->class->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->class->name);
-                                    $arg->value->class->name = str_replace('Gambit', 'Filter', $arg->value->class->name);
-
-                                    /** @var Node\Identifier $resolvedName */
-                                    $resolvedName = $arg->value->class->getAttribute('resolvedName');
-
-                                    if ($resolvedName) {
-                                        $resolvedName->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $resolvedName->name);
-                                        $resolvedName->name = str_replace('Gambit', 'Filter', $resolvedName->name);
-                                    }
-                                } elseif ($arg->value instanceof Node\Scalar\String_) {
-                                    $arg->value->value = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->value);
-                                    $arg->value->value = str_replace('Gambit', 'Filter', $arg->value->value);
-                                }
-
-                                if ($method === 'addGambit') {
-                                    $this->data['searchers'][$searcher]['filters'][] = $arg->value;
-                                } elseif ($method === 'setFullTextGambit') {
-                                    $this->data['searchers'][$searcher]['fulltext'] = isset($resolvedName)
-                                        ? $resolvedName->name
-                                        : ($arg->value instanceof Node\Expr\ClassConstFetch
-                                            ? $arg->value->class->name
-                                            : $arg->value->value);
-                                }
-
-                                $this->data['to_delete'][] = $node;
                             }
+
+                            $arg = $node->args[0];
+
+                            if ($arg->value instanceof Node\Expr\ClassConstFetch) {
+                                $arg->value->class->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->class->name);
+                                $arg->value->class->name = str_replace('Gambit', 'Filter', $arg->value->class->name);
+                            } elseif ($arg->value instanceof Node\Scalar\String_) {
+                                $arg->value->value = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->value);
+                                $arg->value->value = str_replace('Gambit', 'Filter', $arg->value->value);
+                            }
+
+                            if ($method === 'addFilter') {
+                                $this->data['searchers'][$searcher]['filters'][] = $arg->value;
+                            } elseif ($method === 'addFilterMutator') {
+                                $this->data['searchers'][$searcher]['mutators'][] = $arg->value;
+                            }
+                        } elseif ($class === 'Flarum\Extend\SimpleFlarumSearch') {
+                            $searcher = $new->args[0]->value->class->getAttribute('resolvedName')->name;
+
+                            $arg = $node->args[0];
+
+                            if ($arg->value instanceof Node\Expr\ClassConstFetch) {
+                                $arg->value->class->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->class->name);
+                                $arg->value->class->name = str_replace('Gambit', 'Filter', $arg->value->class->name);
+
+                                /** @var Node\Identifier $resolvedName */
+                                $resolvedName = $arg->value->class->getAttribute('resolvedName');
+
+                                if ($resolvedName) {
+                                    $resolvedName->name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $resolvedName->name);
+                                    $resolvedName->name = str_replace('Gambit', 'Filter', $resolvedName->name);
+                                }
+                            } elseif ($arg->value instanceof Node\Scalar\String_) {
+                                $arg->value->value = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $arg->value->value);
+                                $arg->value->value = str_replace('Gambit', 'Filter', $arg->value->value);
+                            }
+
+                            if ($method === 'addGambit') {
+                                $this->data['searchers'][$searcher]['filters'][] = $arg->value;
+                            } elseif ($method === 'setFullTextGambit') {
+                                $this->data['searchers'][$searcher]['fulltext'] = isset($resolvedName)
+                                    ? $resolvedName->name
+                                    : ($arg->value instanceof Node\Expr\ClassConstFetch
+                                        ? $arg->value->class->name
+                                        : $arg->value->value);
+                            }
+                        }
+
+                        if ($node->var instanceof Node\Expr\New_) {
+                            $this->data['to_delete'][] = $node;
                         }
                     }
 
@@ -278,6 +375,10 @@ class Search extends Replacement
 
         if (isset($collector)) {
             $collectorData = $collector->data;
+        } elseif (isset($visitor)) {
+            $collectorData = [
+                'extendData' => $visitor->data,
+            ];
         }
 
         return new ReplacementResult($code, $collectorData);
@@ -305,7 +406,11 @@ class Search extends Replacement
                 'from' => 'Flarum\\Filter',
                 'to' => 'Flarum\\Search\\Filter',
                 'partial' => true,
-            ]
+            ],
+            [
+                'from' => 'Flarum\\Search\\QueryCriteria',
+                'to' => 'Flarum\\Search\\SearchCriteria',
+            ],
         ], $data['replacements'] ?? [])));
 
         return new ReplacementResult($traverser->traverse($ast));
@@ -322,9 +427,10 @@ class Search extends Replacement
         $traverser->addVisitor(new ChangeSignatures([
             'Flarum\\Search\\Filter\\FilterInterface' => [
                 'filter' => [
+                    'visibility' => Modifiers::PUBLIC,
                     'params' => [
-                        'filterState' => ['SearchState'],
-                        'filterValue' => ['array', 'string'],
+                        'state' => ['SearchState'],
+                        'value' => ['array', 'string'],
                         'negate' => ['bool'],
                     ],
                     'return' => ['void'],

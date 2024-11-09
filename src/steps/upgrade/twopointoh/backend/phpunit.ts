@@ -10,7 +10,14 @@ export default class PhpUnit extends BaseUpgradeStep {
     return [
       (_file, code) => ({
         updated: this.php!.run('upgrade.2-0.phpunit', { file, code }).code
-      })
+      }),
+      (file, code) => {
+        if (! file.endsWith('.xml')) return null;
+
+        return {
+          updated: code.replace('xsi:noNamespaceSchemaLocation="([^"]+)"', 'xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"')
+        };
+      }
     ];
   }
 

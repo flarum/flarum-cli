@@ -12,7 +12,7 @@ export default class <%= className %> extends Modal {
   content() {
     return (
       <div className="Modal-body">
-        // See https://docs.flarum.org/extend/interactive-components.html#modals for more information.
+        // See https://docs.flarum.org/2.x/extend/interactive-components.html#modals for more information.
       </div>
     );
   }

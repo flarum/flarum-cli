@@ -52,7 +52,7 @@ class <%= className %> extends Resource\AbstractDatabaseResource
         return [
 
             /**
-             * @see https://docs.flarum.org/extend/api#api-resources
+             * @see https://docs.flarum.org/2.x/extend/api#api-resources
              */
 
             // Example:

@@ -211,7 +211,7 @@ export default class LessChanges extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#miscellaneous';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#miscellaneous';
     const readMore = chalk.dim(`Read more: ${link}`);
     const dataThemeDark = chalk.yellow.bold('[data-theme^=dark]');
     const dataThemeLight = chalk.yellow.bold('[data-theme^=light]');

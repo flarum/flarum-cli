@@ -10,6 +10,6 @@ class <%= className %> extends AbstractPolicy
 {
     public function can(User $actor, string $ability, <%= modelClassName %> $model)
     {
-        // See https://docs.flarum.org/extend/authorization.html#custom-policies for more information.
+        // See https://docs.flarum.org/2.x/extend/authorization.html#custom-policies for more information.
     }
 }

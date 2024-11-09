@@ -29,7 +29,7 @@ export default class MiscBackendChanges extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#miscellaneous-1';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#miscellaneous-1';
     const readMore = chalk.dim(`Read more: ${link}`);
     const requiresManualChangeLink = 'https://laravel.com/docs/11.x/upgrade#modifying-columns';
 

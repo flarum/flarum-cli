@@ -54,7 +54,7 @@ class JsonApi extends Replacement
                          * @TODO: Remove this in favor of one of the API resource classes that were added.
                          *      Or extend an existing API Resource to add this to.
                          *      Or use a vanilla RequestHandlerInterface controller.
-                         *      @link https://docs.flarum.org/extend/api#endpoints
+                         *      @link https://docs.flarum.org/2.x/extend/api#endpoints
                          */
                         PHPDOC)]);
                     } else {
@@ -138,7 +138,7 @@ class JsonApi extends Replacement
         $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
             public $hasExtenders = false;
 
-            const LINK_TO_DOCS = 'https://docs.flarum.org/extend/api#extending-api-resources';
+            const LINK_TO_DOCS = 'https://docs.flarum.org/2.x/extend/api#extending-api-resources';
             const COMMENT = '// @TODO: Replace with the new implementation '.self::LINK_TO_DOCS;
 
             public function enterNode(\PhpParser\Node $node)

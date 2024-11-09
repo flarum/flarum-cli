@@ -65,18 +65,32 @@ class ChangeSignatures extends NodeVisitorAbstract
                         $node->returnType = $returnType;
                     }
 
+                    $k = 0;
                     foreach ($types['params'] ?? [] as $param => $paramTypes) {
-                        foreach ($node->params as $paramNode) {
-                            if ($paramNode->var->name === $param) {
+                        foreach ($node->params as $i => $paramNode) {
+                            if ($i === $k) {
                                 if ($paramType = NodeUtil::makeType($paramTypes)) {
                                     $paramNode->type = $paramType;
                                 }
+
+                                if ($paramNode->var->name !== $param) {
+                                    $oldName = $paramNode->var->name;
+                                    $paramNode->var->name = $param;
+
+                                    // If the parameter name is changed, we need to update the parameter name inside the method.
+                                    $this->updateVariableName($node, $oldName, $param);
+                                }
                             }
                         }
+                        $k++;
                     }
 
                     if (isset($types['rename'])) {
                         $node->name->name = $types['rename'];
+                    }
+
+                    if (! empty($types['visibility'])) {
+                        $node->flags = $types['visibility'];
                     }
                 }
             }
@@ -101,5 +115,72 @@ class ChangeSignatures extends NodeVisitorAbstract
         }
 
         $this->custom && ($this->custom)($node);
+    }
+
+    private function updateVariableName($node, string $oldName, string $newName): void
+    {
+        if (! $node instanceof Node) {
+            return;
+        }
+
+        if (($node instanceof Node\Expr\Variable || $node instanceof Node\Arg) && $node->name === $oldName) {
+            $node->name = $newName;
+        }
+
+        if ($node instanceof Node\Stmt\Function_ || $node instanceof Node\Stmt\ClassMethod) {
+            foreach ($node->params as $param) {
+                if ($param->var->name === $oldName) {
+                    $param->var->name = $newName;
+                }
+            }
+        }
+
+        if (property_exists($node, 'var') && $node->var) {
+            if ($node->var->name === $oldName) {
+                $node->var->name = $newName;
+            } else {
+                $this->updateVariableName($node->var, $oldName, $newName);
+            }
+        }
+
+        if (is_iterable($node)) {
+            foreach ($node as $child) {
+                $this->updateVariableName($child, $oldName, $newName);
+            }
+        }
+
+        if (property_exists($node, 'stmts') && $node->stmts) {
+            foreach ($node->stmts as $stmt) {
+                $this->updateVariableName($stmt, $oldName, $newName);
+            }
+        }
+
+        if (property_exists($node, 'expr') && $node->expr) {
+            $this->updateVariableName($node->expr, $oldName, $newName);
+        }
+
+        if (property_exists($node, 'items') && $node->items) {
+            foreach ($node->items as $item) {
+                $this->updateVariableName($item, $oldName, $newName);
+            }
+        }
+
+        if (property_exists($node, 'args') && $node->args) {
+            foreach ($node->args as $arg) {
+                $this->updateVariableName($arg, $oldName, $newName);
+            }
+        }
+
+        if (property_exists($node, 'cond') && $node->cond) {
+            $this->updateVariableName($node->cond, $oldName, $newName);
+        }
+
+        if (property_exists($node, 'stmt') && $node->stmt) {
+            $this->updateVariableName($node->stmt, $oldName, $newName);
+        }
+
+        if (property_exists($node, 'value') && $node->value) {
+            $this->updateVariableName($node->value, $oldName, $newName);
+        }
     }
 }

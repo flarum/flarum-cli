@@ -44,7 +44,7 @@ export default class ImportExt extends BaseUpgradeStep {
     const useExtensions = chalk.bgYellow.bold('useExtensions');
     const format = chalk.bgCyan.bold('ext:vendor/extension/module-path');
     const exampleImport = chalk.bgCyan.bold('import Tag from \'ext:flarum/tags/common/models/Tag\';');
-    const example = chalk.dim(`For example: ${exampleImport} (Documentation: https://docs.flarum.org/extend/registry)`);
+    const example = chalk.dim(`For example: ${exampleImport} (Documentation: https://docs.flarum.org/2.x/extend/registry)`);
 
     return `The format of importing from extensions has changed. The webpack config's ${useExtensions} option has been removed.
                      The tool cannot recognize imports from other extensions, you must manually update them.

@@ -29,7 +29,7 @@ export default class Filesystem extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/extend/update-2_0#flysystem-updated-from-1x-to-3x';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#flysystem-updated-from-1x-to-3x';
     const readMore = chalk.dim(`Read more: ${link}`);
     const otherLink = 'https://flysystem.thephpleague.com/docs/upgrade-from-1.x/';
     const otherReadMore = chalk.dim(`For more details, read the Flysystem 1.x to V2 & V3 upgrade guide: ${otherLink}`);
