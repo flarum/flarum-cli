@@ -235,6 +235,9 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
       const ast = advanced as t.File;
 
+      const noJsx = /\bm\(\s*["']/gs.test(code);
+      const jsx = !noJsx; // /<\/\w+>/gs.test(code);
+
       traverse(ast, {
         CallExpression(path) {
           const node = path.node;
@@ -250,60 +253,80 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
               return;
             }
 
-            let attrsToJsx = null
-
-            if (attrs && t.isObjectExpression(attrs)) {
-              attrsToJsx = (attrs as t.ObjectExpression).properties
-                .filter((prop) => t.isObjectProperty(prop) && ! t.isArrayPattern(prop.value))
-                .map((prop) => {
-                  prop = prop as t.ObjectProperty;
-
-                  const key = 'value' in prop.key ? prop.key.value : ('name' in prop.key ? prop.key.name : prop.key.type);
-
-                  if (t.isArrayPattern(prop.value) || t.isObjectPattern(prop.value) || t.isRestElement(prop.value)) {
-                    console.warn('Failed to convert to JSX:', { [key.toString()]: prop.value });
-                    return null;
-                  }
-
-                  if (t.isAssignmentPattern(prop.value)) {
-                    return t.jsxAttribute(
-                      t.jsxIdentifier(key.toString()),
-                      t.isStringLiteral(prop.value.right) ? prop.value.right : t.jsxExpressionContainer(prop.value.right)
-                    );
-                  }
-
-                  try {
-                    return t.jsxAttribute(
-                      t.jsxIdentifier(key.toString()),
-                      t.isStringLiteral(prop.value) ? prop.value : t.jsxExpressionContainer(prop.value)
-                    );
-                  } catch (error) {
-                    console.log({ [key.toString()]: prop.value });
-                    throw error;
-                  }
-                }) as t.JSXAttribute[];
-            } else if (attrs && t.isIdentifier(attrs)) {
-              attrsToJsx = [t.jsxSpreadAttribute(attrs)];
-            } else if (attrs) {
-              console.warn(`Unknown attrs type for ${funcName} in ${file}: ${attrs.type}`);
-            }
-
-            const tag = t.jsxIdentifier(funcName === 'avatar' ? 'Avatar' : 'Icon');
+            const tag = funcName === 'avatar' ? 'Avatar' : 'Icon';
             const mainArgName = funcName === 'avatar' ? 'user' : 'name';
-            const mainArg = t.jsxAttribute(t.jsxIdentifier(mainArgName), t.isStringLiteral(userOrName) ? userOrName : t.jsxExpressionContainer(userOrName));
 
-            const jsxElem = t.jsxElement(
-              t.jsxOpeningElement(tag, [mainArg, ...attrsToJsx || []], true),
-              null,
-              [],
-              true
-            );
+            if (jsx) {
+              let attrsToJsx = null
 
-            // If the node is enclosed in { ... }, remove them
-            if (t.isJSXExpressionContainer(path.parent)) {
-              path.parentPath.replaceWith(jsxElem);
+              if (attrs && t.isObjectExpression(attrs)) {
+                attrsToJsx = (attrs as t.ObjectExpression).properties
+                  .filter((prop) => t.isObjectProperty(prop) && ! t.isArrayPattern(prop.value))
+                  .map((prop) => {
+                    prop = prop as t.ObjectProperty;
+
+                    const key = 'value' in prop.key ? prop.key.value : ('name' in prop.key ? prop.key.name : prop.key.type);
+
+                    if (t.isArrayPattern(prop.value) || t.isObjectPattern(prop.value) || t.isRestElement(prop.value)) {
+                      console.warn('Failed to convert to JSX:', { [key.toString()]: prop.value });
+                      return null;
+                    }
+
+                    if (t.isAssignmentPattern(prop.value)) {
+                      return t.jsxAttribute(
+                        t.jsxIdentifier(key.toString()),
+                        t.isStringLiteral(prop.value.right) ? prop.value.right : t.jsxExpressionContainer(prop.value.right)
+                      );
+                    }
+
+                    try {
+                      return t.jsxAttribute(
+                        t.jsxIdentifier(key.toString()),
+                        t.isStringLiteral(prop.value) ? prop.value : t.jsxExpressionContainer(prop.value)
+                      );
+                    } catch (error) {
+                      console.log({ [key.toString()]: prop.value });
+                      throw error;
+                    }
+                  }) as t.JSXAttribute[];
+              } else if (attrs && t.isIdentifier(attrs)) {
+                attrsToJsx = [t.jsxSpreadAttribute(attrs)];
+              } else if (attrs) {
+                console.warn(`Unknown attrs type for ${funcName} in ${file}: ${attrs.type}`);
+              }
+
+              const mainArg = t.jsxAttribute(t.jsxIdentifier(mainArgName), t.isStringLiteral(userOrName) ? userOrName : t.jsxExpressionContainer(userOrName));
+
+              const jsxElem = t.jsxElement(
+                t.jsxOpeningElement(t.jsxIdentifier(tag), [mainArg, ...attrsToJsx || []], true),
+                null,
+                [],
+                true
+              );
+
+              // If the node is enclosed in { ... }, remove them
+              if (t.isJSXExpressionContainer(path.parent)) {
+                path.parentPath.replaceWith(jsxElem);
+              } else {
+                path.replaceWith(jsxElem);
+              }
             } else {
-              path.replaceWith(jsxElem);
+              // Avatar.component({ ... })
+              // Icon.component({ ... })
+
+              const mainArg = t.objectProperty(t.identifier(mainArgName), userOrName);
+              let otherAttrs = attrs && t.isObjectExpression(attrs) ? (attrs as t.ObjectExpression).properties : [];
+
+              if (attrs && t.isSpreadElement(attrs)) {
+                otherAttrs = [t.spreadElement(attrs.argument)];
+              }
+
+              const component = t.callExpression(
+                t.memberExpression(t.identifier(tag), t.identifier('component')),
+                [t.objectExpression([mainArg, ...otherAttrs])]
+              );
+
+              path.replaceWith(component);
             }
           }
         }
@@ -334,7 +357,9 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
           .replace('app.extensionData', 'app.registry')
           .replace("extend(BasicsPage.prototype, 'homePageItems'", "extend(BasicsPage, 'homePageItems'")
           .replace('className="NotificationList', 'className="HeaderList')
+          .replace('className: "NotificationList', 'className: "HeaderList')
           .replace('className="NotificationGroup', 'className="HeaderListGroup')
+          .replace('className: "NotificationGroup', 'className: "HeaderListGroup')
           .replace('flarum/forum/states/SearchState', 'flarum/common/states/SearchState')
       };
     };
