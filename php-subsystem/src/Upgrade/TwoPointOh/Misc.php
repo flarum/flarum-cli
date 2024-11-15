@@ -40,7 +40,7 @@ class Misc extends Replacement
 
     protected function operations(): array
     {
-        return ['run', 'types', 'alertable'];
+        return ['run', 'types', 'alertable', 'optionalArgs', 'constructorPropertyPromotion'];
     }
 
     function run(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -362,6 +362,150 @@ class Misc extends Replacement
                 if ($node instanceof \PhpParser\Node\Stmt\Class_) {
                     // Add the AlertableInterface implementation
                     $node->implements[] = new Node\Name('AlertableInterface');
+                }
+            }
+        });
+
+        return new ReplacementResult($traverser->traverse($ast));
+    }
+
+    function optionalArgs(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
+            public function leaveNode(\PhpParser\Node $node)
+            {
+                // PHP 8.4 deprecates optional arguments that have a type but does not include the null type.
+                if ($node instanceof Node\Param) {
+
+                    if (! $node->type || ! $node->default) {
+                        return $node;
+                    }
+
+                    if ($node->type instanceof Node\NullableType) {
+                        return $node;
+                    }
+
+                    if (! $node->default instanceof Node\Expr\ConstFetch || $node->default->name->name !== 'null') {
+                        return $node;
+                    }
+
+                    if ($node->type instanceof Node\UnionType) {
+                        $hasNullType = ! empty(array_filter($node->type->types, function ($type) {
+                            return $type instanceof Node\Expr\ConstFetch && $type->name->name === 'null';
+                        }));
+
+                        if ($hasNullType) {
+                            return $node;
+                        }
+                    }
+
+                    if ($node->type instanceof Node\Expr\ConstFetch && $node->type->name->name === 'mixed') {
+                        return $node;
+                    }
+
+                    // Adding the null type
+                    if ($node->type instanceof Node\UnionType || $node->type instanceof Node\IntersectionType) {
+                        $node->type->types[] = new Node\Expr\ConstFetch(new Node\Name('null'));
+                        return $node;
+                    }
+
+                    $node->type = new Node\NullableType($node->type);
+
+                    return $node;
+                }
+            }
+        });
+
+        return new ReplacementResult($traverser->traverse($ast));
+    }
+
+    function constructorPropertyPromotion(string $file, string $code, array $ast, array $data): ?ReplacementResult
+    {
+        $traverser = $this->traverser();
+
+        $traverser->addVisitor(new NodeVisitor\ParentConnectingVisitor());
+
+        $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
+            protected $data = [];
+            protected $currentClass = null;
+
+            public function enterNode(Node $node)
+            {
+                if ($node instanceof Node\Stmt\Class_) {
+                    $this->currentClass = $node->name->name;
+                    $this->data[$this->currentClass] = [
+                        'properties' => [],
+                    ];
+
+                    foreach ($node->stmts as $stmt) {
+                        if ($stmt instanceof Node\Stmt\Property) {
+                            foreach ($stmt->props as $prop) {
+                                if ($prop instanceof PropertyItem) {
+                                    $this->data[$this->currentClass]['properties'][$prop->name->name] = [
+                                        'flags' => $stmt->flags,
+                                        'passed_to_constructor' => false,
+                                        'directly_passed' => false,
+                                    ];
+                                }
+                            }
+                        }
+
+                        if ($stmt instanceof Node\Stmt\ClassMethod && $stmt->name->name === '__construct') {
+                            foreach ($stmt->params as $param) {
+                                if (isset($this->data[$this->currentClass]['properties'][$param->var->name])) {
+                                    $this->data[$this->currentClass]['properties'][$param->var->name]['passed_to_constructor'] = true;
+                                }
+                            }
+
+                            foreach ($stmt->stmts as $substmt) {
+                                if ($substmt instanceof Node\Stmt\Expression && $substmt->expr instanceof Node\Expr\Assign) {
+                                    if ($substmt->expr->var instanceof Node\Expr\PropertyFetch) {
+                                        $property = $substmt->expr->var->name->name;
+                                        $passedTheSameArgVar = $substmt->expr->expr instanceof Node\Expr\Variable && $substmt->expr->expr->name === $property;
+                                        if (isset($this->data[$this->currentClass]['properties'][$property]) && $passedTheSameArgVar) {
+                                            $this->data[$this->currentClass]['properties'][$property]['directly_passed'] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            public function leaveNode(\PhpParser\Node $node)
+            {
+                if ($node instanceof Node\Stmt\Class_) {
+                    $this->currentClass = $node->name->name;
+                }
+
+                if ($node instanceof Node\Stmt\Property
+                    && ! empty($this->data[$this->currentClass]['properties'][$node->props[0]->name->name]['passed_to_constructor'])
+                    && ! empty($this->data[$this->currentClass]['properties'][$node->props[0]->name->name]['directly_passed'])
+                ) {
+                    return NodeVisitor::REMOVE_NODE;
+                }
+
+                if ($node instanceof Node\Param && $node->getAttribute('parent') instanceof Node\Stmt\ClassMethod && $node->getAttribute('parent')->name->name === '__construct') {
+                    if (! empty($this->data[$this->currentClass]['properties'][$node->var->name]['passed_to_constructor'])
+                        && ! empty($this->data[$this->currentClass]['properties'][$node->var->name]['directly_passed'])
+                    ) {
+                        $node->flags = $this->data[$this->currentClass]['properties'][$node->var->name]['flags'];
+                    }
+                }
+
+                if ($node instanceof Node\Stmt\Expression && $node->expr instanceof Node\Expr\Assign) {
+                    if ($node->expr->var instanceof Node\Expr\PropertyFetch) {
+                        $property = $node->expr->var->name->name;
+
+                        if (! empty($this->data[$this->currentClass]['properties'][$property]['passed_to_constructor'])
+                            && ! empty($this->data[$this->currentClass]['properties'][$property]['directly_passed'])
+                        ) {
+                            return NodeVisitor::REMOVE_NODE;
+                        }
+                    }
                 }
             }
         });
