@@ -438,7 +438,7 @@ class Search extends Replacement
                 'constrain' => [
                     'params' => [
                         'query' => ['\\Illuminate\\Database\\Eloquent\\Builder'],
-                        'actor' => ['Flarum\\User\\User'],
+                        'actor' => ['\\Flarum\\User\\User'],
                         'negate' => ['bool'],
                     ],
                     'return' => ['void'],

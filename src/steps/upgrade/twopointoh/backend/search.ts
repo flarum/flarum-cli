@@ -192,6 +192,16 @@ export default class Search extends BaseUpgradeStep {
         }
 
         return null;
+      },
+
+      (_file, code) => {
+        if (! code.includes('$criteria->query') && ! code.includes('SearchCriteria $criteria')) {
+          return null;
+        }
+
+        return {
+          updated: code.replace('$criteria->query', '$criteria->filters')
+        };
       }
     ];
   }

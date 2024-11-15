@@ -13,6 +13,7 @@ class ChangeSignatures extends NodeVisitorAbstract
     protected $changes = [];
     protected $custom = null;
     protected $valid = false;
+    protected $uses = [];
 
     public function __construct(array $changes, Closure $custom = null)
     {
@@ -22,6 +23,12 @@ class ChangeSignatures extends NodeVisitorAbstract
 
     public function enterNode(Node $node)
     {
+        if ($node instanceof Node\Stmt\Use_) {
+            foreach ($node->uses as $use) {
+                $this->uses[($use->alias ? $use->alias->name : null) ?? $use->name->getLast()] = $use->name->toString();
+            }
+        }
+
         if (! $this->valid && $node instanceof Class_) {
             $implements = array_map(function (Node\Name $interface) {
                 return $interface->getAttribute('resolvedName')->name;
@@ -70,7 +77,14 @@ class ChangeSignatures extends NodeVisitorAbstract
                         foreach ($node->params as $i => $paramNode) {
                             if ($i === $k) {
                                 if ($paramType = NodeUtil::makeType($paramTypes)) {
-                                    $paramNode->type = $paramType;
+                                    if (! ($paramType instanceof Node\Name)
+                                        || ($paramType->getAttribute('resolvedName')
+                                            && $paramNode->type->getAttribute('resolvedName')
+                                            && ltrim($paramType->getAttribute('resolvedName')->name, '\\') !== ltrim($paramNode->type->getAttribute('resolvedName')->name, '\\')
+                                        )
+                                    ) {
+                                        $paramNode->type = $paramType;
+                                    }
                                 }
 
                                 if ($paramNode->var->name !== $param) {
