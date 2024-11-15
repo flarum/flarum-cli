@@ -36,11 +36,11 @@ export default class TwoPointOh extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected requireExistingExtension = false;
+  protected requireExistingExtension = true;
 
   skipFinalMessage = true;
 
-  protected steps(steps: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
+  protected steps(steps: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
     return this.prepareSteps(steps, [
@@ -62,10 +62,10 @@ export default class TwoPointOh extends BaseCommand {
       PhpUnit,
       // LESS
       LessChanges,
-    ]);
+    ], extRoot);
   }
 
-  private prepareSteps(steps: StepManager<FlarumProviders>, collection: any[]): StepManager<FlarumProviders> {
+  private prepareSteps(steps: StepManager<FlarumProviders>, collection: any[], extRoot: string): StepManager<FlarumProviders> {
     let total = 0;
     let stepCount = 1;
 
@@ -74,7 +74,7 @@ export default class TwoPointOh extends BaseCommand {
     });
 
     collection = collection.map((Step: new (...args: any) => any) => {
-      const step = new Step(this, stepCount, total, this.flags['force-steps']);
+      const step = new Step(this, extRoot, stepCount, total, this.flags['force-steps']);
       stepCount++;
       return step;
     });

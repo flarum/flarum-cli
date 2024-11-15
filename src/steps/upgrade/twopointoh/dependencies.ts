@@ -79,6 +79,10 @@ export default class Dependencies extends BaseUpgradeStep {
         }
       }
 
+      if (composer.require.php) {
+        composer.require.php = '^8.2';
+      }
+
       return {
         updated: composer,
       };

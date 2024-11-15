@@ -282,6 +282,19 @@ class Misc extends Replacement
                     'return' => ['array']
                 ],
             ],
+            'Flarum\\Extend\\ExtenderInterface' => [
+                'extend' => [
+                    'return' => ['void']
+                ],
+            ],
+            'Flarum\\Extend\\LifecycleInterface' => [
+                'onEnable' => [
+                    'return' => ['void']
+                ],
+                'onDisable' => [
+                    'return' => ['void']
+                ],
+            ],
         ], function (Node $node) {
             if ($node instanceof Node\Stmt\Return_
                 && $node->expr instanceof Node\Scalar\String_

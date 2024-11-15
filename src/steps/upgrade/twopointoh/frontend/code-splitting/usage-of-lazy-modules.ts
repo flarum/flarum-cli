@@ -96,12 +96,20 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
     },
   };
 
+  private composers = [
+    'ComposerBody',
+    'DiscussionComposer',
+    'ReplyComposer',
+    'EditPostComposer',
+  ];
+
   replacements(file: string): Replacement[] {
     if (file.endsWith('.js') || file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.jsx')) {
      return [
        this.updateModalShow(),
        this.updateComposerLoad(),
        this.updateExtending(),
+       this.updateMatches(),
        this.removeImportLines(),
      ];
     }
@@ -158,6 +166,10 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
         if (localModule) {
           lazyModules.push(localModule);
+
+          if (this.composers.includes(module)) {
+            this.composers.push(localModule);
+          }
         }
       }
     });
@@ -214,6 +226,8 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
         const lines: (t.ExpressionStatement | t.MemberExpression)[] = [];
 
+        const composers = this.composers;
+
         // pick up {module}.prototype... lines to add to the .then(() => { lines }) at the end of the call expression.
         traverse(ast, {
           ExpressionStatement(path) {
@@ -243,9 +257,17 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
             if (object.name !== module) return;
 
-            lines.push(node);
+            if (composers.includes(module)) {
+              lines.push(node);
+              path.remove();
+            } else if ((t.isFunctionExpression(expression.right) || t.isArrowFunctionExpression(expression.right)) && (t.isIdentifier(left.property) || t.isStringLiteral(left.property))) {
+              // SettingsPage.prototype['draftsItems'] = ...;
+              // change to extend('flarum/forum/components/SettingsPage', 'draftItems', ...);
+              const methodName = t.isIdentifier(left.property) ? left.property.name : left.property.value;
+              const extend = t.callExpression(t.identifier('extend'), [t.stringLiteral(importPath), t.stringLiteral(methodName), expression.right]);
 
-            path.remove();
+              path.replaceWith(t.expressionStatement(extend));
+            }
           },
         });
 
@@ -365,6 +387,21 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
         if (exists) {
           code = code.replace(new RegExp(`(^${importedAs}[^'"].*$)`, 'gm'), `$1 // @TODO: Check if this usage is correct. Lazy loaded modules must be loaded using the async import function. https://docs.flarum.org/2.x/extend/code-splitting`);
         }
+      });
+
+      return {
+        updated: code,
+      };
+    };
+  }
+
+  updateMatches(): Replacement {
+    return (_file, code) => {
+      this.forEachLazyModule(code, ({module, importPath}) => {
+        code = code
+          .replace(new RegExp(`composer\\.bodyMatches\\(${module}\\)`, 'g'), `composer.bodyMatches('${importPath}')`)
+          .replace(new RegExp(`\\.state\\.bodyMatches\\(${module}\\)`, 'g'), `.state.bodyMatches('${importPath}')`)
+          .replace(new RegExp(`app\\.current\\.matches\\(${module}\\)`, 'g'), `app.current.matches('${importPath}')`);
       });
 
       return {

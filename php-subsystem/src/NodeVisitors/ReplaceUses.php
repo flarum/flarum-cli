@@ -73,6 +73,16 @@ class ReplaceUses extends NodeVisitorAbstract
             }
         }
 
+        if ($node instanceof Node\Stmt\Property) {
+            $this->replaceOnType($node->type);
+        }
+
+        if ($node instanceof \PhpParser\Node\Expr\Instanceof_) {
+            foreach ($this->replacements as $replacement) {
+                $node->class->name = $this->replace($node->class->name, $replacement);
+            }
+        }
+
         if ($node instanceof \PhpParser\Node\Expr\ClassConstFetch) {
             foreach ($this->replacements as $replacement) {
                 if ($node->class instanceof \PhpParser\Node\Scalar\InterpolatedString ) {

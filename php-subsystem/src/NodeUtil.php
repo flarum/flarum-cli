@@ -45,7 +45,15 @@ class NodeUtil
             return new \PhpParser\Node\Stmt\Use_([
                 new \PhpParser\Node\Stmt\UseUse(new Name($fqn))
             ]);
-        }, $uses);
+        }, array_filter($uses, function (string $fqn) use ($node) {
+            foreach ($node->stmts as $stmt) {
+                if ($stmt instanceof \PhpParser\Node\Stmt\Use_ && $stmt->uses[0]->name->toString() === $fqn) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
 
         $lastUseStatement = null;
 

@@ -58,12 +58,14 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected step = 0;
   protected totalSteps = 0;
   protected forceStep = false;
+  protected root: string;
 
-  public constructor(command: BaseCommand, step: number, totalSteps: number, forceStep: boolean) {
+  public constructor(command: BaseCommand, root: string, step: number, totalSteps: number, forceStep: boolean) {
     this.command = command;
     this.step = step;
     this.totalSteps = totalSteps;
     this.forceStep = forceStep;
+    this.root = root;
   }
 
   protected beforeHook = false;
@@ -80,6 +82,10 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected fsEditor: null|Editor = null;
 
   async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
+    if (this.root !== paths.cwd()) {
+      process.chdir(this.root);
+    }
+
     const fsEditor = create(fs);
 
     this.fsEditor = fsEditor;

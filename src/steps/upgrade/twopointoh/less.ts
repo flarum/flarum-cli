@@ -155,7 +155,7 @@ export default class LessChanges extends BaseUpgradeStep {
         }
 
         for (const mixin of LessChanges.MIXINS) {
-          code = code.replace(new RegExp(`\.${mixin}\\((.*?)\\);`, 'g'), `${mixin}: $1;`);
+          code = code.replace(new RegExp(`\\.${mixin}\\((.*?)\\);`, 'g'), `${mixin}: $1;`);
         }
 
         code = replaceWithCssVars(replaceWithCssVars(code))

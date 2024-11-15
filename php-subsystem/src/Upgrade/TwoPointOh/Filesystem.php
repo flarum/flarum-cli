@@ -33,6 +33,14 @@ class Filesystem extends Replacement
             [
                 'from' => 'League\\Flysystem\\Memory\\MemoryAdapter',
                 'to' => 'League\\Flysystem\\InMemory\\InMemoryFilesystemAdapter'
+            ],
+            [
+                'from' => 'League\\Flysystem\\AdapterInterface',
+                'to' => 'League\\Flysystem\\FilesystemAdapter'
+            ],
+            [
+                'from' => 'League\\Flysystem\\AwsS3v3\\AwsS3Adapter',
+                'to' => 'League\\Flysystem\\AwsS3V3\\AwsS3V3Adapter'
             ]
         ]));
 

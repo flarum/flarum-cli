@@ -41,7 +41,8 @@ export default class Infrastructure extends BaseUpgradeStep {
         .replace('REUSABLE_backend.yml@1.x', 'REUSABLE_backend.yml@2.x')
         .replace('REUSABLE_frontend.yml@1.x', 'REUSABLE_frontend.yml@2.x')
         .replace('REUSABLE_backend.yml@main', 'REUSABLE_backend.yml@2.x')
-        .replace('REUSABLE_frontend.yml@main', 'REUSABLE_frontend.yml@2.x'),
+        .replace('REUSABLE_frontend.yml@main', 'REUSABLE_frontend.yml@2.x')
+        .replace(/php_versions: '\["[^']+]'/, "php_versions: '[\"8.2\", \"8.3\", \"8.4\"]'")
     });
   }
 
