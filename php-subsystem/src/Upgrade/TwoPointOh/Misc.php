@@ -295,6 +295,11 @@ class Misc extends Replacement
                     'return' => ['void']
                 ],
             ],
+            'Flarum\\Api\\Controller\\AbstractDeleteController' => [
+                'delete' => [
+                    'return' => ['void']
+                ],
+            ],
         ], function (Node $node) {
             if ($node instanceof Node\Stmt\Return_
                 && $node->expr instanceof Node\Scalar\String_
