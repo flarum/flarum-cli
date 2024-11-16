@@ -458,6 +458,9 @@ class Misc extends Replacement
                                 if ($prop instanceof PropertyItem) {
                                     $this->data[$this->currentClass]['properties'][$prop->name->name] = [
                                         'flags' => $stmt->flags,
+                                        'type' => $stmt->type && property_exists($stmt->type, 'name')
+                                            ? $stmt->type->name
+                                            : null,
                                         'passed_to_constructor' => false,
                                         'directly_passed' => false,
                                     ];
@@ -469,6 +472,10 @@ class Misc extends Replacement
                             foreach ($stmt->params as $param) {
                                 if (isset($this->data[$this->currentClass]['properties'][$param->var->name])) {
                                     $this->data[$this->currentClass]['properties'][$param->var->name]['passed_to_constructor'] = true;
+
+                                    if (empty($this->data[$this->currentClass]['properties'][$param->var->name]['type']) && $param->type && property_exists($param->type, 'name')) {
+                                        $this->data[$this->currentClass]['properties'][$param->var->name]['type'] = $param->type->name;
+                                    }
                                 }
                             }
 
@@ -499,6 +506,30 @@ class Misc extends Replacement
                     && ! empty($this->data[$this->currentClass]['properties'][$node->props[0]->name->name]['directly_passed'])
                 ) {
                     return NodeVisitor::REMOVE_NODE;
+                }
+
+                if ($node instanceof Node\Stmt\ClassMethod && $node->name->name === '__construct' && $node->getDocComment()) {
+                    // remove needless dockblock lines such as
+                    // @param {type} $property
+                    $dockblock = $node->getDocComment()->getText();
+                    $modified = false;
+
+                    foreach ($this->data[$this->currentClass]['properties'] as $property => $data) {
+                        if (empty($data['passed_to_constructor'] || empty($data['directly_passed']))) {
+                            continue;
+                        }
+
+                        $dockblock = preg_replace('/^\s*\*\s*@param\s*'.($data['type'] ?? '').'\s*\$'.$property.'\s*$/m', '', $dockblock);
+                        $modified = true;
+                    }
+
+                    if ($modified) {
+                        if (preg_match('/^[\/*\s]+$/', $dockblock)) {
+                            $node->setAttribute('comments', null);
+                        } else {
+                            $node->setAttribute('comments', [new \PhpParser\Comment\Doc($dockblock)]);
+                        }
+                    }
                 }
 
                 if ($node instanceof Node\Param && $node->getAttribute('parent') instanceof Node\Stmt\ClassMethod && $node->getAttribute('parent')->name->name === '__construct') {
