@@ -18,6 +18,7 @@ import LessChanges from "../../steps/upgrade/twopointoh/less";
 import PhpUnit from "../../steps/upgrade/twopointoh/backend/phpunit";
 import {Flags} from "@oclif/core";
 import EmailViews from "../../steps/upgrade/twopointoh/backend/email-views";
+import InterventionImage from "../../steps/upgrade/twopointoh/backend/intervention-image";
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -58,6 +59,7 @@ export default class TwoPointOh extends BaseCommand {
       Mailer,
       EmailViews,
       JsonApi,
+      InterventionImage,
       Search,
       PhpUnit,
       // LESS

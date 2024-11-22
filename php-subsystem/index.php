@@ -23,6 +23,10 @@ switch ($input['op']) {
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Filesystem())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
 
+    case 'upgrade.2-0.intervention-image':
+        $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\InterventionImage())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
+        break;
+
     case 'upgrade.2-0.json-api':
         $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\JsonApi())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
         break;
