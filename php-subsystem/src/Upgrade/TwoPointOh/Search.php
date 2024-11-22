@@ -31,6 +31,10 @@ class Search extends Replacement
             return null;
         }
 
+        if (strpos($code, 'implements FilterInterface') !== false) {
+            return null;
+        }
+
         $data['filterKey'] = $data['gambits'][0]['filterKey'] ?? '';
 
         $traverser = $this->traverser();
@@ -51,7 +55,7 @@ class Search extends Replacement
             {
                 if ($node instanceof Node\Stmt\Namespace_) {
                     NodeUtil::addUsesToNamespace($node, [
-                        'Flarum\\Search\\Filter\\FilterInterface' => 'Flarum\\Search\\Filter\\FilterInterface',
+                        'Flarum\\Search\\Filter\\FilterInterface',
                     ]);
                 }
 

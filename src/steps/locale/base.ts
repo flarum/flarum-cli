@@ -89,7 +89,9 @@ export class LocaleStep implements Step<FlarumProviders> {
       // Do nothing
     }
 
-    fsEditor.write(path, doc.toString());
+    fsEditor.write(path, doc.toString({
+      lineWidth: 200,
+    }));
 
     return fs;
   }

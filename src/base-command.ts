@@ -129,10 +129,18 @@ export default abstract class BaseCommand extends Command {
         this.log(chalk.bold(chalk.yellow('Before the exit, the following steps were completed:')));
       }
     } else if (!out.succeeded) {
-      this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
-      this.log(chalk.red(out.error));
+      const prettyPrint = out.e?.code === 'FL_ERR';
 
-      if (out.errorTrace) {
+      if (! prettyPrint) this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
+
+      if (prettyPrint) {
+        this.log('\n');
+        this.log('\u001B[A     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error))
+      } else {
+        this.log(chalk.red(out.error));
+      }
+
+      if (out.errorTrace && ! prettyPrint) {
         this.log(chalk.dim(chalk.red(out.errorTrace)));
       }
 

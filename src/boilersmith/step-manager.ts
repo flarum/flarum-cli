@@ -75,6 +75,7 @@ type StepsResult =
       errorTrace?: string;
       messages: Message[];
       stepsRan: string[];
+      e?: any;
     };
 
 const formatDependencies = (strings: string[]) => strings.map((s) => `"${s}"`).join(', ');
@@ -247,6 +248,7 @@ export class StepManager<Providers extends DefaultProviders> {
         errorTrace: error instanceof Error ? error.stack : undefined,
         stepsRan: stepNames,
         messages: io.getOutput(),
+        e: error,
       };
     }
 

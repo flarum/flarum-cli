@@ -79,6 +79,7 @@ export default class Search extends BaseUpgradeStep {
                 )
                 .replace(/\s*public function apply\(([^)]*)\)\s*{.*?[^ ] {4}}/s, '')
                 .replace(/namespace (.*)Gambit([^;]+);/, `namespace $1Filter$2;`)
+                .replace(/namespace (.*)Gambit([^;]*);/, `namespace $1Filter$2;`)
             }
           }
         }

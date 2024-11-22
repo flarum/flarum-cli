@@ -96,7 +96,9 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     const status = await simpleGit(paths.requestedDir() ?? paths.cwd()).status();
 
     if (status?.files.length) {
-      this.command.error('You have uncommitted changes in your repository. Please commit or stash them before continuing.');
+      this.command.error('You have uncommitted changes in your repository. Please commit or stash them before continuing.', {
+        code: 'FL_ERR',
+      });
     }
 
     const stepMarker = chalk.bgRed.bold('  STEP ' + this.step + '/' + this.totalSteps + '   ');
