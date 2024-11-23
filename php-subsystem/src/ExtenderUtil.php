@@ -49,9 +49,11 @@ class ExtenderUtil
     $this->traverser->addVisitor($this->nameResolver);
   }
 
-  public function add($params)
+  public function add($params): array
   {
-    return $this->run(new NodeVisitors\AddExtender($params, $this->nameResolver->getNameContext()));
+    return [
+        'code' => $this->run(new NodeVisitors\AddExtender($params, $this->nameResolver->getNameContext())),
+    ];
   }
 
   protected function run(NodeVisitor $visitor)

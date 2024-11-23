@@ -8,7 +8,7 @@ use Flarum\Foundation\EventGeneratorTrait;
 
 class <%= className %> extends AbstractModel
 {
-    // See https://docs.flarum.org/extend/models.html#backend-models for more information.
+    // See https://docs.flarum.org/2.x/extend/models.html#backend-models for more information.
     <% if (tableName) { %>
     protected $table = '<%= tableName %>';<% } %>
 }

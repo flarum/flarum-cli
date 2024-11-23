@@ -9,7 +9,7 @@ import { GenerateSearchDriverAbstractModelSearcherStub } from '../../../steps/st
 import { LocaleStep } from '../../../steps/locale/base';
 
 export default class SearchDriver extends BaseCommand {
-  static description = 'Generate a controller class';
+  static description = 'Generate a search driver';
 
   static flags = { ...BaseCommand.flags };
 

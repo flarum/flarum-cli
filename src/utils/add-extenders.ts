@@ -120,7 +120,7 @@ export default function addExtenders(path: string, extenders: ExtenderDef[], fro
 
   array.elements.push(...expressions);
 
-  generateCode(ast).then((formattedCode: string) => fs.writeFileSync(path, formattedCode));
+  generateCode(ast, true).then((formattedCode: string) => fs.writeFileSync(path, formattedCode));
 }
 
 function applyImportsForExtenders(

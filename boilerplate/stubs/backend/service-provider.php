@@ -9,7 +9,7 @@ class <%= className %> extends AbstractServiceProvider
 {
     public function register()
     {
-        // See https://docs.flarum.org/extend/service-provider.html#service-provider for more information.
+        // See https://docs.flarum.org/2.x/extend/service-provider.html#service-provider for more information.
     }
 
     public function boot(Container $container)

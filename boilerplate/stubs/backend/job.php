@@ -2,22 +2,17 @@
 
 namespace <%= classNamespace %>;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\SerializesModels;
+use Flarum\Queue\AbstractJob;
 
-class <%= className %> implements ShouldQueue
+class <%= className %>
 {
-    use Queueable;
-    use SerializesModels;
-
     public function __construct(
-
+        //
     ) {
     }
 
     public function handle()
     {
-        // See https://laravel.com/docs/10.x/queues for more information.
+        // See https://laravel.com/docs/11.x/queues for more information.
     }
 }

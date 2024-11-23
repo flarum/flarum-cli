@@ -13,7 +13,7 @@ import chalk from 'chalk';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { tmpdir } from 'os';
-import simpleGit from 'simple-git';
+import simpleGit, {CommitResult} from 'simple-git';
 import { create } from 'mem-fs-editor';
 import { commitAsync } from 'boilersmith/utils/commit-async';
 import { Validator } from '../../utils/validation';
@@ -125,9 +125,9 @@ async function getMonorepoConf(io: IO, monorepoConfPath?: string): Promise<Flaru
   return { packages };
 }
 
-async function commitAll(cwd: string, message: string | string[]) {
+export async function commitAll(cwd: string, message: string | string[]): Promise<CommitResult> {
   await simpleGit(cwd).add('.');
-  await simpleGit(cwd).commit(message);
+  return simpleGit(cwd).commit(message);
 }
 
 export class MonorepoCreate implements Step<FlarumProviders> {

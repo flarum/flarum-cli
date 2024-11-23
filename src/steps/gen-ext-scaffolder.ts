@@ -157,7 +157,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           name,
           type: 'autocomplete',
           message: 'License',
-          choices: [...(spdxLicenseListSimple as Set<string>)].map((e) => ({ title: e, value: e })),
+          choices: [...(spdxLicenseListSimple as Set<string>), 'proprietary'].map((e) => ({ title: e, value: e })),
           initial: 'MIT',
         },
         getCurrVal: async (fs: Store, paths: Paths) => {
@@ -170,7 +170,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       return {
         name,
         uses: ['licenseType'],
-        compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
+        compute: async (_paths, licenseType: string) => (licenseType && licenseType !== 'proprietary' ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
       };
 
     case 'extensionId':
@@ -387,7 +387,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         longDescription: "Files, tools, and scripts to build Flarum's frontend.",
         dependsOn: [],
         filesToReplace: [
-          'js/webpack.config.js',
+          'js/webpack.config.cjs',
           { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
           { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
           { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },

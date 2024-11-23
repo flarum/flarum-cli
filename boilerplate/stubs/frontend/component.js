@@ -16,7 +16,7 @@ export default class <%= className %> extends Component {
   view() {
     return (
       <div className="<%= className %>">
-        // See https://docs.flarum.org/extend/frontend.html#components for more information.
+        {/* See https://docs.flarum.org/2.x/extend/frontend.html#components for more information. */}
       </div>
     );
   }

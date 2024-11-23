@@ -199,6 +199,8 @@ class AddExtender extends NodeVisitorAbstract
         }
 
         return $closure->getNode();
+      case 'raw':
+        return $spec['value'];
       default:
         $type = $spec['type'];
         throw new \Exception("Unrecognized type: $type");

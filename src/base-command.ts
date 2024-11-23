@@ -21,7 +21,7 @@ export enum LocationType {
 }
 
 export default abstract class BaseCommand extends Command {
-  protected STUB_PATH = resolve(__dirname, '../boilerplate/stubs/');
+  public STUB_PATH = resolve(__dirname, '../boilerplate/stubs/');
 
   protected dry = false;
   protected locationType?: LocationType;
@@ -53,19 +53,25 @@ export default abstract class BaseCommand extends Command {
 
   protected requireExistingExtension = true;
 
-  async run(): Promise<void> {
-    const { args, flags } = await this.parse(this.constructor as any);
+  protected skipFinalMessage = false;
+
+  async runSteps(steps: StepManager<FlarumProviders>) {
+    const { args} = await this.parse(this.constructor as any);
 
     this.args = args;
-    this.flags = flags;
-
     const path: string | undefined = args.path;
 
-    const welcomeMessage = this.welcomeMessage();
-    if (welcomeMessage) {
-      this.log(welcomeMessage);
-    }
+    const paths = new NodePaths({
+      requestedDir: path,
+      package: await this.extRoot(path),
+    });
 
+    const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
+
+    return steps.run(paths, this.genIO(), { php: phpProvider }, this.dry, args);
+  }
+
+  async extRoot(path: string|undefined): Promise<string> {
     let extRoot: string;
 
     if (this.requireExistingExtension) {
@@ -78,23 +84,37 @@ export default abstract class BaseCommand extends Command {
       extRoot = path || process.cwd();
     }
 
+    return extRoot;
+  }
+
+  async run(): Promise<void> {
+    const { args, flags } = await this.parse(this.constructor as any);
+
+    this.args = args;
+    this.flags = flags;
+
+    const path: string | undefined = args.path;
+
+    const welcomeMessage = this.welcomeMessage();
+
+    if (welcomeMessage) {
+      this.log(welcomeMessage);
+      await this.continueWhenReady(this.genIO());
+    }
+
+    const extRoot = await this.extRoot(path);
+
     await this.additionalPreRunChecks(extRoot);
 
-    const paths = new NodePaths({
-      requestedDir: path,
-      package: extRoot,
-    });
-
-    const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
-
-    const out = await this.steps(new StepManager<FlarumProviders>(), extRoot).run(paths, this.genIO(), { php: phpProvider }, this.dry, args);
+    const out = await this.runSteps(this.steps(new StepManager<FlarumProviders>(), extRoot));
 
     const errorMessages = out.messages.filter((m) => m.type === 'error');
 
-    this.log('\n\n');
-    if (out.succeeded && errorMessages.length === 0) {
+    // this.log('\n\n');
+
+    if (!this.skipFinalMessage && out.succeeded && errorMessages.length === 0) {
       this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
-    } else if (out.succeeded) {
+    } else if (!this.skipFinalMessage && out.succeeded) {
       this.log(chalk.bold(chalk.underline(chalk.yellow('All steps completed, but with some errors:'))));
 
       for (const message of errorMessages) {
@@ -102,15 +122,25 @@ export default abstract class BaseCommand extends Command {
       }
 
       this.log(chalk.bold(chalk.yellow('The steps that completed were:')));
-    } else if (out.error.startsWith('EEXIT:')) {
+    } else if (!out.succeeded && out.error.startsWith('EEXIT:')) {
       this.log(chalk.bold(chalk.underline(chalk.red('Exiting.'))));
-      if (out.stepsRan.length > 0) {
+
+      if (!this.skipFinalMessage && out.stepsRan.length > 0) {
         this.log(chalk.bold(chalk.yellow('Before the exit, the following steps were completed:')));
       }
-    } else {
-      this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
-      this.log(chalk.red(out.error));
-      if (out.errorTrace) {
+    } else if (!out.succeeded) {
+      const prettyPrint = out.e?.code === 'FL_ERR';
+
+      if (! prettyPrint) this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
+
+      if (prettyPrint) {
+        this.log('\n');
+        this.log('\u001B[A     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error))
+      } else {
+        this.log(chalk.red(out.error));
+      }
+
+      if (out.errorTrace && ! prettyPrint) {
         this.log(chalk.dim(chalk.red(out.errorTrace)));
       }
 
@@ -120,13 +150,16 @@ export default abstract class BaseCommand extends Command {
       }
     }
 
-    for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
+    if (!this.skipFinalMessage) {
+      for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
+    }
 
     this.log('');
     const nonErrorMessages = out.messages.filter((m) => m.type !== 'error');
     if (nonErrorMessages.length > 0) {
       this.log('');
       this.log('The following messages were generated during execution:');
+
       for (const message of nonErrorMessages) {
         this.log(message.message);
       }
@@ -137,6 +170,7 @@ export default abstract class BaseCommand extends Command {
     }
 
     const goodbyeMessage = this.goodbyeMessage();
+
     if (goodbyeMessage) {
       this.log(goodbyeMessage);
     }
@@ -231,7 +265,11 @@ export default abstract class BaseCommand extends Command {
     );
   }
 
+  protected confirmed = false;
+
   protected async confirmExtDir(extRoot: string): Promise<void> {
+    if (this.confirmed) return;
+
     const verify = await this.genIO().getParam({
       name: 'verify',
       type: 'confirm',
@@ -240,6 +278,8 @@ export default abstract class BaseCommand extends Command {
     });
 
     if (!verify) this.exit();
+
+    this.confirmed = true;
   }
 
   protected async ensureComposerInstallRan(extRoot: string): Promise<void> {
@@ -260,6 +300,21 @@ export default abstract class BaseCommand extends Command {
       cli.action.stop();
     } else {
       this.error("Run `composer install` in your extension's root directory, then try again.");
+    }
+  }
+
+  public async continueWhenReady(io: IO): Promise<void> {
+    const continueUpgrade = await io.getParam({
+      name: 'continue',
+      type: 'confirm',
+      message: 'Ready to continue?',
+      initial: true,
+    });
+
+    if (! continueUpgrade) {
+      this.log('');
+      this.log('Aborted.');
+      this.exit();
     }
   }
 

@@ -1,6 +1,9 @@
 import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import PageStructure from 'flarum/forum/components/PageStructure';
+import IndexSidebar from 'flarum/forum/components/IndexSidebar';
+import listItems from 'flarum/common/helpers/listItems';
+import ItemList from 'flarum/common/utils/ItemList';
 
 export default class <%= className %> extends Page {
   loading = false;
@@ -20,7 +23,8 @@ export default class <%= className %> extends Page {
         className="<%= className %>"
         loading={this.loading}
         hero={this.hero.bind(this)}
-        sidebar={this.sidebar.bind(this)}
+        sidebar={() => <IndexSidebar />}
+        // sidebar={this.sidebar.bind(this)}
       >
         {this.loading || (
           <div className="<%= className %>-content">
@@ -31,7 +35,7 @@ export default class <%= className %> extends Page {
     );
   }
 
-  hero(): Mithril.Children {
+  hero() {
     return (
       <header className="Hero <%= className %>Hero">
         <div className="container">
@@ -48,17 +52,17 @@ export default class <%= className %> extends Page {
     );
   }
 
-  sidebar(): Mithril.Children {
-    return (
-      <nav className="<%= className %>-nav">
-        <ul>{listItems(this.sidebarItems().toArray())}</ul>
-      </nav>
-    );
-  }
-
-  sidebarItems() {
-    const items = new ItemList();
-
-    return items;
-  }
+  // sidebar() {
+  //   return (
+  //     <nav className="<%= className %>-nav">
+  //       <ul>{listItems(this.sidebarItems().toArray())}</ul>
+  //     </nav>
+  //   );
+  // }
+  //
+  // sidebarItems() {
+  //   const items = new ItemList();
+  //
+  //   return items;
+  // }
 }

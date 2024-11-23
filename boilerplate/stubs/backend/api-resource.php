@@ -52,9 +52,10 @@ class <%= className %> extends Resource\AbstractDatabaseResource
         return [
 
             /**
-             * @see https://docs.flarum.org/extend/api
+             * @see https://docs.flarum.org/2.x/extend/api#api-resources
              */
 
+            // Example:
             Schema\Str::make('name')
                 ->requiredOnCreate()
                 ->minLength(3)

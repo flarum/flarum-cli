@@ -44,12 +44,18 @@ export class LocaleStep implements Step<FlarumProviders> {
 
     this.params = await this.compileParams(fs, paths, io);
 
-    const path = paths.package('locale/en.yml');
+    let path;
 
-    // Ensure locale/en.yml exists
-    if (!fsEditor.exists(path)) {
-      const stubFilePath = resolve(__dirname, `../../../boilerplate/skeleton/extension/locale/en.yml`);
-      fsEditor.copyTpl(stubFilePath, path, { params: this.params });
+    if (fsEditor.exists(paths.package('resources/locale/en.yml'))) {
+      path = paths.package('resources/locale/en.yml');
+    } else {
+      path = paths.package('locale/en.yml');
+
+      // Ensure locale/en.yml exists
+      if (!fsEditor.exists(path)) {
+        const stubFilePath = resolve(__dirname, `../../../boilerplate/skeleton/extension/locale/en.yml`);
+        fsEditor.copyTpl(stubFilePath, path, {params: this.params});
+      }
     }
 
     const doc = YAML.parseDocument(fsEditor.read(path));
@@ -83,7 +89,9 @@ export class LocaleStep implements Step<FlarumProviders> {
       // Do nothing
     }
 
-    fsEditor.write(path, doc.toString());
+    fsEditor.write(path, doc.toString({
+      lineWidth: 200,
+    }));
 
     return fs;
   }
