@@ -28,7 +28,7 @@ This tool was built to simplify the development of Flarum extensions by automati
 <!-- installation -->
 
 ```sh-session
-$ npm install -g @flarum/cli
+$ npm install -g @flarum/cli@^2.0.0
 ```
 
 <!-- installationstop -->
