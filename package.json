@@ -5,6 +5,7 @@
   "author": "Flarum Team",
   "bin": {
     "fl": "bin/run",
+    "fl1": "bin/run",
     "flarum-cli": "bin/run"
   },
   "bugs": "https://github.com/flarum/cli/issues",
