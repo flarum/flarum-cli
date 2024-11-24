@@ -5,7 +5,7 @@ import { Validator } from '../../../utils/validation';
 import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 import { Store } from 'mem-fs';
-import {StubGenerationSchema} from "boilersmith/steps/stub-base";
+import { StubGenerationSchema } from 'boilersmith/steps/stub-base';
 
 export class GenerateAdvancedApiResourceStub extends BasePhpStubStep {
   type = 'Generate Api Resource Class';

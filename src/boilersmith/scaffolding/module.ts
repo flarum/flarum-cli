@@ -180,7 +180,6 @@ export async function setModuleValue<MN extends string>(
   }
 }
 
-// eslint-disable-next-line max-params,complexity
 export async function applyModule<MN extends string, TN extends string>(
   module: Module<MN>,
   modulesEnabled: Record<string, boolean>,

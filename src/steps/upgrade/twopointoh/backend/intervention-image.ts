@@ -1,29 +1,27 @@
-import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
+import chalk from 'chalk';
 
 export default class InterventionImage extends BaseUpgradeStep {
   type = 'Intervention Image Library v3';
 
   replacements(file: string): Replacement[] {
-    if (! file.endsWith('.php')) return [];
+    if (!file.endsWith('.php')) return [];
 
     return [
       (file, code) => ({
-        updated: this.php!.run('upgrade.2-0.intervention-image', { file, code }).code
-      })
+        updated: this.php!.run('upgrade.2-0.intervention-image', { file, code }).code,
+      }),
     ];
   }
 
   targets(): string[] {
-    return [
-      'src/**/*',
-    ];
+    return ['src/**/*'];
   }
 
   gitCommit(): GitCommit {
     return {
       message: 'chore(2.0): `intervention/image` v3 changes',
-      description: 'Intervention Image Library v3 changes'
+      description: 'Intervention Image Library v3 changes',
     };
   }
 

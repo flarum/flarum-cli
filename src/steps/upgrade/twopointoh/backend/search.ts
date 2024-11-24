@@ -1,20 +1,19 @@
-import {AdvancedContent, BaseUpgradeStep, GitCommit, Replacement} from "../base";
-import chalk from "chalk";
-import {StepManager} from "boilersmith/step-manager";
-import {FlarumProviders} from "../../../../providers";
-import {genExtScaffolder} from "../../../gen-ext-scaffolder";
-import {GenerateGambitStub} from "../../../stubs/frontend/gambit";
-import {GenerateSearchGambitExtender} from "../../../js/search-gambit";
-import {LocaleStep} from "../../../locale/base";
-import s from "string";
-import {pluralKebabCaseModel} from "../../../../utils/model-name";
+import { AdvancedContent, BaseUpgradeStep, GitCommit, Replacement } from '../base';
+import chalk from 'chalk';
+import { StepManager } from 'boilersmith/step-manager';
+import { FlarumProviders } from '../../../../providers';
+import { genExtScaffolder } from '../../../gen-ext-scaffolder';
+import { GenerateGambitStub } from '../../../stubs/frontend/gambit';
+import { GenerateSearchGambitExtender } from '../../../js/search-gambit';
+import { LocaleStep } from '../../../locale/base';
+import { pluralKebabCaseModel } from '../../../../utils/model-name';
 
 type Gambit = {
   name: string;
   pattern: string;
   filterKey?: string;
   filterFile: string;
-}
+};
 
 export default class Search extends BaseUpgradeStep {
   type = 'Search & Filter API changes';
@@ -22,7 +21,12 @@ export default class Search extends BaseUpgradeStep {
   generatedFrontendStuff = false;
 
   protected gambits: Gambit[] = [];
-  protected data: { collectedData: any, replacements: { from: string, to: string }[], filterClasses: string[] } = { collectedData: {}, replacements: [], filterClasses: [] };
+  protected data: { collectedData: any; replacements: { from: string; to: string }[]; filterClasses: string[] } = {
+    collectedData: {},
+    replacements: [],
+    filterClasses: [],
+  };
+
   protected searchers: Record<string, string> = {};
 
   before(file: string, code: string, _advanced: AdvancedContent): void {
@@ -38,13 +42,8 @@ export default class Search extends BaseUpgradeStep {
       (file, code) => {
         if (code.includes(' extends AbstractRegexGambit') || /implements ([\dA-z]+,\s*)*GambitInterface/.test(code)) {
           const isOnlyGambit = !code.includes('FilterInterface');
-          const oldName = file.split('/')
-            .pop()!
-            .replace('.php', '');
-          const name = oldName
-            .replace('FilterGambit', 'Gambit')
-            .replace('GambitFilter', 'Gambit')
-            .replace('Filter', 'Gambit');
+          const oldName = file.split('/').pop()!.replace('.php', '');
+          const name = oldName.replace('FilterGambit', 'Gambit').replace('GambitFilter', 'Gambit').replace('Filter', 'Gambit');
           const filterName = name.replace('Gambit', 'Filter');
           const pattern = code.match(/ function getGambitPattern\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
           const filterKey = isOnlyGambit
@@ -52,11 +51,12 @@ export default class Search extends BaseUpgradeStep {
             : code.match(/function getFilterKey\(\)(?:: string)?\s*{\s*return '(.*)';\s*}/)?.[1];
 
           if (pattern || /^\s+public function apply\(SearchState \$.+$/m.test(code)) {
-            const newPath = file.replace(/FilterGambit/g, 'Filter')
+            const newPath = file
+              .replace(/FilterGambit/g, 'Filter')
               .replace(/GambitFilter/g, 'Filter')
               .replace(/Gambit/g, 'Filter');
 
-            if (pattern) this.gambits.push({name, pattern, filterKey, filterFile: newPath});
+            if (pattern) this.gambits.push({ name, pattern, filterKey, filterFile: newPath });
 
             // old fully qualified class name to new fully qualified class name
             const namespace = code.match(/namespace ([^;]+);/)?.[1];
@@ -73,14 +73,11 @@ export default class Search extends BaseUpgradeStep {
                 .replace('use Flarum\\Search\\GambitInterface;\n', '')
                 .replace(/implements ([\dA-z]+,\s*)*GambitInterface(,\s*)?/, 'implements $1')
                 .replace(/\s*\w+ function getGambitPattern\(\)(?:: string)?\s*{\s*return '.*';\s*}/, '')
-                .replace(/(\s*protected function )conditions(\([^)]*\)\s*{.*?[^ ] {4}})/s, isOnlyGambit
-                  ? '$1filter$2'
-                  : ''
-                )
+                .replace(/(\s*protected function )conditions(\([^)]*\)\s*{.*?[^ ] {4}})/s, isOnlyGambit ? '$1filter$2' : '')
                 .replace(/\s*public function apply\(([^)]*)\)\s*{.*?[^ ] {4}}/s, '')
                 .replace(/namespace (.*)Gambit([^;]+);/, `namespace $1Filter$2;`)
-                .replace(/namespace (.*)Gambit([^;]*);/, `namespace $1Filter$2;`)
-            }
+                .replace(/namespace (.*)Gambit([^;]*);/, `namespace $1Filter$2;`),
+            };
           }
         }
 
@@ -110,7 +107,7 @@ export default class Search extends BaseUpgradeStep {
       },
 
       (file, code) => {
-        if (! code.includes(' extends AbstractFilterer') || ! code.includes('use Flarum\\Filter\\AbstractFilterer')) {
+        if (!code.includes(' extends AbstractFilterer') || !code.includes('use Flarum\\Filter\\AbstractFilterer')) {
           return null;
         }
 
@@ -137,7 +134,7 @@ export default class Search extends BaseUpgradeStep {
       async (_file) => {
         if (this.gambits.length > 0 && Object.keys(this.data.collectedData.extendData?.searchers || {}).length > 0) {
           const result = await this.command.runSteps(
-            (new StepManager<FlarumProviders>()).silentGroup((steps) => {
+            new StepManager<FlarumProviders>().silentGroup((steps) => {
               this.gambits.forEach((gambit, index) => {
                 let gambitKey = gambit.pattern.replace('is:', '');
 
@@ -165,19 +162,24 @@ export default class Search extends BaseUpgradeStep {
                     type: gambit.pattern.includes('is:') ? 'boolean' : 'key-value',
                     filterKey: gambit.filterKey,
                   })
-                  .step(new GenerateSearchGambitExtender(), {}, [
+                  .step(
+                    new GenerateSearchGambitExtender(),
+                    {},
+                    [
+                      {
+                        sourceStep: `gambit-${index}`,
+                        exposedName: 'classNamespace',
+                        consumedName: 'className',
+                      },
+                    ],
                     {
-                      sourceStep: `gambit-${index}`,
-                      exposedName: 'classNamespace',
-                      consumedName: 'className',
-                    },
-                  ], {
-                    frontend: 'common',
-                    modelType: type,
-                  })
+                      frontend: 'common',
+                      modelType: type,
+                    }
+                  )
                   .step(new LocaleStep(genExtScaffolder()), {}, [], {
                     key: `lib.gambits.${gambit.filterKey}.key`,
-                    value: gambitKey
+                    value: gambitKey,
                   });
 
                 delete this.gambits[index];
@@ -185,7 +187,7 @@ export default class Search extends BaseUpgradeStep {
             })
           );
 
-          if (! result.succeeded) {
+          if (!result.succeeded) {
             this.command.error(result.error);
           }
 
@@ -196,22 +198,19 @@ export default class Search extends BaseUpgradeStep {
       },
 
       (_file, code) => {
-        if (! code.includes('$criteria->query') && ! code.includes('SearchCriteria $criteria')) {
+        if (!code.includes('$criteria->query') && !code.includes('SearchCriteria $criteria')) {
           return null;
         }
 
         return {
-          updated: code.replace('$criteria->query', '$criteria->filters')
+          updated: code.replace('$criteria->query', '$criteria->filters'),
         };
-      }
+      },
     ];
   }
 
   targets(): string[] {
-    return [
-      'src/**/*',
-      'extend.php',
-    ];
+    return ['src/**/*', 'extend.php'];
   }
 
   gitCommit(): GitCommit {
@@ -226,7 +225,9 @@ export default class Search extends BaseUpgradeStep {
     const readMore = chalk.dim(`Read more: ${link}`);
     const exampleBeforeLink = 'https://github.com/flarum/framework/blob/1.x/extensions/tags';
     const exampleAfterLink = 'https://github.com/flarum/framework/blob/2.x/extensions/tags';
-    const exampleReadMore = chalk.dim(`We recommend looking at a comparison between the bundled extensions (like tags) from 1.x to 2.x to have a better understanding of the changes:`);
+    const exampleReadMore = chalk.dim(
+      `We recommend looking at a comparison between the bundled extensions (like tags) from 1.x to 2.x to have a better understanding of the changes:`
+    );
 
     return `Flarum 2.0 introduces a new search driver implementation. It also merges Filterers and Searchers into a single API.
                      Gambits are now handled on the frontend side where they are converted to filters.

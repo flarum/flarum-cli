@@ -1,5 +1,5 @@
-import {BaseUpgradeStep, GitCommit, Replacement} from "./base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, Replacement } from './base';
+import chalk from 'chalk';
 
 export default class Dependencies extends BaseUpgradeStep {
   type = 'Update the extension dependencies to the latest versions.';
@@ -19,10 +19,7 @@ export default class Dependencies extends BaseUpgradeStep {
   }
 
   targets(): string[] {
-    return [
-      'composer.json',
-      'js/package.json',
-    ];
+    return ['composer.json', 'js/package.json'];
   }
 
   gitCommit(): GitCommit {
@@ -90,7 +87,7 @@ export default class Dependencies extends BaseUpgradeStep {
       return {
         updated: composer,
       };
-    }
+    };
   }
 
   updatePackageJson(): Replacement {
@@ -100,7 +97,7 @@ export default class Dependencies extends BaseUpgradeStep {
       const map: Record<string, string> = {
         'flarum-webpack-config': '^3.0.0',
         'flarum-tsconfig': '^2.0.0',
-      }
+      };
 
       const dependencies = advanced.dependencies || advanced.devDependencies;
 

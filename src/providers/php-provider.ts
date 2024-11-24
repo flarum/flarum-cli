@@ -68,9 +68,7 @@ export class PhpSubsystemProvider implements PhpProvider {
 
     const res = execSync(`php ${this.phpPath}`, { input });
 
-    if (!res) {
-      throw new Error(`The PHP subsystem returned an invalid value: ${res}`);
-    }
+    this.handlePhpError(res);
 
     return JSON.parse(res.toString()).code;
   }
@@ -83,10 +81,20 @@ export class PhpSubsystemProvider implements PhpProvider {
 
     const res = execSync(`php ${this.phpPath}`, { input });
 
-    if (!res) {
-      throw new Error(`The PHP subsystem returned an invalid value: ${res}`);
-    }
+    this.handlePhpError(res);
 
     return JSON.parse(res.toString());
+  }
+
+  protected handlePhpError(res: Buffer): void {
+    let json;
+
+    if (res) {
+      json = JSON.parse(res.toString());
+    }
+
+    if (!res || json.error) {
+      throw new Error(`The PHP subsystem returned an invalid value: ${json.message || 'No message'} - ${json.trace || 'No trace'}`);
+    }
   }
 }

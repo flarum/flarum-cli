@@ -1,5 +1,5 @@
-import {BaseUpgradeStep, GitCommit, ImportChange, Replacement} from "./base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, Replacement } from './base';
+import chalk from 'chalk';
 
 export default class LessChanges extends BaseUpgradeStep {
   type = 'LESS code changes to more vanilla CSS';
@@ -99,7 +99,7 @@ export default class LessChanges extends BaseUpgradeStep {
   ];
 
   replacements(file: string): Replacement[] {
-    if (! file.endsWith('.less')) return [];
+    if (!file.endsWith('.less')) return [];
 
     const replacements: Record<string, string> = {};
     const declarations: Record<string, Record<'dark' | 'light', string>> = {};
@@ -108,10 +108,14 @@ export default class LessChanges extends BaseUpgradeStep {
       // Replace color functions with CSS variable declarations and usage.
       (_file, code) => {
         // match all color functions
-        const colorFunctions = code.match(/(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\([^)]+\)/g);
+        const colorFunctions = code.match(
+          /(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\([^)]+\)/g
+        );
 
         colorFunctions?.forEach((colorFunction) => {
-          const content = colorFunction.match(/(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\(([^)]+)\)/);
+          const content = colorFunction.match(
+            /(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\(([^)]+)\)/
+          );
           let needsReplacement = false;
 
           for (const variable of LessChanges.MODE_SPECIFIC_VARS) {
@@ -122,7 +126,7 @@ export default class LessChanges extends BaseUpgradeStep {
           }
 
           if (needsReplacement) {
-            const varName = content![2].match(/@([A-z0-9_-]+)/)![1];
+            const varName = content![2].match(/@([\dA-z-]+)/)![1];
             const modifier = content![1];
             const degree = content![2].replace(/[^\d.]/g, '');
             const newVarName = `--${varName}-${modifier}-${degree}`;
@@ -140,15 +144,19 @@ export default class LessChanges extends BaseUpgradeStep {
 
       // Basic replacements.
       (_file, code) => {
-        const replaceWithCssVars = (code: string) => code
-          // property: @variable => property: var(--variable)
-          .replace(/^(\s+)([^@:]+):\s*(.*)@([A-z0-9_-]+)([^;]*);(.*)$/gim, (_, indent, property, before, variable, after, comments) => {
-            if (LessChanges.vars().includes(variable) && !/(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\(/.test(before)) {
-              return `${indent}${property}: ${before}var(--${variable})${after};${comments}`;
-            }
+        const replaceWithCssVars = (code: string) =>
+          code
+            // property: @variable => property: var(--variable)
+            .replace(/^(\s+)([^:@]+):\s*(.*)@([\dA-z-]+)([^;]*);(.*)$/gim, (_, indent, property, before, variable, after, comments) => {
+              if (
+                LessChanges.vars().includes(variable) &&
+                !/(fade|lighten|darken|mix|saturate|desaturate|shade|fadein|fadeout|spin|tint|greyscale|contrast)\(/.test(before)
+              ) {
+                return `${indent}${property}: ${before}var(--${variable})${after};${comments}`;
+              }
 
-            return _;
-          });
+              return _;
+            });
 
         for (const [colorFunction, replacement] of Object.entries(replacements)) {
           code = code.replace(colorFunction, replacement);
@@ -178,7 +186,7 @@ export default class LessChanges extends BaseUpgradeStep {
           let newLightVars = '[data-theme^=light] {';
           let newDarkVars = '[data-theme^=dark] {';
 
-          for (const [varName, {light, dark}] of Object.entries(declarations)) {
+          for (const [varName, { light, dark }] of Object.entries(declarations)) {
             newLightVars += `\n  ${varName}: ${light};`;
             newDarkVars += `\n  ${varName}: ${dark};`;
           }
@@ -190,17 +198,14 @@ export default class LessChanges extends BaseUpgradeStep {
         }
 
         return {
-          updated: code
-        }
-      }
+          updated: code,
+        };
+      },
     ];
   }
 
   targets(): string[] {
-    return [
-      'less/**/*',
-      'resources/less/**/*',
-    ];
+    return ['less/**/*', 'resources/less/**/*'];
   }
 
   gitCommit(): GitCommit {
@@ -211,7 +216,7 @@ export default class LessChanges extends BaseUpgradeStep {
   }
 
   pauseMessage(): string {
-    const link = 'https://docs.flarum.org/2.x/extend/update-2_0#miscellaneous';
+    const link = 'https://docs.flarum.org/2.x/extend/update-2_0/#less-preprocessing';
     const readMore = chalk.dim(`Read more: ${link}`);
     const dataThemeDark = chalk.yellow.bold('[data-theme^=dark]');
     const dataThemeLight = chalk.yellow.bold('[data-theme^=light]');
@@ -227,13 +232,12 @@ export default class LessChanges extends BaseUpgradeStep {
                       - ${dataThemeDark} for dark mode
                       - ${dataThemeLight} for light mode
                       - ${dataColoredHeader} for colored header
-                      - ${dataColoredHeaderFalse} for non-colored header`
+                      - ${dataColoredHeaderFalse} for non-colored header
+
+                      ${readMore}`;
   }
 
   static vars(): string[] {
-    return [
-      ...LessChanges.MODE_SPECIFIC_VARS,
-      ...LessChanges.VARS,
-    ];
+    return [...LessChanges.MODE_SPECIFIC_VARS, ...LessChanges.VARS];
   }
 }

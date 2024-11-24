@@ -13,7 +13,7 @@ import chalk from 'chalk';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { tmpdir } from 'os';
-import simpleGit, {CommitResult} from 'simple-git';
+import simpleGit, { CommitResult } from 'simple-git';
 import { create } from 'mem-fs-editor';
 import { commitAsync } from 'boilersmith/utils/commit-async';
 import { Validator } from '../../utils/validation';

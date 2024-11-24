@@ -1,30 +1,27 @@
-import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
+import chalk from 'chalk';
 
 export default class MiscBackendChanges extends BaseUpgradeStep {
   type = 'Miscellaneous backend changes.';
 
   replacements(file: string): Replacement[] {
-    if (! file.endsWith('.php')) return [];
+    if (!file.endsWith('.php')) return [];
 
     return [
       (file, code) => ({
-        updated: this.php!.run('upgrade.2-0.misc', { file, code }).code
-      })
+        updated: this.php!.run('upgrade.2-0.misc', { file, code }).code,
+      }),
     ];
   }
 
   targets(): string[] {
-    return [
-      'extend.php',
-      'src/**/*',
-    ];
+    return ['extend.php', 'src/**/*'];
   }
 
   gitCommit(): GitCommit {
     return {
       message: 'chore(2.0): misc backend changes',
-      description: 'Miscellaneous backend changes'
+      description: 'Miscellaneous backend changes',
     };
   }
 

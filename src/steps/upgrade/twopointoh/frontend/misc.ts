@@ -1,8 +1,8 @@
-import {BaseUpgradeStep, GitCommit, ImportChange, Replacement} from "../base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, ImportChange, Replacement } from '../base';
+import chalk from 'chalk';
 import * as t from '@babel/types';
-import traverse from "@babel/traverse";
-import {getFunctionName} from "../../../../utils/ast";
+import traverse from '@babel/traverse';
+import { getFunctionName } from '../../../../utils/ast';
 
 export default class MiscFrontendChanges extends BaseUpgradeStep {
   type = 'Miscellaneous frontend changes.';
@@ -16,7 +16,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
   // - `UploadImageButton` namespace `admin` -> `common`
 
   replacements(file: string): Replacement[] {
-    if (! file.endsWith('.js') && ! file.endsWith('.ts') && ! file.endsWith('.tsx') && ! file.endsWith('.jsx')) return [];
+    if (!file.endsWith('.js') && !file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.jsx')) return [];
 
     return [
       this.usePageStructure(),
@@ -32,15 +32,13 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
   }
 
   targets(): string[] {
-    return [
-      'js/src/**/*',
-    ];
+    return ['js/src/**/*'];
   }
 
   gitCommit(): GitCommit {
     return {
       message: 'chore(2.0): misc frontend changes',
-      description: 'Miscellaneous frontend changes'
+      description: 'Miscellaneous frontend changes',
     };
   }
 
@@ -55,36 +53,45 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
   private usePageStructure(): Replacement {
     return (file, code) => {
-      if (! code.includes(' extends Page ') || ! code.includes('flarum/common/components/Page')) return null;
+      if (!code.includes(' extends Page ') || !code.includes('flarum/common/components/Page')) return null;
 
-      const pageName = file.split('/').pop()!.replace(/\.\w+$/, '');
+      const pageName = file
+        .split('/')
+        .pop()!
+        .replace(/\.\w+$/, '');
 
-      // eslint-disable-next-line
-      const regex = /return \(\s*<div className="IndexPage">\s*{?(.*?hero.*?)}?\s*<div className="container">\s*<div className="sideNavContainer">\s*(<nav.*<\/nav>)\s*<div className="IndexPage-results sideNavOffset">(.*?)<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*\);/gs;
+      const regex =
+        /return \(\s*<div clas{2}Name="IndexPage">\s*{?(.*?hero.*?)}?\s*<div clas{2}Name="container">\s*<div clas{2}Name="sideNavContainer">\s*(<nav.*<\/nav>)\s*<div clas{2}Name="IndexPage-results sideNavOf{2}set">(.*?)(?:<\/div>\s*){4}\);/gs;
 
-      if (! regex.test(code)) return null;
+      if (!regex.test(code)) return null;
 
       return {
-        imports: [{
-          replacesPath: null,
-          import: {
-            name: 'PageStructure',
-            defaultImport: true,
-            path: 'flarum/forum/components/PageStructure',
+        imports: [
+          {
+            replacesPath: null,
+            import: {
+              name: 'PageStructure',
+              defaultImport: true,
+              path: 'flarum/forum/components/PageStructure',
+            },
           },
-        }, {
-          replacesPath: null,
-          import: {
-            name: 'IndexSidebar',
-            defaultImport: true,
-            path: 'flarum/forum/components/IndexSidebar',
+          {
+            replacesPath: null,
+            import: {
+              name: 'IndexSidebar',
+              defaultImport: true,
+              path: 'flarum/forum/components/IndexSidebar',
+            },
           },
-        }],
+        ],
         updated: code
-          .replace(regex, `
+          .replace(
+            regex,
+            `
             return (<PageStructure className="${pageName}" hero={() => ($1)} sidebar={() => <IndexSidebar />}>
               $3
-            </PageStructure>);`)
+            </PageStructure>);`
+          )
           .replace('className="IndexPage-', `className="${pageName}-`),
       };
     };
@@ -94,26 +101,29 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
     return (_file, code) => {
       code = code.replace('flarum/common/components/NotificationsDropdown', 'flarum/forum/components/NotificationsDropdown');
 
-      if (! code.includes(' extends NotificationsDropdown ') || ! code.includes('flarum/forum/components/NotificationsDropdown')) return null;
+      if (!code.includes(' extends NotificationsDropdown ') || !code.includes('flarum/forum/components/NotificationsDropdown')) return null;
 
-      // eslint-disable-next-line
-      const regex = /getMenu\(\)\s*{\s*return\s*\(\s*<div className={'Dropdown-menu ' \+ this\.attrs\.menuClassName} onclick={this\.menuClick\.bind\(this\)}>\s*{this\.showing \?\s+(.*?)\s+:\s+''\}\s+<\/div>\s+\);\s+\}/gs;
+      const regex =
+        /getMenu\(\)\s*{\s*return\s*\(\s*<div className={'Dropdown-menu ' \+ this\.attrs\.menuClassName} onclick={this\.menuClick\.bind\(this\)}>\s*{this\.showing \?\s+(.*?)\s+:\s+''}\s+<\/div>\s+\);\s+}/gs;
 
       return {
-        imports: [{
-          replacesPath: 'flarum/forum/components/NotificationsDropdown',
-          import: {
-            name: 'HeaderDropdown',
-            defaultImport: true,
-            path: 'flarum/forum/components/HeaderDropdown',
-          }
-        }],
-        updated: code
-          .replace(' extends NotificationsDropdown ', ' extends HeaderDropdown ')
-          .replace(regex, `
+        imports: [
+          {
+            replacesPath: 'flarum/forum/components/NotificationsDropdown',
+            import: {
+              name: 'HeaderDropdown',
+              defaultImport: true,
+              path: 'flarum/forum/components/HeaderDropdown',
+            },
+          },
+        ],
+        updated: code.replace(' extends NotificationsDropdown ', ' extends HeaderDropdown ').replace(
+          regex,
+          `
           getContent() {
             return $1;
-          }`)
+          }`
+        ),
       };
     };
   }
@@ -131,22 +141,30 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
           if (t.isJSXIdentifier(node.name) && node.name.name === 'div' && node.attributes.length === 1) {
             const attr = node.attributes.find((attr) => t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'className');
 
-            if (attr && t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && t.isStringLiteral(attr.value) && attr.value.value.split(' ').includes('Form')) {
+            if (
+              attr &&
+              t.isJSXAttribute(attr) &&
+              t.isJSXIdentifier(attr.name) &&
+              t.isStringLiteral(attr.value) &&
+              attr.value.value.split(' ').includes('Form')
+            ) {
               const openingClone = t.cloneNode(node);
               openingClone.name = t.jsxIdentifier('Form');
               // remove the Form className while keeping other classes
               const newClassName = attr.value.value.replace(/\bForm\b/, '').trim();
 
-              openingClone.attributes = newClassName ? openingClone.attributes.filter((attr) => {
-                  if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'className') {
-                    attr.value = t.stringLiteral(newClassName);
-                    return true;
-                  }
+              openingClone.attributes = newClassName
+                ? openingClone.attributes.filter((attr) => {
+                    if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'className') {
+                      attr.value = t.stringLiteral(newClassName);
+                      return true;
+                    }
 
-                  return true;
-                }) : openingClone.attributes.filter((attr) => {
-                  return !(t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'className');
-                });
+                    return true;
+                  })
+                : openingClone.attributes.filter((attr) => {
+                    return !(t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'className');
+                  });
 
               const closingClone = t.cloneNode(path.node.closingElement!);
               closingClone.name = t.jsxIdentifier('Form');
@@ -162,37 +180,43 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
       });
 
       return {
-        imports: [{
-          import: {
-            name: 'Form',
-            defaultImport: true,
-            path: 'flarum/common/components/Form',
-          }
-        }],
+        imports: [
+          {
+            import: {
+              name: 'Form',
+              defaultImport: true,
+              path: 'flarum/common/components/Form',
+            },
+          },
+        ],
         updated: ast,
       };
-    }
+    };
   }
 
   private updateIndexPage(): Replacement {
     return (_file, code) => {
-      if (! code.includes('IndexPage.prototype.sidebar')
-        && ! code.includes('IndexPage.prototype.navItems')
-        && ! code.includes('IndexPage.prototype.sidebarItems')
-        && ! code.includes('IndexPage.prototype.currentTag')
-        && ! code.includes("IndexPage.prototype, 'sidebar'")
-        && ! code.includes("IndexPage.prototype, 'navItems'")
-        && ! code.includes("IndexPage.prototype, 'sidebarItems'")
-      ) return null;
+      if (
+        !code.includes('IndexPage.prototype.sidebar') &&
+        !code.includes('IndexPage.prototype.navItems') &&
+        !code.includes('IndexPage.prototype.sidebarItems') &&
+        !code.includes('IndexPage.prototype.currentTag') &&
+        !code.includes("IndexPage.prototype, 'sidebar'") &&
+        !code.includes("IndexPage.prototype, 'navItems'") &&
+        !code.includes("IndexPage.prototype, 'sidebarItems'")
+      )
+        return null;
 
       return {
-        imports: [{
-          import: {
-            name: 'IndexSidebar',
-            defaultImport: true,
-            path: 'flarum/forum/components/IndexSidebar',
-          }
-        }],
+        imports: [
+          {
+            import: {
+              name: 'IndexSidebar',
+              defaultImport: true,
+              path: 'flarum/forum/components/IndexSidebar',
+            },
+          },
+        ],
         updated: code
           .replace(/IndexPage\.prototype\.sidebarItems/g, 'IndexSidebar.prototype.items')
           .replace("IndexPage.prototype, 'sidebarItems'", "IndexSidebar.prototype, 'items'")
@@ -248,7 +272,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
             const userOrName = args[0];
             const attrs = args[1];
 
-            if (! t.isExpression(userOrName) && ! t.isStringLiteral(userOrName)) {
+            if (!t.isExpression(userOrName) && !t.isStringLiteral(userOrName)) {
               console.warn(`Unknown userOrName type for ${funcName} in ${file}: ${userOrName.type}`);
               return;
             }
@@ -257,15 +281,15 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
             const mainArgName = funcName === 'avatar' ? 'user' : 'name';
 
             if (jsx) {
-              let attrsToJsx = null
+              let attrsToJsx = null;
 
               if (attrs && t.isObjectExpression(attrs)) {
                 attrsToJsx = (attrs as t.ObjectExpression).properties
-                  .filter((prop) => t.isObjectProperty(prop) && ! t.isArrayPattern(prop.value))
+                  .filter((prop) => t.isObjectProperty(prop) && !t.isArrayPattern(prop.value))
                   .map((prop) => {
                     prop = prop as t.ObjectProperty;
 
-                    const key = 'value' in prop.key ? prop.key.value : ('name' in prop.key ? prop.key.name : prop.key.type);
+                    const key = 'value' in prop.key ? prop.key.value : 'name' in prop.key ? prop.key.name : prop.key.type;
 
                     if (t.isArrayPattern(prop.value) || t.isObjectPattern(prop.value) || t.isRestElement(prop.value)) {
                       console.warn('Failed to convert to JSX:', { [key.toString()]: prop.value });
@@ -295,14 +319,12 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
                 console.warn(`Unknown attrs type for ${funcName} in ${file}: ${attrs.type}`);
               }
 
-              const mainArg = t.jsxAttribute(t.jsxIdentifier(mainArgName), t.isStringLiteral(userOrName) ? userOrName : t.jsxExpressionContainer(userOrName));
-
-              const jsxElem = t.jsxElement(
-                t.jsxOpeningElement(t.jsxIdentifier(tag), [mainArg, ...attrsToJsx || []], true),
-                null,
-                [],
-                true
+              const mainArg = t.jsxAttribute(
+                t.jsxIdentifier(mainArgName),
+                t.isStringLiteral(userOrName) ? userOrName : t.jsxExpressionContainer(userOrName)
               );
+
+              const jsxElem = t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(tag), [mainArg, ...(attrsToJsx || [])], true), null, [], true);
 
               // If the node is enclosed in { ... }, remove them
               if (t.isJSXExpressionContainer(path.parent)) {
@@ -321,20 +343,19 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
                 otherAttrs = [t.spreadElement(attrs.argument)];
               }
 
-              const component = t.callExpression(
-                t.memberExpression(t.identifier(tag), t.identifier('component')),
-                [t.objectExpression([mainArg, ...otherAttrs])]
-              );
+              const component = t.callExpression(t.memberExpression(t.identifier(tag), t.identifier('component')), [
+                t.objectExpression([mainArg, ...otherAttrs]),
+              ]);
 
               path.replaceWith(component);
             }
           }
-        }
+        },
       });
 
       return {
         imports,
-        updated: ast
+        updated: ast,
       };
     };
   }
@@ -360,7 +381,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
           .replace('className: "NotificationList', 'className: "HeaderList')
           .replace('className="NotificationGroup', 'className="HeaderListGroup')
           .replace('className: "NotificationGroup', 'className: "HeaderListGroup')
-          .replace('flarum/forum/states/SearchState', 'flarum/common/states/SearchState')
+          .replace('flarum/forum/states/SearchState', 'flarum/common/states/SearchState'),
       };
     };
   }
@@ -371,9 +392,9 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
       return {
         updated: code
-          .replace(/initializers\.has\(["']lock["']\)/g, 'initializers.has(\'flarum-lock\')')
-          .replace(/initializers\.has\(["']subscriptions["']\)/g, 'initializers.has(\'flarum-subscriptions\')')
-          .replace(/initializers\.has\(["']flarum\/nicknames["']\)/g, 'initializers.add(\'flarum-nicknames\')'),
+          .replace(/initializers\.has\(["']lock["']\)/g, "initializers.has('flarum-lock')")
+          .replace(/initializers\.has\(["']subscriptions["']\)/g, "initializers.has('flarum-subscriptions')")
+          .replace(/initializers\.has\(["']flarum\/nicknames["']\)/g, "initializers.add('flarum-nicknames')"),
       };
     };
   }
@@ -390,7 +411,10 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
           // <UploadImageButton name="favicon" />
           // =>
           // <UploadImageButton name="favicon" routePath="favicon" value={app.data.settings.favicon_path} url={app.forum.attribute('faviconUrl')} />
-          .replace(/<UploadImageButton\s+name="([\dA-z-]+)"\s*/g, '<UploadImageButton name="$1" routePath="$1" value={app.data.settings[\'$1_path\']} url={app.forum.attribute(\'$1Url\')}')
+          .replace(
+            /<UploadImageButton\s+name="([\dA-z-]+)"\s*/g,
+            '<UploadImageButton name="$1" routePath="$1" value={app.data.settings[\'$1_path\']} url={app.forum.attribute(\'$1Url\')}'
+          )
           // UploadImageButton.component({
           //   name: 'fof-watermark',
           //   ...
@@ -411,19 +435,19 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
 
             return `UploadImageButton.component({${attrs}, routePath: '${name}', value: app.data.settings['${name}_path'], url: app.forum.attribute('${name}Url')})`;
           }),
-      }
+      };
     };
   }
 
   private updateExtendModal(): Replacement[] {
     return [
       (file, code, advanced) => {
-        if (! file.endsWith('.tsx') && ! file.endsWith('.jsx') && ! file.endsWith('.js') && ! file.endsWith('.ts')) return null;
+        if (!file.endsWith('.tsx') && !file.endsWith('.jsx') && !file.endsWith('.js') && !file.endsWith('.ts')) return null;
 
-        if (! code.includes(' extends Modal') || ! code.includes('flarum/common/components/Modal')) return null;
+        if (!code.includes(' extends Modal') || !code.includes('flarum/common/components/Modal')) return null;
 
         // eslint-disable-next-line prefer-regex-literals
-        if (! (new RegExp('<input\\s').test(code)) && ! code.includes(' onsubmit(')) return null;
+        if (!new RegExp('<input\\s').test(code) && !code.includes(' onsubmit(')) return null;
 
         const ast = advanced as t.File;
 
@@ -435,7 +459,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
             if (node.superClass && t.isIdentifier(node.superClass) && node.superClass.name === 'Modal') {
               node.superClass = t.identifier('FormModal');
             }
-          }
+          },
         });
 
         return {
@@ -446,29 +470,31 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
                 name: 'FormModal',
                 defaultImport: true,
                 path: 'flarum/common/components/FormModal',
-              }
-            }
+              },
+            },
           ],
           updated: advanced,
         };
       },
 
       (file, code) => {
-        if (! file.endsWith('.tsx') && ! file.endsWith('.jsx') && ! file.endsWith('.js') && ! file.endsWith('.ts')) return null;
+        if (!file.endsWith('.tsx') && !file.endsWith('.jsx') && !file.endsWith('.js') && !file.endsWith('.ts')) return null;
 
-        if (! code.includes('extends FormModal')) return null;
+        if (!code.includes('extends FormModal')) return null;
 
-        if (! code.includes('IInternalModalAttrs')) return null;
+        if (!code.includes('IInternalModalAttrs')) return null;
 
         return {
-          imports: [{
-            replacesPath: 'flarum/common/components/Modal',
-            import: {
-              name: 'IFormModalAttrs',
-              defaultImport: false,
-              path: 'flarum/common/components/FormModal',
-            }
-          }],
+          imports: [
+            {
+              replacesPath: 'flarum/common/components/Modal',
+              import: {
+                name: 'IFormModalAttrs',
+                defaultImport: false,
+                path: 'flarum/common/components/FormModal',
+              },
+            },
+          ],
           updated: code.replace(/IInternalModalAttrs/g, 'IFormModalAttrs'),
         };
       },

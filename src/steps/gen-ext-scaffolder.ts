@@ -170,7 +170,8 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       return {
         name,
         uses: ['licenseType'],
-        compute: async (_paths, licenseType: string) => (licenseType && licenseType !== 'proprietary' ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
+        compute: async (_paths, licenseType: string) =>
+          licenseType && licenseType !== 'proprietary' ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : '',
       };
 
     case 'extensionId':
@@ -622,11 +623,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           'js/tests/integration/.gitkeep',
         ],
         jsonToAugment: {
-          'js/package.json': [
-            'devDependencies.@flarum/jest-config',
-            'scripts.test',
-            'type',
-          ],
+          'js/package.json': ['devDependencies.@flarum/jest-config', 'scripts.test', 'type'],
         },
         needsTemplateParams: [],
         inferEnabled: async (_fs, paths: Paths) => {

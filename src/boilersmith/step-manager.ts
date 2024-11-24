@@ -101,7 +101,7 @@ export class StepManager<Providers extends DefaultProviders> {
   ): this {
     this.validateDependencies(step, dependencies, mapPaths);
 
-    if (! shouldRun.silent) {
+    if (!shouldRun.silent) {
       shouldRun.silent = this.silent;
       shouldRun.confirmationMessage = this.silent ? undefined : shouldRun.confirmationMessage;
       shouldRun.optional = this.silent ? false : shouldRun.optional;
@@ -127,14 +127,14 @@ export class StepManager<Providers extends DefaultProviders> {
 
     this.validateDependencies(step, dependencies, mapPaths);
 
-    if (! shouldRun.silent) {
+    if (!shouldRun.silent) {
       shouldRun.silent = this.silent;
       shouldRun.confirmationMessage = this.silent ? undefined : shouldRun.confirmationMessage;
       shouldRun.optional = this.silent ? false : shouldRun.optional;
       shouldRun.default = this.silent ? true : shouldRun.default;
     }
 
-    const newStep = {name, step, shouldRun, dependencies, predefinedParams, mapPaths };
+    const newStep = { name, step, shouldRun, dependencies, predefinedParams, mapPaths };
 
     this.steps = [...this.steps, newStep];
 
@@ -288,7 +288,6 @@ export class StepManager<Providers extends DefaultProviders> {
     return promptConfirm;
   }
 
-  // eslint-disable-next-line max-params
   protected async runStep(
     storedStep: StoredStep<Providers>,
     paths: Paths,
@@ -337,7 +336,7 @@ export class StepManager<Providers extends DefaultProviders> {
   }
 }
 
-export class AtomicStepManager<Providers = DefaultProviders> extends StepManager<Providers> {
+export class AtomicStepManager<Providers extends DefaultProviders> extends StepManager<Providers> {
   protected steps: StoredStep<Providers>[] = [];
 
   constructor(

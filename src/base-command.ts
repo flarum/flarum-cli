@@ -56,7 +56,7 @@ export default abstract class BaseCommand extends Command {
   protected skipFinalMessage = false;
 
   async runSteps(steps: StepManager<FlarumProviders>) {
-    const { args} = await this.parse(this.constructor as any);
+    const { args } = await this.parse(this.constructor as any);
 
     this.args = args;
     const path: string | undefined = args.path;
@@ -71,7 +71,7 @@ export default abstract class BaseCommand extends Command {
     return steps.run(paths, this.genIO(), { php: phpProvider }, this.dry, args);
   }
 
-  async extRoot(path: string|undefined): Promise<string> {
+  async extRoot(path: string | undefined): Promise<string> {
     let extRoot: string;
 
     if (this.requireExistingExtension) {
@@ -131,16 +131,16 @@ export default abstract class BaseCommand extends Command {
     } else if (!out.succeeded) {
       const prettyPrint = out.e?.code === 'FL_ERR';
 
-      if (! prettyPrint) this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
+      if (!prettyPrint) this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
 
       if (prettyPrint) {
         this.log('\n');
-        this.log('\u001B[A     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error))
+        this.log('\u001B[A     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error));
       } else {
         this.log(chalk.red(out.error));
       }
 
-      if (out.errorTrace && ! prettyPrint) {
+      if (out.errorTrace && !prettyPrint) {
         this.log(chalk.dim(chalk.red(out.errorTrace)));
       }
 
@@ -311,7 +311,7 @@ export default abstract class BaseCommand extends Command {
       initial: true,
     });
 
-    if (! continueUpgrade) {
+    if (!continueUpgrade) {
       this.log('');
       this.log('Aborted.');
       this.exit();

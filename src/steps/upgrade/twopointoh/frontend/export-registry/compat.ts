@@ -1,5 +1,5 @@
-import {BaseUpgradeStep, GitCommit, Replacement} from "../../base";
-import chalk from "chalk";
+import { BaseUpgradeStep, GitCommit, Replacement } from '../../base';
+import chalk from 'chalk';
 
 export default class Compat extends BaseUpgradeStep {
   type = 'Replace removed compat API with simple imports.';
@@ -20,19 +20,14 @@ export default class Compat extends BaseUpgradeStep {
   }
 
   targets(): string[] {
-    return [
-      'js/src/common/compat.*',
-      'js/src/forum/compat.*',
-      'js/src/forum/index.*',
-      'js/src/admin/compat.*',
-      'js/src/admin/index.*',
-    ];
+    return ['js/src/common/compat.*', 'js/src/forum/compat.*', 'js/src/forum/index.*', 'js/src/admin/compat.*', 'js/src/admin/index.*'];
   }
 
   gitCommit(): GitCommit {
     return {
       message: 'chore(2.0): remove compat API',
-      description: 'The compat API has been removed. Modules from extensions are now automatically accessible from other extensions using the format ext:vendor/extension/module-path.'
+      description:
+        'The compat API has been removed. Modules from extensions are now automatically accessible from other extensions using the format ext:vendor/extension/module-path.',
     };
   }
 
@@ -58,7 +53,7 @@ export default class Compat extends BaseUpgradeStep {
           // export default { ... }; => ''
           .replace(/export\s+default\s+{[^}]*};/gi, '')
           // export default Object.assign(compat, { ... }); => ''
-          .replace(/export\s+default\s+object.assign\(compat, {[^}]*}\);/gi, '')
+          .replace(/export\s+default\s+object.assign\(compat, {[^}]*}\);/gi, ''),
       };
     };
   }
@@ -80,7 +75,7 @@ export default class Compat extends BaseUpgradeStep {
           // Object.assign(compat, module); => ''
           .replace(/^object.assign\(compat, \w+\);$/gim, '')
           // Object.assign(compat, { ... }); => ''
-          .replace(/^object.assign\(compat, {[^}]*}\);$/gim, '')
+          .replace(/^object.assign\(compat, {[^}]*}\);$/gim, ''),
       };
     };
   }

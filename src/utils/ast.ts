@@ -5,7 +5,7 @@ import prettier from 'prettier';
 import prettierConfig from '@flarum/prettier-config/prettierrc.json';
 // import { parse } from '@babel/parser';
 // import generate from '@babel/generator';
-import * as recast from "recast";
+import * as recast from 'recast';
 
 export function parseCode(code: string): t.File {
   try {
@@ -13,13 +13,12 @@ export function parseCode(code: string): t.File {
       parser: require('recast/parsers/babel-ts'),
     });
   } catch (error) {
-    console.log(code)
+    console.log(code);
     throw error;
   }
 }
 
 export async function generateCode(ast: t.File, extenders = false): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const generatedCode = recast.print(ast, {
     parser: require('recast/parsers/babel-ts'),
@@ -102,7 +101,6 @@ function relativizePath(path: string, root: string) {
   return path.replace(new RegExp(`^${root}`), '.').replace(/^common/, '../common');
 }
 
-// eslint-disable-next-line complexity
 export function populateImports(
   ast: t.File,
   module: ModuleImport,
@@ -149,7 +147,7 @@ export function populateImports(
 
       const declaration = t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath));
 
-      if (! insertAt) {
+      if (!insertAt) {
         ast.program.body.unshift(declaration);
       } else {
         ast.program.body.splice(insertAt, 0, declaration);
@@ -159,7 +157,7 @@ export function populateImports(
 
       const declaration = t.importDeclaration([defaultImportDeclaration], t.stringLiteral(relativePath.split('/').slice(0, -1).join('/')));
 
-      if (! insertAt) {
+      if (!insertAt) {
         ast.program.body.unshift(declaration);
       } else {
         ast.program.body.splice(insertAt, 0, declaration);
@@ -185,7 +183,7 @@ export function populateImports(
       } else {
         specificImportDeclarations = newImports.specifiers as t.ImportSpecifier[];
 
-        if (! insertAt) {
+        if (!insertAt) {
           ast.program.body.unshift(newImports);
         } else {
           ast.program.body.splice(insertAt, 0, newImports);
@@ -293,7 +291,9 @@ export function formatCode(code: string, extenders = false): Promise<string> {
 export function getFunctionName(node: t.Node): string | null {
   if (node.type === 'Identifier') {
     return node.name;
-  } else if (node.type === 'MemberExpression') {
+  }
+
+  if (node.type === 'MemberExpression') {
     return `${getFunctionName(node.object)}.${getFunctionName(node.property)}`;
   }
 

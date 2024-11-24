@@ -134,7 +134,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
       for (const fileName of fileNames) {
         if (!existingFilesMatchingNames.includes(fileName)) {
           const stubFilePath = resolve(__dirname, `../../../boilerplate/skeleton/extension/js/src/${frontend}/${fileName}.js`);
-          fsEditor.copyTpl(stubFilePath, paths.package(`js/src/${frontend}/${fileName}.js`), {params: this.params});
+          fsEditor.copyTpl(stubFilePath, paths.package(`js/src/${frontend}/${fileName}.js`), { params: this.params });
         }
       }
 

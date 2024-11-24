@@ -1,5 +1,5 @@
-import ejs from "ejs";
-import {BaseUpgradeStep, GitCommit, Replacement} from "../base";
+import ejs from 'ejs';
+import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 
 export default class EmailViews extends BaseUpgradeStep {
   type = 'Email notifications now require both Plain Text and HTML views.';
@@ -8,7 +8,7 @@ export default class EmailViews extends BaseUpgradeStep {
     [file: string]: {
       html: string;
       text: string;
-    }
+    };
   } = {};
 
   protected templates = {
@@ -17,11 +17,11 @@ export default class EmailViews extends BaseUpgradeStep {
   };
 
   replacements(file: string): Replacement[] {
-    if (! file.endsWith('.php')) return [];
+    if (!file.endsWith('.php')) return [];
 
     return [
       async (file, code) => {
-        if (! code.includes('MailableInterface')) {
+        if (!code.includes('MailableInterface')) {
           return null;
         }
 
@@ -30,8 +30,8 @@ export default class EmailViews extends BaseUpgradeStep {
         this.collected[file] = output.collected;
 
         return {
-          updated: output.code
-        }
+          updated: output.code,
+        };
       },
       async (file, code) => {
         if (Object.keys(this.collected).length === 0) return null;
@@ -40,11 +40,11 @@ export default class EmailViews extends BaseUpgradeStep {
         const newFiles: any[] = [];
 
         Object.keys(this.collected).forEach((classFile) => {
-          if (! this.collected[classFile]) {
+          if (!this.collected[classFile]) {
             return;
           }
 
-          if (! this.collected[classFile].html && ! this.collected[classFile].text) {
+          if (!this.collected[classFile].html && !this.collected[classFile].text) {
             return;
           }
 
@@ -77,17 +77,13 @@ export default class EmailViews extends BaseUpgradeStep {
   }
 
   targets(): string[] {
-    return [
-      'src/**/*',
-      'views/**/*.blade.php',
-      'resources/views/**/*.blade.php',
-    ];
+    return ['src/**/*', 'views/**/*.blade.php', 'resources/views/**/*.blade.php'];
   }
 
   gitCommit(): GitCommit {
     return {
       message: 'chore(2.0): notification emails now require both plain text and HTML views',
-      description: 'You now need to provide both plain text and HTML views for notification emails.'
+      description: 'You now need to provide both plain text and HTML views for notification emails.',
     };
   }
 

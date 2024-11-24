@@ -12,7 +12,9 @@
     "paths": {
       "boilersmith/*": ["src/boilersmith/*"]
     },
+    "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "lib", "dist"]
 }

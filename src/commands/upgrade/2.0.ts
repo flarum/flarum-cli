@@ -1,31 +1,31 @@
 import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../base-command';
 import { FlarumProviders } from '../../providers';
-import Dependencies from "../../steps/upgrade/twopointoh/dependencies";
-import Infrastructure from "../../steps/upgrade/twopointoh/infra";
-import ImportExt from "../../steps/upgrade/twopointoh/frontend/export-registry/import-ext";
-import Compat from "../../steps/upgrade/twopointoh/frontend/export-registry/compat";
-import UsageOfLazyModules from "../../steps/upgrade/twopointoh/frontend/code-splitting/usage-of-lazy-modules";
-import MiscFrontendChanges from "../../steps/upgrade/twopointoh/frontend/misc";
-import FormatCode from "../../steps/upgrade/twopointoh/frontend/format";
-import chalk from "chalk";
-import MiscBackendChanges from "../../steps/upgrade/twopointoh/backend/misc";
-import Filesystem from "../../steps/upgrade/twopointoh/backend/filesystem";
-import Mailer from "../../steps/upgrade/twopointoh/backend/mailer";
-import JsonApi from "../../steps/upgrade/twopointoh/backend/json-api";
-import Search from "../../steps/upgrade/twopointoh/backend/search";
-import LessChanges from "../../steps/upgrade/twopointoh/less";
-import PhpUnit from "../../steps/upgrade/twopointoh/backend/phpunit";
-import {Flags} from "@oclif/core";
-import EmailViews from "../../steps/upgrade/twopointoh/backend/email-views";
-import InterventionImage from "../../steps/upgrade/twopointoh/backend/intervention-image";
+import Dependencies from '../../steps/upgrade/twopointoh/dependencies';
+import Infrastructure from '../../steps/upgrade/twopointoh/infra';
+import ImportExt from '../../steps/upgrade/twopointoh/frontend/export-registry/import-ext';
+import Compat from '../../steps/upgrade/twopointoh/frontend/export-registry/compat';
+import UsageOfLazyModules from '../../steps/upgrade/twopointoh/frontend/code-splitting/usage-of-lazy-modules';
+import MiscFrontendChanges from '../../steps/upgrade/twopointoh/frontend/misc';
+import FormatCode from '../../steps/upgrade/twopointoh/frontend/format';
+import chalk from 'chalk';
+import MiscBackendChanges from '../../steps/upgrade/twopointoh/backend/misc';
+import Filesystem from '../../steps/upgrade/twopointoh/backend/filesystem';
+import Mailer from '../../steps/upgrade/twopointoh/backend/mailer';
+import JsonApi from '../../steps/upgrade/twopointoh/backend/json-api';
+import Search from '../../steps/upgrade/twopointoh/backend/search';
+import LessChanges from '../../steps/upgrade/twopointoh/less';
+import PhpUnit from '../../steps/upgrade/twopointoh/backend/phpunit';
+import { Flags } from '@oclif/core';
+import EmailViews from '../../steps/upgrade/twopointoh/backend/email-views';
+import InterventionImage from '../../steps/upgrade/twopointoh/backend/intervention-image';
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
 
   static flags = {
     ...BaseCommand.flags,
-    'step': Flags.string({
+    step: Flags.string({
       description: 'Optionally specify a specific step to run',
       required: false,
     }),
@@ -44,27 +44,31 @@ export default class TwoPointOh extends BaseCommand {
   protected steps(steps: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
-    return this.prepareSteps(steps, [
-      // Frontend
-      FormatCode,
-      Dependencies,
-      Infrastructure,
-      Compat,
-      ImportExt,
-      UsageOfLazyModules,
-      MiscFrontendChanges,
-      // Backend
-      MiscBackendChanges,
-      Filesystem,
-      Mailer,
-      EmailViews,
-      JsonApi,
-      InterventionImage,
-      Search,
-      PhpUnit,
-      // LESS
-      LessChanges,
-    ], extRoot);
+    return this.prepareSteps(
+      steps,
+      [
+        // Frontend
+        FormatCode,
+        Dependencies,
+        Infrastructure,
+        Compat,
+        ImportExt,
+        UsageOfLazyModules,
+        MiscFrontendChanges,
+        // Backend
+        MiscBackendChanges,
+        Filesystem,
+        Mailer,
+        EmailViews,
+        JsonApi,
+        InterventionImage,
+        Search,
+        PhpUnit,
+        // LESS
+        LessChanges,
+      ],
+      extRoot
+    );
   }
 
   private prepareSteps(steps: StepManager<FlarumProviders>, collection: any[], extRoot: string): StepManager<FlarumProviders> {

@@ -2,41 +2,41 @@ import * as t from '@babel/types';
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import {Step, StepManager} from 'boilersmith/step-manager';
+import { Step } from 'boilersmith/step-manager';
 import pick from 'pick-deep';
-import {FlarumProviders} from "../../../providers";
-import {formatCode, generateCode, ModuleImport, parseCode, populateImports} from "../../../utils/ast";
-import {create, Editor} from "mem-fs-editor";
-import {commitAll} from "../../monorepo/create";
-import BaseCommand from "../../../base-command";
-import globby from "globby";
-import chalk from "chalk";
-import s from "string";
-import simpleGit from "simple-git";
-import {cloneNode} from "@babel/types";
-import {PhpProvider} from "../../../providers/php-provider";
+import { FlarumProviders } from '../../../providers';
+import { formatCode, generateCode, ModuleImport, parseCode, populateImports } from '../../../utils/ast';
+import { create, Editor } from 'mem-fs-editor';
+import { commitAll } from '../../monorepo/create';
+import BaseCommand from '../../../base-command';
+import globby from 'globby';
+import chalk from 'chalk';
+import s from 'string';
+import simpleGit from 'simple-git';
+import { cloneNode } from '@babel/types';
+import { PhpProvider } from '../../../providers/php-provider';
 
 export type ReplacementResult = {
   imports?: ImportChange[];
-  newPath?: string|null;
-  newFiles?: { path: string, code: string }[];
+  newPath?: string | null;
+  newFiles?: { path: string; code: string }[];
   delete?: boolean;
   updated: string | AdvancedContent;
 };
 
-export type Replacement = (file: string, code: string, advanced: AdvancedContent) => null|ReplacementResult|Promise<null|ReplacementResult>;
+export type Replacement = (file: string, code: string, advanced: AdvancedContent) => null | ReplacementResult | Promise<null | ReplacementResult>;
 
-export type AdvancedContent = t.File|Record<string, any>|null;
+export type AdvancedContent = t.File | Record<string, any> | null;
 
 export type ImportChange = {
-  replacesPath?: string|null;
+  replacesPath?: string | null;
   import: ModuleImport;
 };
 
 export type GitCommit = {
   message: string;
   description: string;
-}
+};
 
 export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract type: string;
@@ -53,7 +53,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected command: BaseCommand;
 
-  protected php: null|PhpProvider = null;
+  protected php: null | PhpProvider = null;
 
   protected step = 0;
   protected totalSteps = 0;
@@ -79,7 +79,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract gitCommit(): GitCommit;
   abstract pauseMessage(): string;
 
-  protected fsEditor: null|Editor = null;
+  protected fsEditor: null | Editor = null;
 
   async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
     if (this.root !== paths.cwd()) {
@@ -106,7 +106,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.command.log('');
 
     // Skip if this was already done (check by commits).
-    if (!this.forceStep && await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message)) {
+    if (!this.forceStep && (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message))) {
       this.command.log('     => ' + chalk.bgGreen.bold('    SKIP    '));
       this.command.log('');
       return fs;
@@ -116,13 +116,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     let dots = 1;
     let nl = false;
     const progress = () => {
-      if (! nl) {
+      if (!nl) {
         this.command.log('');
         nl = true;
       }
 
       const filledDots = '.'.repeat(dots) + ' '.repeat(3 - dots);
-      this.command.log('\u001B[A' + '     => ' + chalk.bold('  WORKING' + filledDots));
+      this.command.log('\u001B[A     => ' + chalk.bold('  WORKING' + filledDots));
 
       dots = (dots + 1) % 4;
     };
@@ -134,13 +134,13 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       // target can have a wildcard
       const files = target.includes('*')
-        // eslint-disable-next-line no-await-in-loop
-        ? await globby(paths.package(target))
+        ? // eslint-disable-next-line no-await-in-loop
+          await globby(paths.package(target))
         : [paths.package(target)];
 
       if (this.beforeHook) {
         for (const file of files) {
-          if (! fsEditor.exists(file)) {
+          if (!fsEditor.exists(file)) {
             continue;
           }
 
@@ -158,7 +158,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       const applyOn = async (files: string[]) => {
         for (const file of files) {
-          if (deletedFiles.includes(file) || ! fsEditor.exists(file)) {
+          if (deletedFiles.includes(file) || !fsEditor.exists(file)) {
             continue;
           }
 
@@ -202,7 +202,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
             resolve(true);
           });
         });
-      }
+      };
 
       // eslint-disable-next-line no-await-in-loop
       await applyOn(files);
@@ -213,7 +213,9 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       // }
     }
 
-    const changesMade = await simpleGit(paths.requestedDir() ?? paths.cwd()).diffSummary().then((summary) => summary.files.length > 0);
+    const changesMade = await simpleGit(paths.requestedDir() ?? paths.cwd())
+      .diffSummary()
+      .then((summary) => summary.files.length > 0);
 
     if (changesMade) {
       await simpleGit(paths.requestedDir() ?? paths.cwd()).add('.');
@@ -236,7 +238,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   async applyReplacements(file: string, code: string, advanced: AdvancedContent): Promise<ReplacementResult> {
     let newPath = file;
-    let newFiles: any = undefined;
+    let newFiles: any;
 
     for (const callback of this.replacements(file, code)) {
       // eslint-disable-next-line no-await-in-loop
@@ -254,7 +256,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         };
       }
 
-      if (! result) continue;
+      if (!result) continue;
 
       // eslint-disable-next-line no-await-in-loop
       code = await this.updateCode(file, code, result.updated);
@@ -292,18 +294,18 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     const ast = advanced as t.File;
 
     // Remove old import first.
-    let index: number|null = null;
+    let index: number | null = null;
     let postAdd = null;
 
     if (imp.replacesPath) {
       index = ast.program.body.findIndex((node) => {
-        if (! t.isImportDeclaration(node)) return false;
+        if (!t.isImportDeclaration(node)) return false;
 
         return node.source.value === imp.replacesPath;
       });
 
       const replaces = cloneNode(ast.program.body[index] as t.ImportDeclaration);
-      replaces.specifiers = replaces.specifiers.filter((specifier) => ! t.isImportDefaultSpecifier(specifier));
+      replaces.specifiers = replaces.specifiers.filter((specifier) => !t.isImportDefaultSpecifier(specifier));
 
       if (imp.import.defaultImport && replaces?.specifiers?.length) {
         postAdd = () => ast.program.body.splice(index!, 0, replaces);

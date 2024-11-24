@@ -49,6 +49,7 @@ describe('Test extension skeleton step', function () {
     'modules.phpstan': true,
     'modules.editorConfig': true,
     'modules.styleci': true,
+    'modules.frontendTesting': true,
   };
   const initStep = genExtScaffolder().genInitStep();
 
@@ -122,13 +123,13 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(false);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
-    expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['js', 'jsCommon', 'typescript', 'bundlewatch', 'prettier']));
+    expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['js', 'jsCommon', 'typescript', 'bundlewatch', 'prettier', 'frontendTesting']));
   });
 
   test('Can exclude TS completely', async function () {
     const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.typescript': false } });
 
-    const expected = (await getExpected(false)).filter((path) => !path.includes('tsconfig'));
+    const expected = (await getExpected(false)).filter((path) => !path.includes('tsconfig.json'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
