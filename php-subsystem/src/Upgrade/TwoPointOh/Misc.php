@@ -278,8 +278,17 @@ class Misc extends Replacement
                 ],
             ],
             'Flarum\\Foundation\\AbstractValidator' => [
+                'assertValid' => [
+                    'return' => ['void']
+                ],
                 'getRules' => [
                     'return' => ['array']
+                ],
+                'getMessages' => [
+                    'return' => ['array']
+                ],
+                'makeValidator' => [
+                    'return' => ['\Illuminate\Validation\Validator']
                 ],
             ],
             'Flarum\\Extend\\ExtenderInterface' => [
@@ -298,6 +307,17 @@ class Misc extends Replacement
             'Flarum\\Api\\Controller\\AbstractDeleteController' => [
                 'delete' => [
                     'return' => ['void']
+                ],
+            ],
+            'Flarum\\User\\AvatarValidator' => [
+                'assertValid' => [
+                    'return' => ['void']
+                ],
+                'getMaxSize' => [
+                    'return' => ['int']
+                ],
+                'getAllowedTypes' => [
+                    'return' => ['array']
                 ],
             ],
         ], function (Node $node) {
@@ -524,7 +544,7 @@ class Misc extends Replacement
                             continue;
                         }
 
-                        $dockblock = preg_replace('/^\s*\*\s*@param\s*'.($data['type'] ?? '').'\s*\$'.$property.'\s*$/m', '', $dockblock);
+                        $dockblock = preg_replace('/^\s*\*\s*@param\s*'.($data['type'] ?? '').'\s*\$'.$property.'\s*.*$/m', '', $dockblock);
                         $modified = true;
                     }
 
