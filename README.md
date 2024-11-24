@@ -8,14 +8,12 @@ A CLI for developing Flarum extensions</p>
 <a href="https://npmjs.org/package/@flarum/cli"><img alt="Downloads/week" src="https://img.shields.io/npm/dw/@flarum/cli.svg"></a>
 <a href="https://github.com/flarum/cli/blob/master/package.json"><img alt="License" src="https://img.shields.io/npm/l/@flarum/cli.svg"></a>
 <br>
-<img width=720 src="https://sycho9.github.io/flarum-cli.svg" alt="terminal_example">
 </p>
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Updating](#updating)
-- [Usage](#usage)
-- [Commands](#commands)
+| Version | Node.js | Flarum | PHP    |
+|---------|---------|--------|--------|
+| 3.x     | >= 18.x | >= 2.0 | >= 8.0 |
+| 1.x-2.x | >= 12.x | >= 1.0 | >= 7.2 |
 
 ## Introduction
 
