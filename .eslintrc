@@ -14,7 +14,9 @@
     "object-curly-spacing": "off",
     "import/no-unresolved": "error",
     "node/no-missing-import": "off", // We have other rules for this.
-    "no-template-curly-in-string": "off" // We use this for clone-and-fill
+    "no-template-curly-in-string": "off", // We use this for clone-and-fill
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "no-negated-condition": "off"
   },
   "extends": ["oclif", "oclif-typescript", "plugin:import/errors", "plugin:import/warnings", "prettier"],
   "settings": {
