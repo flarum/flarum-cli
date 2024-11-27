@@ -75,23 +75,23 @@ export default class Info extends Command {
     const defaultBinPath = otherBinPath.split('/').slice(0, -1).join('/') + '/fl';
 
     if (!this.isWindows()) {
-      const which = execSync('which ' + otherBin, { encoding: 'utf8' }).trim();
       // replace the default fl bin with the now installed fl2 or fl1 bin
       // the path to the fl bin is the same as the path to the fl2 or fl1 bin, just without the 2 or 1
-      this.execRetryingAsSudo(`ln -sf ${which} ${defaultBinPath}`);
+      this.execRetryingAsSudo(`cp -f ${otherBinPath} ${defaultBinPath}`);
     } else {
-      const where = execSync('where ' + otherBin, { encoding: 'utf8' }).trim();
-      execSync(`mklink /H C:\\Windows\\System32\\fl.exe ${where}`, { stdio: 'inherit' });
+      execSync(`copy /Y ${otherBinPath} ${defaultBinPath}`, { stdio: 'inherit' });
     }
   }
 
   install(cli: number | string, flarum: number | string, sudo = false) {
-    execAsync((sudo ? 'sudo ' : '') + `npm install -g fl${flarum}@npm:@flarum/cli@${cli} --force`).then(({ stdout }) => {
-      if (stdout && stdout.toString().includes('Permission denied') && !sudo && !this.isWindows()) {
+    try {
+      execSync((sudo ? 'sudo ' : '') + `npm install -g fl${flarum}@npm:@flarum/cli@${cli} --force`, { stdio: 'inherit' });
+    } catch (error: any) {
+      if (error.stderr && error.stderr.toString().includes('Permission denied') && !sudo && !this.isWindows()) {
         this.log(chalk.red('Permission denied. Running with sudo.'));
         this.install(cli, flarum, true);
       }
-    });
+    }
   }
 
   isWindows() {
@@ -99,19 +99,21 @@ export default class Info extends Command {
   }
 
   binPath(bin: string): null | string {
-    const result = this.isWindows() ? execSync('where ' + bin, { encoding: 'utf8' }).trim() : execSync('which ' + bin, { encoding: 'utf8' }).trim();
-
-    this.log(result);
-
-    return result || null;
+    try {
+      return this.isWindows() ? execSync('where ' + bin, { encoding: 'utf8' }).trim() : execSync('which ' + bin, { encoding: 'utf8' }).trim();
+    } catch {
+      return null;
+    }
   }
 
   protected execRetryingAsSudo(command: string): void {
-    execAsync(command).catch(({ stderr }) => {
-      if (stderr && stderr.toString().includes('Permission denied')) {
+    try {
+      execSync(command, { stdio: 'inherit' });
+    } catch (error: any) {
+      if (error.stderr && error.stderr.toString().includes('Permission denied')) {
         this.log(chalk.red('Permission denied. Running with sudo.'));
         execSync('sudo ' + command, { stdio: 'inherit' });
       }
-    });
+    }
   }
 }
