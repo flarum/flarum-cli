@@ -1,8 +1,9 @@
 {
   "name": "@flarum/cli",
   "description": "A CLI for developing Flarum extensions",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "Flarum Team",
+  "flarum": "2.x",
   "bin": {
     "fl": "bin/run",
     "fl2": "bin/run",
