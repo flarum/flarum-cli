@@ -1,5 +1,5 @@
-import {Command} from "@oclif/core";
-import path from "path";
+import { Command } from '@oclif/core';
+import path from 'path';
 
 export default class Info extends Command {
   static description = 'Related Flarum version information.';
