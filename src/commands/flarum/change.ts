@@ -2,11 +2,8 @@ import { Command } from '@oclif/core';
 import path from 'path';
 import { PromptsIO } from 'boilersmith/io';
 import { exit } from '@oclif/errors';
-import { execSync, exec } from 'child_process';
-import util from 'util';
+import { execSync } from 'child_process';
 import chalk from 'chalk';
-
-const execAsync = util.promisify(exec);
 
 export default class Info extends Command {
   static description = 'Related Flarum version information.';
