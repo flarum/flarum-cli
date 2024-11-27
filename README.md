@@ -10,11 +10,10 @@ A CLI for developing Flarum extensions</p>
 <br>
 </p>
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Updating](#updating)
-- [Usage](#usage)
-- [Commands](#commands)
+| Version | Node.js | Flarum | PHP    |
+|---------|---------|--------|--------|
+| 3.x     | >= 18.x | >= 2.0 | >= 8.0 |
+| 1.x-2.x | >= 12.x | >= 1.0 | >= 7.2 |
 
 ## Introduction
 
@@ -50,7 +49,7 @@ $ npm install -g @flarum/cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
-@flarum/cli/2.0.0 linux-x64 node-v18.19.1
+@flarum/cli/2.0.1 linux-x64 node-v18.19.1
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
@@ -121,25 +120,6 @@ _And of course, you can always use the help command to see a list of all availab
 - `flarum-cli help [COMMAND]`
 
 All commands can use a `--no-interaction` flag to proceed with default values for prompts when possible.
-
-## 🔥 The Most Powerful Commands
-
-Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former obviously allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
-
-- Table migration
-- Policy
-- API Serializer
-- CRUD API Controllers
-- CRUD Handlers
-- Repository
-- Validator
-- Routes
-- Related Extenders
-
-[center]
-![terminal_example](https://sycho9.github.io/flarum-cli.svg)
-![example_project_with_model_command](https://lh3.googleusercontent.com/-fUnfqQ7rwyo/YQVwwm0sa0I/AAAAAAAAFfE/-o9B30M2gE8y6d3NWaVgBhYa8xEwqLuNwCLcBGAsYHQ/s16000/Screenshot%2Bfrom%2B2021-07-31%2B16-46-38.png)
-[/center]
 
 ## Infrastructure Modules
 
