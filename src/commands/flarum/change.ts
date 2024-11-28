@@ -74,9 +74,11 @@ export default class Info extends Command {
     if (!this.isWindows()) {
       // replace the default fl bin with the now installed fl2 or fl1 bin
       // the path to the fl bin is the same as the path to the fl2 or fl1 bin, just without the 2 or 1
-      this.execRetryingAsSudo(`cp -f ${otherBinPath} ${defaultBinPath}`);
+      this.execRetryingAsSudo(`rm -f ${defaultBinPath}`);
+      this.execRetryingAsSudo(`cp -P ${otherBinPath} ${defaultBinPath}`);
     } else {
-      execSync(`copy /Y ${otherBinPath} ${defaultBinPath}`, { stdio: 'inherit' });
+      execSync(`del /F /Q ${defaultBinPath}`, { stdio: 'inherit' });
+      execSync(`xcopy /B /Y ${otherBinPath} ${defaultBinPath}`, { stdio: 'inherit' });
     }
   }
 
