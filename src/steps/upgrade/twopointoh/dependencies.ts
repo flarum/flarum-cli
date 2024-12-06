@@ -57,8 +57,10 @@ export default class Dependencies extends BaseUpgradeStep {
           }
         });
 
-        if (key.startsWith('flarum/') && value !== '*') {
-          composer.require[key] = '^2.0.0';
+        if (key === 'flarum/core') {
+          composer.require[key] = '^2.0.0-beta';
+        } else if (key.startsWith('flarum/') && value !== '*') {
+          composer.require[key] = '*';
         }
       }
 
@@ -71,8 +73,10 @@ export default class Dependencies extends BaseUpgradeStep {
           }
         });
 
-        if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
-          composer['require-dev'][key] = '^2.0.0';
+        if (key === 'flarum/core') {
+          composer['require-dev'][key] = '^2.0.0-beta';
+        } else if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
+          composer['require-dev'][key] = '*';
         }
       }
 
