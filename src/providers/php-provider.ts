@@ -90,7 +90,11 @@ export class PhpSubsystemProvider implements PhpProvider {
     let json;
 
     if (res) {
-      json = JSON.parse(res.toString());
+      try {
+        json = JSON.parse(res.toString());
+      } catch {
+        throw new Error(`The PHP subsystem returned an invalid value: ${res.toString()}`);
+      }
     }
 
     if (!res || json.error) {
