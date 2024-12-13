@@ -10,5 +10,8 @@
     "psr-4": {
       "Flarum\\CliPhpSubsystem\\": "src/"
     }
+  },
+  "platform": {
+    "php": "8.0"
   }
 }

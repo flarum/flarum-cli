@@ -2,6 +2,15 @@
 
 use Flarum\CliPhpSubsystem\ExtenderUtil;
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
+if (PHP_VERSION_ID < 80000) {
+    echo json_encode([
+        'error' => 'PHP 8.0 or newer is required'
+    ]);
+    exit(1);
+}
+
 require __DIR__ . '/vendor/autoload.php';
 
 $input = json_decode(file_get_contents("php://stdin"), true);

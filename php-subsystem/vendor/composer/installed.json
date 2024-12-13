@@ -1,60 +1,67 @@
 {
-  "packages": [
-    {
-      "name": "nikic/php-parser",
-      "version": "v5.0.2",
-      "version_normalized": "5.0.2.0",
-      "source": {
-        "type": "git",
-        "url": "https://github.com/nikic/PHP-Parser.git",
-        "reference": "139676794dc1e9231bf7bcd123cfc0c99182cb13"
-      },
-      "dist": {
-        "type": "zip",
-        "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/139676794dc1e9231bf7bcd123cfc0c99182cb13",
-        "reference": "139676794dc1e9231bf7bcd123cfc0c99182cb13",
-        "shasum": ""
-      },
-      "require": {
-        "ext-ctype": "*",
-        "ext-json": "*",
-        "ext-tokenizer": "*",
-        "php": ">=7.4"
-      },
-      "require-dev": {
-        "ircmaxell/php-yacc": "^0.0.7",
-        "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0"
-      },
-      "time": "2024-03-05T20:51:40+00:00",
-      "bin": ["bin/php-parse"],
-      "type": "library",
-      "extra": {
-        "branch-alias": {
-          "dev-master": "5.0-dev"
-        }
-      },
-      "installation-source": "dist",
-      "autoload": {
-        "psr-4": {
-          "PhpParser\\": "lib/PhpParser"
-        }
-      },
-      "notification-url": "https://packagist.org/downloads/",
-      "license": ["BSD-3-Clause"],
-      "authors": [
+    "packages": [
         {
-          "name": "Nikita Popov"
+            "name": "nikic/php-parser",
+            "version": "v5.3.1",
+            "version_normalized": "5.3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "8eea230464783aa9671db8eea6f8c6ac5285794b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/8eea230464783aa9671db8eea6f8c6ac5285794b",
+                "reference": "8eea230464783aa9671db8eea6f8c6ac5285794b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-json": "*",
+                "ext-tokenizer": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^9.0"
+            },
+            "time": "2024-10-08T18:51:32+00:00",
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.3.1"
+            },
+            "install-path": "../nikic/php-parser"
         }
-      ],
-      "description": "A PHP parser written in PHP",
-      "keywords": ["parser", "php"],
-      "support": {
-        "issues": "https://github.com/nikic/PHP-Parser/issues",
-        "source": "https://github.com/nikic/PHP-Parser/tree/v5.0.2"
-      },
-      "install-path": "../nikic/php-parser"
-    }
-  ],
-  "dev": true,
-  "dev-package-names": []
+    ],
+    "dev": true,
+    "dev-package-names": []
 }

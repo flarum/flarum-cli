@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'flarum/cli-php-util',
-        'pretty_version' => 'dev-main',
-        'version' => 'dev-main',
-        'reference' => '42418e7740cb916b86141e808b36b799d7b85f67',
+        'pretty_version' => '3.x-dev',
+        'version' => '3.9999999.9999999.9999999-dev',
+        'reference' => 'bc73591972dddaeba622f8cb022f21ae0f002bed',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,18 +11,18 @@
     ),
     'versions' => array(
         'flarum/cli-php-util' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => '42418e7740cb916b86141e808b36b799d7b85f67',
+            'pretty_version' => '3.x-dev',
+            'version' => '3.9999999.9999999.9999999-dev',
+            'reference' => 'bc73591972dddaeba622f8cb022f21ae0f002bed',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'nikic/php-parser' => array(
-            'pretty_version' => 'v5.0.2',
-            'version' => '5.0.2.0',
-            'reference' => '139676794dc1e9231bf7bcd123cfc0c99182cb13',
+            'pretty_version' => 'v5.3.1',
+            'version' => '5.3.1.0',
+            'reference' => '8eea230464783aa9671db8eea6f8c6ac5285794b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
