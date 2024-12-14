@@ -70,9 +70,9 @@ class JsonApi extends Replacement
                 }
 
                 if ($node instanceof \PhpParser\Node\Stmt\ClassMethod) {
-                    if ($node->name->name === 'getDefaultAttributes') {
+                    if ($node->name->name === 'getDefaultAttributes' && ($doc = $node->getDocComment())) {
                         // Get the type from the docblock
-                        preg_match('/@param\s+([^\s]+)\s+\$'.$node->params[0]->var->name.'/', $node->getDocComment()->getText(), $matches);
+                        preg_match('/@param\s+([^\s]+)\s+\$'.$node->params[0]->var->name.'/', $doc->getText(), $matches);
 
                         $model = null;
 

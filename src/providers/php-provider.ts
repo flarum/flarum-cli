@@ -98,7 +98,7 @@ export class PhpSubsystemProvider implements PhpProvider {
     }
 
     if (!res || json.error) {
-      throw new Error(`The PHP subsystem returned an invalid value: ${json.message || 'No message'} - ${json.trace || 'No trace'}`);
+      throw new Error(`The PHP subsystem returned an invalid value: ${json.message || json.error || 'No message'} - ${json.trace || 'No trace'}`);
     }
   }
 }
