@@ -73,7 +73,7 @@ export default class Dependencies extends BaseUpgradeStep {
           }
         });
 
-        if (key === 'flarum/core') {
+        if (['flarum/core', 'flarum/testing', 'flarum/phpstan'].includes(key)) {
           composer['require-dev'][key] = '^2.0.0-beta';
         } else if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
           composer['require-dev'][key] = '*';
