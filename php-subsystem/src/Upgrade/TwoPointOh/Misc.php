@@ -278,6 +278,9 @@ class Misc extends Replacement
                 ],
             ],
             'Flarum\\Foundation\\AbstractValidator' => [
+                '$rules' => [
+                    'type' => ['array']
+                ],
                 'assertValid' => [
                     'return' => ['void']
                 ],
